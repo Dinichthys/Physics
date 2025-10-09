@@ -59,7 +59,11 @@ Circle SceneManager::GetPointIntersectionWithCircle(const Coordinates& pixel_pos
                                                     float& coeff, size_t& cur_circle_idx) {
     Circle circle(Coordinates(0, 0, 0, 0), 0, kSphere);
     size_t circles_num = circles_.size();
+    size_t new_cur_circle_idx = -1;
     for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
+        if (circle_index == cur_circle_idx) {
+            continue;
+        }
         float res_plus = 0;
         float res_minus = 0;
         if (!GetIntersectionResultQuadraticEquation(circles_[circle_index], pixel_pos, vec, res_plus, res_minus)) {
@@ -68,14 +72,15 @@ Circle SceneManager::GetPointIntersectionWithCircle(const Coordinates& pixel_pos
         if (((res_plus < coeff) || (coeff < 0)) && (res_plus > 0)) {
             coeff = res_plus;
             circle = *(circles_[circle_index]);
-            cur_circle_idx = circle_index;
+            new_cur_circle_idx = circle_index;
         }
         if (((res_minus < coeff) || (coeff < 0)) && (res_minus > 0)) {
             coeff = res_minus;
             circle = *(circles_[circle_index]);
-            cur_circle_idx = circle_index;
+            new_cur_circle_idx = circle_index;
         }
     }
+    cur_circle_idx = new_cur_circle_idx;
 
     return circle;
 }
@@ -86,7 +91,7 @@ graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coor
     float coeff = -1;
     Coordinates radius_vec = !(point - center);
     Coordinates before_ref = !(point - eye_pos);
-    Coordinates after_ref = (before_ref - radius_vec * (before_ref && radius_vec) * 2) * (point - eye_pos).GetModule();
+    Coordinates after_ref = before_ref - radius_vec * (before_ref && radius_vec) * 2;
     Circle circle = GetPointIntersectionWithCircle(point, after_ref, coeff, cur_circle_idx);
 
     if (coeff < 0) {
@@ -94,16 +99,14 @@ graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coor
     }
 
     if (circle.GetObjectType() == kLight) {
-        return color + graphics::Color(kMaxColor, kMaxColor, kMaxColor);
+        return graphics::Color(kMaxColor, kMaxColor, kMaxColor);
     }
 
     Coordinates new_center(circle.GetCenterCoordinates());
 
     Coordinates new_point = point + after_ref * coeff;
 
-    color = color + GetLightEffect(new_point, point, new_center, cur_circle_idx);
-
-    return color;
+    return color + GetLightEffect(new_point, point, new_center, cur_circle_idx);
 }
 
 graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,

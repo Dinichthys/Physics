@@ -26,6 +26,10 @@ class ObjectInfo {
         ObjectType GetType() const {return type_;};
         float GetCoeffReffraction() const {return coeff_reffraction_;};
         float GetCoeffReflection() const {return coeff_reflection_;};
+
+        void SetType(ObjectType type) {type_ = type;};
+        void SetCoeffReffraction(float coeff_reffraction) {coeff_reffraction_ = coeff_reffraction;};
+        void SetCoeffReflection(float coeff_reflection) {coeff_reflection_ = coeff_reflection;};
 };
 
 #endif // OBJECT_INFO_HPP
