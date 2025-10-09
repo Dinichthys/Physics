@@ -13,7 +13,7 @@ namespace graphics {
         float brightness_;
 
         public:
-            explicit Color(float red = 0, float green = 0, float blue = 0, float brightness = 255)
+            explicit Color(float red = 0, float green = 0, float blue = 0, float brightness = kMaxColor)
                 :Coordinates(3, red, green, blue) {
                 brightness_ = brightness;
                 if (red > kMaxColor) {
@@ -27,6 +27,20 @@ namespace graphics {
                 }
                 if (brightness > kMaxColor) {
                     brightness_ = kMaxColor;
+                }
+            };
+
+            explicit Color(const Coordinates& coors)
+                :Coordinates(coors) {
+                brightness_ = kMaxColor;
+                if (coors[0] > kMaxColor) {
+                    Coordinates::SetCoordinate(0, kMaxColor);
+                }
+                if (coors[1] > kMaxColor) {
+                    Coordinates::SetCoordinate(1, kMaxColor);
+                }
+                if (coors[2] > kMaxColor) {
+                    Coordinates::SetCoordinate(2, kMaxColor);
                 }
             };
 

@@ -39,7 +39,7 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
             }
             if (circle.GetObjectType() == kLight) {
                 vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
-                vertices_.SetPixelColor(i * width + j, graphics::Color(kMaxColor, kMaxColor, kMaxColor));
+                vertices_.SetPixelColor(i * width + j, graphics::Color(circle.GetBrightness()));
                 continue;
             }
 
@@ -109,7 +109,7 @@ graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coor
         }
 
         if (circle.GetObjectType() == kLight) {
-            color = color + graphics::Color(kMaxColor, kMaxColor, kMaxColor) * coeff_reflection;
+            color = color + graphics::Color(circle.GetBrightness()) * coeff_reflection;
             break;
         }
 
@@ -135,6 +135,7 @@ graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coo
         Circle light(*(circles_[light_index]));
         Coordinates light_coordinates(light.GetCenterCoordinates());
         Coordinates brightness(light.GetBrightness());
+        float mid_color = (brightness[0] + brightness[1] + brightness[2]) / 3;
 
         bool drawable = true;
         for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
@@ -143,14 +144,14 @@ graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coo
             }
             float res_plus = 0;
             float res_minus = 0;
-            if (!GetIntersectionResultQuadraticEquation(circles_[circle_index], point, point - light_coordinates, res_plus, res_minus)) {
+            if (!GetIntersectionResultQuadraticEquation(circles_[circle_index], light_coordinates, point - light_coordinates, res_plus, res_minus)) {
                 continue;
             }
-            if (res_plus < kEpsilon) {
+            if ((res_plus > kEpsilon) && (res_plus < 1)) {
                 drawable = false;
                 break;
             }
-            if (res_minus < kEpsilon) {
+            if ((res_minus > kEpsilon) && (res_plus < 1)) {
                 drawable = false;
                 break;
             }
@@ -168,9 +169,8 @@ graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coo
                             + (!(point - center)) * ((!(point - center)) && (!(light_coordinates - point))) * 2)
                             && (!(eye_pos - point));
 
-
             if (cos_b > 0) {
-                color = color + kMaxColor * powf32(cos_b, kPowCosB);
+                color = color + mid_color * powf32(cos_b, kPowCosB);
             }
         }
 

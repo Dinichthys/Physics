@@ -22,8 +22,8 @@ int main() {
         Circle(Coordinates(3, 500, 300, 100),   200, kSphere, Coordinates(3), 0),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
-        Circle(Coordinates(3, 600, 600, 1000),  50,  kLight,  Coordinates(3, 150, 150, 150)),
-        Circle(Coordinates(3, 1080, 720, -500), 50,  kLight,  Coordinates(3, 150, 150, 150)),
+        Circle(Coordinates(3, 600, 600, 1000),  50,  kLight,  Coordinates(3, 255, 255, 255)),
+        Circle(Coordinates(3, 1080, 720, -500), 50,  kLight,  Coordinates(3, 255, 255, 255)),
     };
 
     std::vector<Circle*> circles;
