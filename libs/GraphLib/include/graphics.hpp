@@ -10,10 +10,10 @@ namespace graphics {
     static const float kMaxColor = 255;
 
     class Color : public Coordinates {
-        uint8_t brightness_;
+        float brightness_;
 
         public:
-            explicit Color(float red = 0, float green = 0, float blue = 0, uint8_t brightness = 255)
+            explicit Color(float red = 0, float green = 0, float blue = 0, float brightness = 255)
                 :Coordinates(3, red, green, blue) {
                 brightness_ = brightness;
                 if (red > kMaxColor) {
@@ -43,6 +43,12 @@ namespace graphics {
                              GetBluePart()   + color.GetBluePart(),
                              GetGreenPart()  + color.GetGreenPart(),
                              GetBrightness() + color.GetBrightness());
+            };
+
+            Color operator * (float val) const {
+                return Color(GetRedPart()    * val,
+                             GetBluePart()   * val,
+                             GetGreenPart()  * val);
             };
     };
 

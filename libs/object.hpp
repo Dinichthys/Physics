@@ -9,8 +9,8 @@
 #include "object_info.hpp"
 
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
-    {kSphere, ObjectInfo{kSphere, __FLT_MAX__, 1}},
-    {kLight, ObjectInfo{kLight, __FLT_MAX__, 1}},
+    {kSphere, ObjectInfo{kSphere, __FLT_MAX__, 0}},
+    {kLight, ObjectInfo{kLight, __FLT_MAX__, 0}},
 };
 
 class Object {
@@ -30,6 +30,10 @@ class Object {
         virtual float GetReffraction() const {return info_.GetCoeffReffraction();};
         virtual float GetReflection() const {return info_.GetCoeffReflection();};
         virtual Coordinates GetBrightness() const {return Coordinates(brightness_);};
+
+        virtual void SetType(ObjectType type) {info_.SetType(type);};
+        virtual void SetCoeffReffraction(float coeff_reffraction) {info_.SetCoeffReffraction(coeff_reffraction);};
+        virtual void SetCoeffReflection(float coeff_reflection) {info_.SetCoeffReflection(coeff_reflection);};
 };
 
 class Circle : public Object {
@@ -38,9 +42,16 @@ class Circle : public Object {
 
     public:
         explicit Circle(const Coordinates& center, float radius, ObjectType type = kSphere,
-                        const Coordinates& brightness = Coordinates(3, 0, 0, 0))
+                        const Coordinates& brightness = Coordinates(3, 0, 0, 0),
+                        float coeff_reflection = NAN, float coeff_reffraction = NAN)
             :Object(center, kObjectsInfo.at(type), brightness) {
             radius_ = radius;
+            if (!isnan(coeff_reffraction)) {
+                Object::SetCoeffReffraction(coeff_reffraction);
+            }
+            if (!isnan(coeff_reflection)) {
+                Object::SetCoeffReflection(coeff_reflection);
+            }
         };
 
         virtual ~Circle() {};

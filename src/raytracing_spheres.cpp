@@ -48,7 +48,7 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
             vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
-            vertices_.SetPixelColor(i * width + j, GetPointColor(point, eye_pos, center, cur_circle_idx));
+            vertices_.SetPixelColor(i * width + j, GetPointColor(point, eye_pos, center, cur_circle_idx, circle.GetReflection()));
         }
     }
 
@@ -86,27 +86,42 @@ Circle SceneManager::GetPointIntersectionWithCircle(const Coordinates& pixel_pos
 }
 
 graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
-                                            const Coordinates& center, size_t cur_circle_idx) {
+                                            const Coordinates& center, size_t cur_circle_idx,
+                                            float coeff_reflection) {
     graphics::Color color(GetLightEffect(point, eye_pos, center, cur_circle_idx));
-    float coeff = -1;
-    Coordinates radius_vec = !(point - center);
-    Coordinates before_ref = !(point - eye_pos);
-    Coordinates after_ref = before_ref - radius_vec * (before_ref && radius_vec) * 2;
-    Circle circle = GetPointIntersectionWithCircle(point, after_ref, coeff, cur_circle_idx);
+    Coordinates new_point(point);
+    Coordinates new_eye_pos(eye_pos);
+    Coordinates new_center(center);
+    size_t new_cur_circle_idx = cur_circle_idx;
+    float new_coeff_reflection = coeff_reflection;
+    for (size_t i = 0; i < kReflectionTimes; i++) {
+        if (new_coeff_reflection < kEpsilon) {
+            return color;
+        }
+        float coeff = -1;
+        Coordinates radius_vec = !(new_point - new_center);
+        Coordinates before_ref = !(new_point - new_eye_pos);
+        Coordinates after_ref = before_ref - radius_vec * (before_ref && radius_vec) * 2;
+        Circle circle = GetPointIntersectionWithCircle(new_point, after_ref, coeff, new_cur_circle_idx);
 
-    if (coeff < 0) {
-        return color;
+        if (coeff < 0) {
+            break;
+        }
+
+        if (circle.GetObjectType() == kLight) {
+            color = color + graphics::Color(kMaxColor, kMaxColor, kMaxColor) * coeff_reflection;
+            break;
+        }
+
+        new_center = circle.GetCenterCoordinates();
+
+        new_eye_pos = new_point;
+        new_point = new_point + after_ref * coeff;
+        color = color + GetLightEffect(new_point, new_eye_pos, new_center, new_cur_circle_idx) * new_coeff_reflection;
+        new_coeff_reflection *= circle.GetReflection();
     }
 
-    if (circle.GetObjectType() == kLight) {
-        return graphics::Color(kMaxColor, kMaxColor, kMaxColor);
-    }
-
-    Coordinates new_center(circle.GetCenterCoordinates());
-
-    Coordinates new_point = point + after_ref * coeff;
-
-    return color + GetLightEffect(new_point, point, new_center, cur_circle_idx);
+    return color;
 }
 
 graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
