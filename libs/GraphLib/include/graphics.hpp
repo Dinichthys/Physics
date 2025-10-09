@@ -7,6 +7,8 @@
 
 namespace graphics {
 
+    static const float kMaxColor = 255;
+
     class Color : public Coordinates {
         uint8_t brightness_;
 
@@ -14,6 +16,18 @@ namespace graphics {
             explicit Color(float red = 0, float green = 0, float blue = 0, uint8_t brightness = 255)
                 :Coordinates(3, red, green, blue) {
                 brightness_ = brightness;
+                if (red > kMaxColor) {
+                    Coordinates::SetCoordinate(0, kMaxColor);
+                }
+                if (green > kMaxColor) {
+                    Coordinates::SetCoordinate(1, kMaxColor);
+                }
+                if (blue > kMaxColor) {
+                    Coordinates::SetCoordinate(2, kMaxColor);
+                }
+                if (brightness > kMaxColor) {
+                    brightness_ = kMaxColor;
+                }
             };
 
             uint8_t GetRedPart() const {return static_cast<uint8_t>(GetCoordinate(0));};
@@ -23,6 +37,13 @@ namespace graphics {
             uint8_t GetBrightness() const {return brightness_;};
 
             void SetBrightness(uint8_t brightness) {brightness_ = brightness;};
+
+            Color operator + (const Color& color) const {
+                return Color(GetRedPart()    + color.GetRedPart(),
+                             GetBluePart()   + color.GetBluePart(),
+                             GetGreenPart()  + color.GetGreenPart(),
+                             GetBrightness() + color.GetBrightness());
+            };
     };
 
     const Color kColorWhite(255, 255, 255);

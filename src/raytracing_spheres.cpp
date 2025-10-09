@@ -11,8 +11,6 @@
 #include "my_assert.h"
 
 void SceneManager::Draw(graphics::RenderWindow* window) {
-    size_t circles_num = circles_.size();
-
     Coordinates eye_pos = eye_.GetEyePos();
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
@@ -32,38 +30,8 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
             pixel_pos = pixel_pos + hor_vec;
 
             float coeff = -1;
-            Circle circle(Coordinates(0, 0, 0, 0), 0, kSphere);
             size_t cur_circle_idx = -1;
-            for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
-                Coordinates center(circles_[circle_index]->GetCenterCoordinates());
-                float radius = circles_[circle_index]->GetRadius();
-                float distance = ((center - pixel_pos) || (pixel_pos - eye_pos)).GetModule()
-                                    / (pixel_pos - eye_pos).GetModule();
-                if (distance > radius) {
-                    continue;
-                }
-                float a = (pixel_pos - eye_pos).SqLength();
-                float b = 2 * ((pixel_pos - eye_pos) && (pixel_pos - center));
-                float c = (pixel_pos - center).SqLength() - radius * radius;
-                float discrim = b * b - 4 * a * c;
-                if (discrim < 0) {
-                    continue;
-                }
-                discrim = sqrt(discrim);
-                float res_minus = (-b - discrim) / (2 * a);
-                float res_plus = (-b + discrim) / (2 * a);
-
-                if (((res_plus < coeff) || (coeff < 0)) && (res_plus > 0)) {
-                    coeff = res_plus;
-                    circle = *(circles_[circle_index]);
-                    cur_circle_idx = circle_index;
-                }
-                if (((res_minus < coeff) || (coeff < 0)) && (res_minus > 0)) {
-                    coeff = res_minus;
-                    circle = *(circles_[circle_index]);
-                    cur_circle_idx = circle_index;
-                }
-            }
+            Circle circle = GetPointIntersectionWithCircle(pixel_pos, pixel_pos - eye_pos, coeff, cur_circle_idx);
             if (coeff < 0) {
                 vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
                 vertices_.SetPixelColor(i * width + j, graphics::kColorBrown);
@@ -79,79 +47,147 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
 
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
-            Coordinates color(kIBase);
-            for (size_t light_index = 0; light_index < circles_num; light_index++) {
-                if (circles_[light_index]->GetObjectType() != kLight) {
-                    continue;
-                }
-                Circle light(*(circles_[light_index]));
-                Coordinates light_coordinates(light.GetCenterCoordinates());
-                Coordinates brightness(light.GetBrightness());
-
-                bool drawable = true;
-                for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
-                    if ((circle_index == cur_circle_idx) || (circles_[circle_index]->GetObjectType() == kLight)) {
-                        continue;
-                    }
-                    Coordinates checking_center(circles_[circle_index]->GetCenterCoordinates());
-                    float distance = ((checking_center - point) || (point - light_coordinates)).GetModule()
-                                     / (point - light_coordinates).GetModule();
-                    float radius = circles_[circle_index]->GetRadius();
-                    if (distance > radius) {
-                        continue;
-                    }
-
-                    float a = (point - light_coordinates).SqLength();
-                    float b = 2 * ((point - light_coordinates) && (point - checking_center));
-                    float c = (point - checking_center).SqLength() - radius * radius;
-                    float discrim = b * b - 4 * a * c;
-                    if (discrim < 0) {
-                        continue;
-                    }
-                    discrim = sqrt(discrim);
-                    float res_minus = (-b - discrim) / (2 * a);
-                    float res_plus = (-b + discrim) / (2 * a);
-
-                    if (res_plus < kEpsilon) {
-                        drawable = false;
-                        break;
-                    }
-                    if (res_minus < kEpsilon) {
-                        drawable = false;
-                        break;
-                    }
-                }
-                if (!drawable) {
-                    continue;
-                }
-
-                float cos_a = (!(point - center)) && (!(light_coordinates - point));
-
-                if (cos_a > 0) {
-                    color = color + brightness * cos_a;
-
-                    float cos_b = ((!(point - light_coordinates))
-                                    + (!(point - center)) * ((!(point - center)) && (!(light_coordinates - point))) * 2)
-                                    && (!(eye_pos - point));
-
-
-                    if (cos_b > 0) {
-                        color = color + kMaxColor * powf32(cos_b, kPowCosB);
-                    }
-                }
-
-                for (size_t i = 0; i < 3; i++)
-                {
-                    if (color[i] > kMaxColor) {
-                        color.SetCoordinate(i, kMaxColor);
-                    }
-                }
-            }
-
             vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
-            vertices_.SetPixelColor(i * width + j, graphics::Color((uint8_t)color[0], (uint8_t)color[1], (uint8_t)color[2]));
+            vertices_.SetPixelColor(i * width + j, GetPointColor(point, eye_pos, center, cur_circle_idx));
         }
     }
 
     window->Draw(vertices_);
+}
+
+Circle SceneManager::GetPointIntersectionWithCircle(const Coordinates& pixel_pos, const Coordinates& vec,
+                                                    float& coeff, size_t& cur_circle_idx) {
+    Circle circle(Coordinates(0, 0, 0, 0), 0, kSphere);
+    size_t circles_num = circles_.size();
+    for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
+        float res_plus = 0;
+        float res_minus = 0;
+        if (!GetIntersectionResultQuadraticEquation(circles_[circle_index], pixel_pos, vec, res_plus, res_minus)) {
+            continue;
+        }
+        if (((res_plus < coeff) || (coeff < 0)) && (res_plus > 0)) {
+            coeff = res_plus;
+            circle = *(circles_[circle_index]);
+            cur_circle_idx = circle_index;
+        }
+        if (((res_minus < coeff) || (coeff < 0)) && (res_minus > 0)) {
+            coeff = res_minus;
+            circle = *(circles_[circle_index]);
+            cur_circle_idx = circle_index;
+        }
+    }
+
+    return circle;
+}
+
+graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
+                                            const Coordinates& center, size_t cur_circle_idx) {
+    graphics::Color color(GetLightEffect(point, eye_pos, center, cur_circle_idx));
+    float coeff = -1;
+    Coordinates radius_vec = !(point - center);
+    Coordinates before_ref = !(point - eye_pos);
+    Coordinates after_ref = (before_ref - radius_vec * (before_ref && radius_vec) * 2) * (point - eye_pos).GetModule();
+    Circle circle = GetPointIntersectionWithCircle(point, after_ref, coeff, cur_circle_idx);
+
+    if (coeff < 0) {
+        return color;
+    }
+
+    if (circle.GetObjectType() == kLight) {
+        return color + graphics::Color(kMaxColor, kMaxColor, kMaxColor);
+    }
+
+    Coordinates new_center(circle.GetCenterCoordinates());
+
+    Coordinates new_point = point + after_ref * coeff;
+
+    color = color + GetLightEffect(new_point, point, new_center, cur_circle_idx);
+
+    return color;
+}
+
+graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
+                                             const Coordinates& center, size_t cur_circle_idx) {
+    size_t circles_num = circles_.size();
+    Coordinates color(kIBase);
+    for (size_t light_index = 0; light_index < circles_num; light_index++) {
+        if (circles_[light_index]->GetObjectType() != kLight) {
+            continue;
+        }
+        Circle light(*(circles_[light_index]));
+        Coordinates light_coordinates(light.GetCenterCoordinates());
+        Coordinates brightness(light.GetBrightness());
+
+        bool drawable = true;
+        for (size_t circle_index = 0; circle_index < circles_num; circle_index++) {
+            if ((circle_index == cur_circle_idx) || (circles_[circle_index]->GetObjectType() == kLight)) {
+                continue;
+            }
+            float res_plus = 0;
+            float res_minus = 0;
+            if (!GetIntersectionResultQuadraticEquation(circles_[circle_index], point, point - light_coordinates, res_plus, res_minus)) {
+                continue;
+            }
+            if (res_plus < kEpsilon) {
+                drawable = false;
+                break;
+            }
+            if (res_minus < kEpsilon) {
+                drawable = false;
+                break;
+            }
+        }
+        if (!drawable) {
+            continue;
+        }
+
+        float cos_a = (!(point - center)) && (!(light_coordinates - point));
+
+        if (cos_a > 0) {
+            color = color + brightness * cos_a;
+
+            float cos_b = ((!(point - light_coordinates))
+                            + (!(point - center)) * ((!(point - center)) && (!(light_coordinates - point))) * 2)
+                            && (!(eye_pos - point));
+
+
+            if (cos_b > 0) {
+                color = color + kMaxColor * powf32(cos_b, kPowCosB);
+            }
+        }
+
+        for (size_t i = 0; i < 3; i++)
+        {
+            if (color[i] > kMaxColor) {
+                color.SetCoordinate(i, kMaxColor);
+            }
+        }
+    }
+
+    return graphics::Color(color[0], color[1], color[2]);
+}
+
+bool SceneManager::GetIntersectionResultQuadraticEquation(const Circle* circle,
+                                                          const Coordinates& pixel_pos,
+                                                          const Coordinates& vec,
+                                                          float& res_plus, float& res_minus) {
+    Coordinates center(circle->GetCenterCoordinates());
+    float radius = circle->GetRadius();
+    float distance = ((center - pixel_pos) || vec).GetModule()
+                        / vec.GetModule();
+    if (distance > radius) {
+        return false;
+    }
+    float a = vec.SqLength();
+    float b = 2 * (vec && (pixel_pos - center));
+    float c = (pixel_pos - center).SqLength() - radius * radius;
+    float discrim = b * b - 4 * a * c;
+    if (discrim < 0) {
+        return false;
+    }
+    discrim = sqrt(discrim);
+    res_minus = (-b - discrim) / (2 * a);
+    res_plus = (-b + discrim) / (2 * a);
+
+    return true;
 }

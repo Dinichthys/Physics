@@ -14,16 +14,16 @@
 int main() {
     set_log_lvl(kError);
 
-    Circle circles_arr[2] = {
-        // Circle(Coordinates(3, 100, 0, 0), 400),
-        // Circle(Coordinates(3, 1000, 1000, 0), 400),
-        // Circle(Coordinates(3, 1000, 0, 0), 400),
+    Circle circles_arr[8] = {
+        Circle(Coordinates(3, 100, 0, 0), 400),
+        Circle(Coordinates(3, 1000, 1000, 0), 400),
+        Circle(Coordinates(3, 1000, 0, 0), 400),
         Circle(Coordinates(3, 500, 300, 100), 200),
 
-        // Circle(Coordinates(3, 100, 400, 0),     50, kLight, Coordinates(3, 200, 200, 200)),
-        // Circle(Coordinates(3, 600, 600, 1000),  50, kLight, Coordinates(3, 150, 150, 150)),
+        Circle(Coordinates(3, 100, 400, 0),     50, kLight, Coordinates(3, 200, 200, 200)),
+        Circle(Coordinates(3, 600, 600, 1000),  50, kLight, Coordinates(3, 150, 150, 150)),
         Circle(Coordinates(3, 1080, 720, -500), 50, kLight, Coordinates(3, 150, 150, 150)),
-        // Circle(Coordinates(3, 840, 760, 100),   50, kLight, Coordinates(3, 150, 150, 150)),
+        Circle(Coordinates(3, 840, 760, 100),   50, kLight, Coordinates(3, 150, 150, 150)),
     };
 
     std::vector<Circle*> circles;
