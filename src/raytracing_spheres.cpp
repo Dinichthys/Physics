@@ -109,7 +109,7 @@ graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coor
         }
 
         if (circle.GetObjectType() == kLight) {
-            color = color + graphics::Color(circle.GetBrightness()) * coeff_reflection;
+            color = color + graphics::Color(circle.GetBrightness()) * new_coeff_reflection;
             break;
         }
 
