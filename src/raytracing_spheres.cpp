@@ -28,17 +28,16 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
         pixel_pos = eye_pos + lt_corner + ver_vec * i;
         for (unsigned int j = 0; j < width; j++) {
             pixel_pos = pixel_pos + hor_vec;
+            vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
 
             float coeff = -1;
             size_t cur_circle_idx = -1;
             Circle circle = GetPointIntersectionWithCircle(pixel_pos, pixel_pos - eye_pos, coeff, cur_circle_idx);
             if (coeff < 0) {
-                vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
                 vertices_.SetPixelColor(i * width + j, kFreeSpaceColor);
                 continue;
             }
             if (circle.GetType() == kLight) {
-                vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
                 vertices_.SetPixelColor(i * width + j, graphics::Color(circle.GetColor()));
                 continue;
             }
@@ -47,7 +46,6 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
 
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
-            vertices_.SetPixelPosition(i * width + j, Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
             vertices_.SetPixelColor(i * width + j, GetPointColor(point, eye_pos, cur_circle_idx, kColorCountingDepth));
         }
     }

@@ -19,7 +19,7 @@ int main() {
         Circle(Coordinates(3, 1000, 1000, 0),   400, kSphere, graphics::kColorRed, 0.8, 0.2),
         // Circle(Coordinates(3, 500, 500, 300),   100, kSphere, kIBase, 1, 0),
         Circle(Coordinates(3, 1000, 0, 0),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
-        Circle(Coordinates(3, 500, 300, 100),   200, kSphere, graphics::kColorRed * 0.75, 0, 1),
+        Circle(Coordinates(3, 500, 300, 100),   200, kSphere, graphics::kColorRed, 0, 1),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
         Circle(Coordinates(3, 600, 600, 1000),  50,  kLight,  graphics::kColorWhite),
