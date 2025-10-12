@@ -28,135 +28,46 @@ bool SceneManager::OnLetterW() {
 }
 
 bool SceneManager::OnArrowRight() {
-    Coordinates lt_corner = eye_.GetEyeLTCorner();
-    Coordinates lb_corner = eye_.GetEyeLBCorner();
-    Coordinates rt_corner = eye_.GetEyeRTCorner();
-    Coordinates rb_corner = eye_.GetEyeRBCorner();
-
-    Coordinates vec(lt_corner);
-    vec.SetCoordinate(0, lt_corner[0] * kCosRotate + lt_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, lt_corner[2] * kCosRotate - lt_corner[0] * kSinRotate);
-    eye_.SetEyeLTCorner(Coordinates(vec));
-
-    vec = lb_corner;
-    vec.SetCoordinate(0, lb_corner[0] * kCosRotate + lb_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, lb_corner[2] * kCosRotate - lb_corner[0] * kSinRotate);
-    eye_.SetEyeLBCorner(Coordinates(vec));
-
-    vec = rt_corner;
-    vec.SetCoordinate(0, rt_corner[0] * kCosRotate + rt_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, rt_corner[2] * kCosRotate - rt_corner[0] * kSinRotate);
-    eye_.SetEyeRTCorner(Coordinates(vec));
-
-    vec = rb_corner;
-    vec.SetCoordinate(0, rb_corner[0] * kCosRotate + rb_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, rb_corner[2] * kCosRotate - rb_corner[0] * kSinRotate);
-    eye_.SetEyeRBCorner(Coordinates(vec));
-
-    return true;
+    return CameraRotation(0, 2, 1);
 }
 
 bool SceneManager::OnArrowLeft() {
+    return CameraRotation(0, 2, -1);
+}
+
+bool SceneManager::OnArrowUp() {
+    return CameraRotation(1, 2, -1);
+}
+
+bool SceneManager::OnArrowDown() {
+    return CameraRotation(1, 2, 1);
+}
+
+bool SceneManager::CameraRotation(size_t ace_1, size_t ace_2, float direction) {
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
     Coordinates rt_corner = eye_.GetEyeRTCorner();
     Coordinates rb_corner = eye_.GetEyeRBCorner();
 
     Coordinates vec(lt_corner);
-    vec.SetCoordinate(0, lt_corner[0] * kCosRotate - lt_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, lt_corner[2] * kCosRotate + lt_corner[0] * kSinRotate);
+    vec.SetCoordinate(ace_1, lt_corner[ace_1] * kCosRotate + direction * lt_corner[ace_2] * kSinRotate);
+    vec.SetCoordinate(ace_2, lt_corner[ace_2] * kCosRotate - direction * lt_corner[ace_1] * kSinRotate);
     eye_.SetEyeLTCorner(Coordinates(vec));
 
     vec = lb_corner;
-    vec.SetCoordinate(0, lb_corner[0] * kCosRotate - lb_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, lb_corner[2] * kCosRotate + lb_corner[0] * kSinRotate);
+    vec.SetCoordinate(ace_1, lb_corner[ace_1] * kCosRotate + direction * lb_corner[ace_2] * kSinRotate);
+    vec.SetCoordinate(ace_2, lb_corner[ace_2] * kCosRotate - direction * lb_corner[ace_1] * kSinRotate);
     eye_.SetEyeLBCorner(Coordinates(vec));
 
     vec = rt_corner;
-    vec.SetCoordinate(0, rt_corner[0] * kCosRotate - rt_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, rt_corner[2] * kCosRotate + rt_corner[0] * kSinRotate);
+    vec.SetCoordinate(ace_1, rt_corner[ace_1] * kCosRotate + direction * rt_corner[ace_2] * kSinRotate);
+    vec.SetCoordinate(ace_2, rt_corner[ace_2] * kCosRotate - direction * rt_corner[ace_1] * kSinRotate);
     eye_.SetEyeRTCorner(Coordinates(vec));
 
     vec = rb_corner;
-    vec.SetCoordinate(0, rb_corner[0] * kCosRotate - rb_corner[2] * kSinRotate);
-    vec.SetCoordinate(2, rb_corner[2] * kCosRotate + rb_corner[0] * kSinRotate);
+    vec.SetCoordinate(ace_1, rb_corner[ace_1] * kCosRotate + direction * rb_corner[ace_2] * kSinRotate);
+    vec.SetCoordinate(ace_2, rb_corner[ace_2] * kCosRotate - direction * rb_corner[ace_1] * kSinRotate);
     eye_.SetEyeRBCorner(Coordinates(vec));
-
-    return true;
-}
-
-bool SceneManager::OnArrowUp() {
-    Coordinates lt_corner = eye_.GetEyeLTCorner();
-    Coordinates lb_corner = eye_.GetEyeLBCorner();
-    Coordinates rt_corner = eye_.GetEyeRTCorner();
-    Coordinates rb_corner = eye_.GetEyeRBCorner();
-
-    Coordinates hor_vec = (lt_corner - rt_corner) / 2;
-    Coordinates vec = lt_corner - hor_vec;
-    float hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    lt_corner.SetCoordinate(0, hor_vec[0] + vec[0] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    lt_corner.SetCoordinate(1, hor_vec[1] + vec[1] * kCosRotate - kSinRotate * hor_length);
-    lt_corner.SetCoordinate(2, hor_vec[2] + vec[2] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeLTCorner(Coordinates(lt_corner));
-
-    vec = lb_corner - hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    lb_corner.SetCoordinate(0, hor_vec[0] + vec[0] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    lb_corner.SetCoordinate(1, hor_vec[1] + vec[1] * kCosRotate - kSinRotate * hor_length);
-    lb_corner.SetCoordinate(2, hor_vec[2] + vec[2] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeLBCorner(Coordinates(lb_corner));
-
-    vec = rt_corner + hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    rt_corner.SetCoordinate(0, -hor_vec[0] + vec[0] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    rt_corner.SetCoordinate(1, -hor_vec[1] + vec[1] * kCosRotate - kSinRotate * hor_length);
-    rt_corner.SetCoordinate(2, -hor_vec[2] + vec[2] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeRTCorner(Coordinates(rt_corner));
-
-    vec = rb_corner + hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    rb_corner.SetCoordinate(0, -hor_vec[0] + vec[0] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    rb_corner.SetCoordinate(1, -hor_vec[1] + vec[1] * kCosRotate - kSinRotate * hor_length);
-    rb_corner.SetCoordinate(2, -hor_vec[2] + vec[2] * (kCosRotate + vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeRBCorner(Coordinates(rb_corner));
-
-    return true;
-}
-
-bool SceneManager::OnArrowDown() {
-    Coordinates lt_corner = eye_.GetEyeLTCorner();
-    Coordinates lb_corner = eye_.GetEyeLBCorner();
-    Coordinates rt_corner = eye_.GetEyeRTCorner();
-    Coordinates rb_corner = eye_.GetEyeRBCorner();
-
-    Coordinates hor_vec = (lt_corner - rt_corner) / 2;
-    Coordinates vec = lt_corner - hor_vec;
-    float hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    lt_corner.SetCoordinate(0, hor_vec[0] + vec[0] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    lt_corner.SetCoordinate(1, hor_vec[1] + vec[1] * kCosRotate + kSinRotate * hor_length);
-    lt_corner.SetCoordinate(2, hor_vec[2] + vec[2] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeLTCorner(Coordinates(lt_corner));
-
-    vec = lb_corner - hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    lb_corner.SetCoordinate(0, hor_vec[0] + vec[0] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    lb_corner.SetCoordinate(1, hor_vec[1] + vec[1] * kCosRotate + kSinRotate * hor_length);
-    lb_corner.SetCoordinate(2, hor_vec[2] + vec[2] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeLBCorner(Coordinates(lb_corner));
-
-    vec = rt_corner + hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    rt_corner.SetCoordinate(0, -hor_vec[0] + vec[0] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    rt_corner.SetCoordinate(1, -hor_vec[1] + vec[1] * kCosRotate + kSinRotate * hor_length);
-    rt_corner.SetCoordinate(2, -hor_vec[2] + vec[2] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeRTCorner(Coordinates(rt_corner));
-
-    vec = rb_corner + hor_vec;
-    hor_length = sqrt(vec[0] * vec[0] + vec[2] * vec[2]);
-    rb_corner.SetCoordinate(0, -hor_vec[0] + vec[0] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    rb_corner.SetCoordinate(1, -hor_vec[1] + vec[1] * kCosRotate + kSinRotate * hor_length);
-    rb_corner.SetCoordinate(2, -hor_vec[2] + vec[2] * (kCosRotate - vec[1] * kSinRotate / hor_length));
-    eye_.SetEyeRBCorner(Coordinates(rb_corner));
 
     return true;
 }
