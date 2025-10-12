@@ -109,6 +109,10 @@ class Coordinates {
             return Coordinates(dimension, x * val, y * val, z * val);
         };
 
+        Coordinates operator * (const Coordinates& another) const {
+            return Coordinates(dimension, x * another.x, y * another.y, z * another.z);
+        };
+
         Coordinates operator / (float val) const {
             return Coordinates(dimension, x / val, y / val, z / val);
         };

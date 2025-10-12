@@ -10,7 +10,6 @@
 
 #include "my_assert.h"
 
-static const Coordinates kIBase(3, 19, 19, 19);
 static const float kEyeHeight = 1000;
 static const float kPowCosB = 32;
 static const float kMaxColor = 255;
@@ -20,7 +19,7 @@ static const float kCosRotate = 0.9961947;
 static const float kSinRotate = 0.08715574;
 static const size_t kColorCountingDepth = 5;
 
-static const graphics::Color kFreeSpaceColor(graphics::kColorBrown);
+static const graphics::Color kFreeSpaceColor(graphics::kColorCyan);
 
 class Eye {
     private:

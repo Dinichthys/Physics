@@ -8,6 +8,8 @@
 
 #include "object_info.hpp"
 
+static const graphics::Color kIBase(100, 100, 100);
+
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
     {kSphere, ObjectInfo{kSphere, 0, 0, 1}},
     {kLight,  ObjectInfo{kLight,  0, 0, 1}},
@@ -16,15 +18,15 @@ static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
 class Object : public ObjectInfo{
     private:
         Coordinates center_;
-        Coordinates brightness_;
+        graphics::Color color_;
 
     public:
         explicit Object(const Coordinates& center, const ObjectInfo& info,
-                        const Coordinates& brightness = Coordinates(3, 0, 0, 0))
-            :ObjectInfo(info), center_(center), brightness_(brightness) {};
+                        const graphics::Color& color = kIBase)
+            :ObjectInfo(info), center_(center), color_(color) {};
 
         virtual const Coordinates& GetCenterCoordinates() const {return center_;};
-        virtual Coordinates GetBrightness() const {return Coordinates(brightness_);};
+        virtual Coordinates GetColor() const {return Coordinates(color_);};
 };
 
 class Circle : public Object {
@@ -33,10 +35,10 @@ class Circle : public Object {
 
     public:
         explicit Circle(const Coordinates& center, float radius, ObjectType type = kSphere,
-                        const Coordinates& brightness = Coordinates(3, 0, 0, 0),
+                        const graphics::Color& color = kIBase,
                         float coeff_reflection = NAN, float coeff_absorption = NAN,
                         float coeff_reffraction = NAN)
-            :Object(center, kObjectsInfo.at(type), brightness) {
+            :Object(center, kObjectsInfo.at(type), color) {
             radius_ = radius;
             if (!isnan(coeff_reffraction)) {
                 Object::SetCoeffReffraction(coeff_reffraction);

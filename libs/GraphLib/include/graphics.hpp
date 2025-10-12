@@ -73,7 +73,7 @@ namespace graphics {
     const Color kColorBrown(150, 75, 0);
     const Color kColorCyan(0, 255, 255);
     const Color kColorYellow(255, 255, 0);
-    const Color kColorBlack(0, 0, 0);
+    const Color kColorBlack(19, 19, 19);
 
     class Text {
         private:
