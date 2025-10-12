@@ -18,7 +18,9 @@ static const float kWindowDistance = 688;
 static const float kStepEye = 10;
 static const float kCosRotate = 0.9961947;
 static const float kSinRotate = 0.08715574;
-static const size_t kReflectionTimes = 5;
+static const size_t kColorCountingDepth = 5;
+
+static const graphics::Color kFreeSpaceColor(graphics::kColorBrown);
 
 class Eye {
     private:
@@ -95,10 +97,13 @@ class SceneManager : public Widget {
         Circle GetPointIntersectionWithCircle(const Coordinates& pixel_pos, const Coordinates& eye_pos,
                                               float& coeff, size_t& cur_circle_index);
         graphics::Color GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
-                                      const Coordinates& center, size_t cur_circle_idx,
-                                      float coeff_reflection);
+                                      size_t cur_circle_idx, size_t depth_counting);
         graphics::Color GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
-                                       const Coordinates& center, size_t cur_circle_idx);
+                                       size_t cur_circle_idx);
+        graphics::Color GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
+                                            size_t cur_circle_idx, size_t depth_counting);
+        graphics::Color GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
+                                            size_t cur_circle_idx, size_t depth_counting);
         bool GetIntersectionResultQuadraticEquation(const Circle* circle, const Coordinates& pixel_pos,
                                                     const Coordinates& eye_pos, float& res_plus, float& res_minus);
 };

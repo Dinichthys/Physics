@@ -52,17 +52,17 @@ namespace graphics {
 
             void SetBrightness(uint8_t brightness) {brightness_ = brightness;};
 
-            Color operator + (const Color& color) const {
-                return Color(GetRedPart()    + color.GetRedPart(),
-                             GetBluePart()   + color.GetBluePart(),
-                             GetGreenPart()  + color.GetGreenPart(),
-                             GetBrightness() + color.GetBrightness());
+            Color operator + (const Color& another) const {
+                return Color(GetRedPart()    + another.GetRedPart(),
+                             GetGreenPart()  + another.GetGreenPart(),
+                             GetBluePart()   + another.GetBluePart(),
+                             GetBrightness() + another.GetBrightness());
             };
 
             Color operator * (float val) const {
                 return Color(GetRedPart()    * val,
-                             GetBluePart()   * val,
-                             GetGreenPart()  * val);
+                             GetGreenPart()  * val,
+                             GetBluePart()   * val);
             };
     };
 

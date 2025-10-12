@@ -15,11 +15,11 @@ int main() {
     set_log_lvl(kError);
 
     Circle circles_arr[6] = {
-        Circle(Coordinates(3, 100, 0, 0),       400, kSphere, Coordinates(3), 0),
-        Circle(Coordinates(3, 1000, 1000, 0),   400, kSphere, Coordinates(3), 1),
-        // Circle(Coordinates(3, 500, 500, 300),   100, kSphere, Coordinates(3), 1),
-        Circle(Coordinates(3, 1000, 0, 0),      400, kSphere, Coordinates(3), 0.5),
-        Circle(Coordinates(3, 500, 300, 100),   200, kSphere, Coordinates(3), 0),
+        Circle(Coordinates(3, 100, 0, 0),       400, kSphere, Coordinates(3), 0, 1),
+        Circle(Coordinates(3, 1000, 1000, 0),   400, kSphere, Coordinates(3), 0.8, 0.2),
+        // Circle(Coordinates(3, 500, 500, 300),   100, kSphere, Coordinates(3), 1, 0),
+        Circle(Coordinates(3, 1000, 0, 0),      400, kSphere, Coordinates(3), 0.5, 0.5),
+        Circle(Coordinates(3, 500, 300, 100),   200, kSphere, Coordinates(3), 0, 1),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
         Circle(Coordinates(3, 600, 600, 1000),  50,  kLight,  Coordinates(3, 255, 255, 255)),

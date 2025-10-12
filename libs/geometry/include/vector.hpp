@@ -134,6 +134,13 @@ class Coordinates {
             y = need_copy.y;
             z = need_copy.z;
         };
+
+        bool operator == (const Coordinates& another) {
+            return ((dimension == another.dimension)
+                    && (x == another.x)
+                    && (y == another.y)
+                    && (z == another.z));
+        };
 };
 
 class MyVector {
