@@ -9,6 +9,7 @@
 #include "object_info.hpp"
 
 static const graphics::Color kIBase(100, 100, 100);
+static const float kAirCoeffRefraction = 1;
 
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
     {kSphere, ObjectInfo{kSphere, 0, 0, 1}},
@@ -37,11 +38,11 @@ class Circle : public Object {
         explicit Circle(const Coordinates& center, float radius, ObjectType type = kSphere,
                         const graphics::Color& color = kIBase,
                         float coeff_reflection = NAN, float coeff_absorption = NAN,
-                        float coeff_reffraction = NAN)
+                        float coeff_refraction = NAN)
             :Object(center, kObjectsInfo.at(type), color) {
             radius_ = radius;
-            if (!isnan(coeff_reffraction)) {
-                Object::SetCoeffReffraction(coeff_reffraction);
+            if (!isnan(coeff_refraction)) {
+                Object::SetCoeffRefraction(coeff_refraction);
             }
             if (!isnan(coeff_absorption)) {
                 Object::SetCoeffAbsorption(coeff_absorption);

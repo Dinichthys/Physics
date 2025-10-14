@@ -31,8 +31,6 @@ RendererError UI::ShowWindow() {
             AnalyzeKey(event);
         }
 
-        LOG(kDebug, "Drawing window");
-
         WidgetContainer::OnIdle();
 
         start_time = end_time;
@@ -62,8 +60,6 @@ RendererError UI::AnalyzeKey(const graphics::Event& event) {
 
             OnMousePress(mouse_pos, &moving_window);
 
-            LOG(kDebug, "Coordinates X = %f, Y = %f\n", mouse_pos[0], mouse_pos[1]);
-
             break;
         }
         case(graphics::EventType::kMouseButtonReleased) : {
@@ -72,8 +68,6 @@ RendererError UI::AnalyzeKey(const graphics::Event& event) {
             GetMousePosition(mouse_pos);
 
             OnMouseRelease(mouse_pos);
-
-            LOG(kDebug, "Coordinates X = %f, Y = %f\n", mouse_pos[0], mouse_pos[1]);
 
             break;
         }

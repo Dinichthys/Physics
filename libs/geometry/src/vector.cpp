@@ -15,8 +15,6 @@ float MyVector::GetAngle() {
 
     float angle = asinf(height/length);
 
-    LOG(kDebug, "Angle = %f", angle * 180 / M_PI);
-
     if (start[0] < end[0]) {
         return angle;
     } else {

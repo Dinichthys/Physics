@@ -93,7 +93,7 @@ class SceneManager : public Widget {
         virtual void Draw(graphics::RenderWindow* window) override;
 
     private:
-        bool CameraRotation(size_t ace_1, size_t ace_2, float direction);
+        bool CameraRotationInTwoAxis(size_t ace_1, size_t ace_2, float direction);
 
         Circle GetPointIntersectionWithCircle(const Coordinates& pixel_pos, const Coordinates& eye_pos,
                                               float& coeff, size_t& cur_circle_index);
