@@ -27,11 +27,14 @@ target_include_directories (${PROJECT_NAME}
         libs/MyLib/My_stdio
 )
 
+find_package(OpenMP REQUIRED)
 target_link_libraries (${PROJECT_NAME}
     PRIVATE
         sfml-system
         sfml-window
         sfml-graphics
+
+        OpenMP::OpenMP_CXX
 )
 
 target_compile_features (${PROJECT_NAME}

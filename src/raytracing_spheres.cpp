@@ -20,14 +20,14 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
     Coordinates hor_vec = !(rt_corner - lt_corner);
     Coordinates ver_vec = !(lb_corner - lt_corner);
 
-    float width = Widget::GetWidth();
-    float height = Widget::GetHeight();
+    size_t width = Widget::GetWidth();
+    size_t height = Widget::GetHeight();
     Coordinates abs_coors = Widget::GetLTCornerAbs();
 
     Coordinates pixel_pos(eye_pos + lt_corner);
-    for (unsigned int i = 0; i < height; i++) {
+    for (size_t i = 0; i < height; i++) {
         pixel_pos = eye_pos + lt_corner + ver_vec * i;
-        for (unsigned int j = 0; j < width; j++) {
+        for (size_t j = 0; j < width; j++) {
             pixel_pos = pixel_pos + hor_vec;
             vertices_.SetPixelPosition(i * width + j,
                                        Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
