@@ -10,7 +10,8 @@
 
 #include "my_assert.h"
 
-static const float kEyeHeight = 1000;
+static const float kEyeHeight = 2000;
+static const Coordinates start_eye_pos(3, 0, 0, -1000);
 static const float kPowCosB = 32;
 static const float kMaxColor = 255;
 static const float kWindowDistance = 688;
@@ -54,29 +55,29 @@ class Eye {
 class SceneManager : public Widget {
     private:
         graphics::VertexArray vertices_;
-        std::vector<Circle*> circles_;
+        std::vector<Object*> objects_;
         Eye eye_;
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
-                     const std::vector<Circle*> circles)
+                     const std::vector<Object*> objects)
             :Widget(lt_corner, width, height), vertices_(width * height),
-             eye_(Coordinates(3, (float)(width / 2), (float)(height / 2), - kEyeHeight),
+             eye_(Coordinates(start_eye_pos),
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)) {
-            size_t circles_num = circles.size();
-            for (size_t i = 0; i < circles_num; i++) {
-                circles_.push_back(new Circle(*(circles[i])));
+            size_t objects_num = objects.size();
+            for (size_t i = 0; i < objects_num; i++) {
+                objects_.push_back(objects[i]);
             }
         };
 
         ~SceneManager() {
-            size_t circles_num = circles_.size();
-            for (size_t i = 0; i < circles_num; i++) {
-                delete circles_.back();
-                circles_.pop_back();
+            size_t objects_num = objects_.size();
+            for (size_t i = 0; i < objects_num; i++) {
+                delete objects_.back();
+                objects_.pop_back();
             }
         };
 
@@ -95,18 +96,17 @@ class SceneManager : public Widget {
     private:
         bool CameraRotationInTwoAxis(size_t ace_1, size_t ace_2, float direction);
 
-        Circle GetPointIntersectionWithCircle(const Coordinates& pixel_pos, const Coordinates& eye_pos,
-                                              float& coeff, size_t& cur_circle_index);
+        Object* GetPointIntersection(const Coordinates& pixel_pos, const Coordinates& vec,
+               float& coeff, size_t& cur_object_idx);
+
         graphics::Color GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
-                                      size_t cur_circle_idx, size_t depth_counting);
+                                      size_t cur_object_idx, size_t depth_counting);
         graphics::Color GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
-                                       size_t cur_circle_idx);
+                                       size_t cur_object_idx);
         graphics::Color GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
-                                            size_t cur_circle_idx, size_t depth_counting);
+                                            size_t cur_object_idx, size_t depth_counting);
         graphics::Color GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
-                                            size_t cur_circle_idx, size_t depth_counting);
-        bool GetIntersectionResultQuadraticEquation(const Circle* circle, const Coordinates& pixel_pos,
-                                                    const Coordinates& eye_pos, float& res_plus, float& res_minus);
+                                            size_t cur_object_idx, size_t depth_counting);
 };
 
 #endif // SCENE_MANAGER

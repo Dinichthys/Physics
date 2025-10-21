@@ -117,7 +117,7 @@ class Coordinates {
             return Coordinates(dimension, x / val, y / val, z / val);
         };
 
-        Coordinates operator ! () {
+        Coordinates operator ! () const {
             float len = GetModule();
             return *this / len;
         };
@@ -139,7 +139,7 @@ class Coordinates {
             z = need_copy.z;
         };
 
-        bool operator == (const Coordinates& another) {
+        bool operator == (const Coordinates& another) const {
             return ((dimension == another.dimension)
                     && (x == another.x)
                     && (y == another.y)

@@ -8,12 +8,13 @@
 
 #include "object_info.hpp"
 
-static const graphics::Color kIBase(100, 100, 100);
+static const graphics::Color kIBase(19, 19, 19);
 static const float kAirCoeffRefraction = 1;
 
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
-    {kSphere, ObjectInfo{kSphere, 0, 0, 1}},
-    {kLight,  ObjectInfo{kLight,  0, 0, 1}},
+    {kSphere, ObjectInfo{kSphere, INFINITY, 0, 1}},
+    {kLight,  ObjectInfo{kLight,  INFINITY, 0, 1}},
+    {kPlane,  ObjectInfo{kPlane,  INFINITY, 0, 1}},
 };
 
 class Object : public ObjectInfo{
@@ -26,35 +27,25 @@ class Object : public ObjectInfo{
                         const graphics::Color& color = kIBase)
             :ObjectInfo(info), center_(center), color_(color) {};
 
+        virtual ~Object() {};
+
         virtual const Coordinates& GetCenterCoordinates() const {return center_;};
         virtual Coordinates GetColor() const {return Coordinates(color_);};
-};
 
-class Circle : public Object {
-    private:
-        float radius_;
+        virtual bool GetIntersection(const Coordinates& start_pos,
+                                     const Coordinates& vec,
+                                     float& coeff) const = 0;
 
-    public:
-        explicit Circle(const Coordinates& center, float radius, ObjectType type = kSphere,
-                        const graphics::Color& color = kIBase,
-                        float coeff_reflection = NAN, float coeff_absorption = NAN,
-                        float coeff_refraction = NAN)
-            :Object(center, kObjectsInfo.at(type), color) {
-            radius_ = radius;
-            if (!isnan(coeff_refraction)) {
-                Object::SetCoeffRefraction(coeff_refraction);
-            }
-            if (!isnan(coeff_absorption)) {
-                Object::SetCoeffAbsorption(coeff_absorption);
-            }
-            if (!isnan(coeff_reflection)) {
-                Object::SetCoeffReflection(coeff_reflection);
-            }
-        };
+        virtual Coordinates GetReflectionVec(const Coordinates& point,
+                                             const Coordinates& vec) const = 0;
 
-        virtual ~Circle() {};
+        virtual Coordinates GetRefractionVec(const Coordinates& point,
+                                             const Coordinates& vec,
+                                             float old_coeff_refraction,
+                                             bool& enter,
+                                             bool& stop) const = 0;
 
-        float GetRadius() const {return radius_;};
+        virtual Coordinates GetNormal(const Coordinates& point, const Coordinates& vec) const = 0;
 };
 
 #endif // OBJECT_HPP
