@@ -82,31 +82,29 @@ class DrawTask {
         size_t GetStartPointIdx() const {return start_point_idx_;};
 };
 
-class Mueue {
+template<typename T>
+class Mueue : public std::stack<T> {
     private:
         std::mutex mu_;
-        std::stack<DrawTask> stk_;
 
     public:
-        explicit Mueue(const std::stack<DrawTask>& stk)
-            :stk_(stk), mu_() {}
+        explicit Mueue(const std::stack<T>& stk)
+            :std::stack<T>(stk), mu_() {}
 
         DrawTask GetElem() {
             while(!mu_.try_lock()) {usleep(kSpinLockTimeOut);}
-            DrawTask elem = stk_.top();
-            stk_.pop();
+            DrawTask elem = std::stack<T>::top();
+            std::stack<T>::pop();
             mu_.unlock();
             return elem;
         };
 
         void push(const DrawTask elem) {
             while(!mu_.try_lock()) {usleep(kSpinLockTimeOut);}
-            stk_.push(elem);
+            std::stack<T>::push(elem);
             mu_.unlock();
             return;
         };
-
-        bool Empty() const {return stk_.empty();};
 };
 
 class SceneManager : public Widget {
@@ -114,7 +112,7 @@ class SceneManager : public Widget {
         graphics::VertexArray vertices_;
         std::vector<Object*> objects_;
         Eye eye_;
-        Mueue tasks_;
+        Mueue<DrawTask> tasks_;
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,

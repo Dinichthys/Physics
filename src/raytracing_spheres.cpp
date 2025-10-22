@@ -36,7 +36,7 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
 }
 
 void SceneManager::DrawPart() {
-    if (tasks_.Empty()) {
+    if (tasks_.empty()) {
         return;
     }
 
