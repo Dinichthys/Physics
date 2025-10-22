@@ -42,16 +42,29 @@ int main() {
                  Coordinates(3, 0, 500, 0), Coordinates(3, 100, 500, 0), Coordinates(3, 200, 0, 500)),
     };
 
-    Square squares_arr[1] = {
-        Square(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
-                 Coordinates(3, 0, 100, 0), Coordinates(3, 200, 100, 0),
-                 Coordinates(3, 400, 50, 50), Coordinates(3, 200, 50, 50)),
+    Triangle pyramid_parts[6] = {
+        Triangle(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow),
+                 Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200), Coordinates(3, 0, 0, 200)),
+        Triangle(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow),
+                 Coordinates(3, 200, 0, 0), Coordinates(3, 0, 0, 200), Coordinates(3, 200, 0, 200)),
+        Triangle(Plane(Coordinates(3, 100, -500, 100), Coordinates(3, -5, -1, 0), graphics::kColorRed),
+                 Coordinates(3, 0, 0, 0), Coordinates(3, 0, 0, 200), Coordinates(3, 100, -500, 100)),
+        Triangle(Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, 5), graphics::kColorYellow),
+                 Coordinates(3, 0, 0, 200), Coordinates(3, 200, 0, 200), Coordinates(3, 100, -500, 100)),
+        Triangle(Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 5, -1, 0), graphics::kColorYellow),
+                 Coordinates(3, 200, 0, 200), Coordinates(3, 200, 0, 0), Coordinates(3, 100, -500, 100)),
+        Triangle(Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, -5), graphics::kColorYellow),
+                 Coordinates(3, 200, 0, 0), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
     };
+    std::vector<Triangle> triangles;
+    size_t triangles_for_pyramid_num = sizeof(pyramid_parts) / sizeof(pyramid_parts[0]);
+    for (size_t i = 0; i < triangles_for_pyramid_num; i++) {
+        triangles.push_back(Triangle(pyramid_parts[i]));
+    }
 
-    Pyramid pyramids[1] = {
-        Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow, 0, 0.5, 2),
-                 Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200),
-                 Coordinates(3, 0, 0, 200), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
+
+    TrianglesSet triangles_set_arr[1] = {
+        TrianglesSet(Coordinates(3, 100, 0, 100), triangles, graphics::kColorYellow, 0, 1, 2),
     };
 
     std::vector<Object*> objects;
@@ -71,14 +84,9 @@ int main() {
         objects.push_back(new Triangle(triangles_arr[i]));
     }
 
-    size_t squares_num = sizeof(squares_arr) / sizeof(squares_arr[0]);
-    for (size_t i = 0; i < squares_num; i++) {
-        objects.push_back(new Square(squares_arr[i]));
-    }
-
-    size_t pyramids_num = sizeof(pyramids) / sizeof(pyramids[0]);
-    for (size_t i = 0; i < pyramids_num; i++) {
-        objects.push_back(new Pyramid(pyramids[i]));
+    size_t triangles_set_arr_num = sizeof(triangles_set_arr) / sizeof(triangles_set_arr[0]);
+    for (size_t i = 0; i < triangles_set_arr_num; i++) {
+        objects.push_back(new TrianglesSet(triangles_set_arr[i]));
     }
 
     std::vector<Widget*> desktop_children;

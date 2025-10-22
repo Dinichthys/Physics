@@ -7,6 +7,7 @@ enum ObjectType {
     kSphere = 0,
     kLight,
     kPlane,
+    kTrianglesSet,
 
     kAllTypes
 };

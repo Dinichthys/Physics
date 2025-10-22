@@ -13,9 +13,10 @@ static const float kAirCoeffRefraction = 1;
 static const float kNormModule = 1;
 
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
-    {kSphere, ObjectInfo{kSphere, INFINITY, 0, 1}},
-    {kLight,  ObjectInfo{kLight,  INFINITY, 0, 1}},
-    {kPlane,  ObjectInfo{kPlane,  INFINITY, 0, 1}},
+    {kSphere,       ObjectInfo{kSphere,       INFINITY, 0, 1}},
+    {kLight,        ObjectInfo{kLight,        INFINITY, 0, 1}},
+    {kPlane,        ObjectInfo{kPlane,        INFINITY, 0, 1}},
+    {kTrianglesSet, ObjectInfo{kTrianglesSet, INFINITY, 0, 1}},
 };
 
 class Object : public ObjectInfo{
