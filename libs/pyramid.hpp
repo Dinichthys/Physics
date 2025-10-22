@@ -60,6 +60,25 @@ class Pyramid : public Square {
                    || result_triangle_3
                    || result_triangle_4;
         };
+
+        virtual Coordinates GetNormal(const Coordinates& point, const Coordinates& vec) const override {
+            if (Square::IsInhere(point)) {
+                return Square::GetNormal(point, vec);
+            }
+            if (triangle_1_.IsInhere(point)) {
+                return triangle_1_.GetNormal(point, vec);
+            }
+            if (triangle_2_.IsInhere(point)) {
+                return triangle_2_.GetNormal(point, vec);
+            }
+            if (triangle_3_.IsInhere(point)) {
+                return triangle_3_.GetNormal(point, vec);
+            }
+            if (triangle_4_.IsInhere(point)) {
+                return triangle_4_.GetNormal(point, vec);
+            }
+            return Coordinates(3);
+        };
 };
 
 #endif // PYRAMID_HPP

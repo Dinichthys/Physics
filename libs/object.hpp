@@ -10,6 +10,7 @@
 
 static const graphics::Color kIBase(19, 19, 19);
 static const float kAirCoeffRefraction = 1;
+static const float kNormModule = 1;
 
 static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
     {kSphere, ObjectInfo{kSphere, INFINITY, 0, 1}},
