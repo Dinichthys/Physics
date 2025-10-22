@@ -79,6 +79,49 @@ class Pyramid : public Square {
             }
             return Coordinates(3);
         };
+
+        virtual Coordinates GetReflectionVec(const Coordinates& point,
+                                             const Coordinates& vec) const override {
+            if (Square::IsInhere(point)) {
+                return Square::GetReflectionVec(point, vec);
+            }
+            if (triangle_1_.IsInhere(point)) {
+                return triangle_1_.GetReflectionVec(point, vec);
+            }
+            if (triangle_2_.IsInhere(point)) {
+                return triangle_2_.GetReflectionVec(point, vec);
+            }
+            if (triangle_3_.IsInhere(point)) {
+                return triangle_3_.GetReflectionVec(point, vec);
+            }
+            if (triangle_4_.IsInhere(point)) {
+                return triangle_4_.GetReflectionVec(point, vec);
+            }
+            return Coordinates(3);
+        };
+
+        virtual Coordinates GetRefractionVec(const Coordinates& point,
+                                             const Coordinates& vec,
+                                             float old_coeff_refraction,
+                                             bool& enter,
+                                             bool& stop) const override {
+            if (Square::IsInhere(point)) {
+                return Square::GetRefractionVec(point, vec, old_coeff_refraction, enter, stop);
+            }
+            if (triangle_1_.IsInhere(point)) {
+                return triangle_1_.GetRefractionVec(point, vec, old_coeff_refraction, enter, stop);
+            }
+            if (triangle_2_.IsInhere(point)) {
+                return triangle_2_.GetRefractionVec(point, vec, old_coeff_refraction, enter, stop);
+            }
+            if (triangle_3_.IsInhere(point)) {
+                return triangle_3_.GetRefractionVec(point, vec, old_coeff_refraction, enter, stop);
+            }
+            if (triangle_4_.IsInhere(point)) {
+                return triangle_4_.GetRefractionVec(point, vec, old_coeff_refraction, enter, stop);
+            }
+            return Coordinates(3);
+        };
 };
 
 #endif // PYRAMID_HPP

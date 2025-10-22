@@ -49,7 +49,7 @@ int main() {
     };
 
     Pyramid pyramids[1] = {
-        Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow),
+        Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow, 0, 0.5, 2),
                  Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200),
                  Coordinates(3, 0, 0, 200), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
     };
