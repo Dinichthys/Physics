@@ -10,16 +10,17 @@
 #include "circle.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
+#include "square.hpp"
+#include "pyramid.hpp"
 
 #include "logging.h"
 
 int main() {
     set_log_lvl(kError);
 
-    Circle circles_arr[9] = {
-        Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
+    Circle circles_arr[8] = {
+        // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
         Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
-        // Circle(Coordinates(3, 500, 500, 300),   100, kSphere, kIBase, 1, 0),
         Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
         Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
         Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
@@ -41,6 +42,18 @@ int main() {
                  Coordinates(3, 0, 500, 0), Coordinates(3, 100, 500, 0), Coordinates(3, 200, 0, 500)),
     };
 
+    Square squares_arr[1] = {
+        Square(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
+                 Coordinates(3, 0, 100, 0), Coordinates(3, 200, 100, 0),
+                 Coordinates(3, 400, 50, 50), Coordinates(3, 200, 50, 50)),
+    };
+
+    Pyramid pyramids[1] = {
+        Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow),
+                 Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200),
+                 Coordinates(3, 0, 0, 200), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
+    };
+
     std::vector<Object*> objects;
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
@@ -56,6 +69,16 @@ int main() {
     size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
     for (size_t i = 0; i < triangles_num; i++) {
         objects.push_back(new Triangle(triangles_arr[i]));
+    }
+
+    size_t squares_num = sizeof(squares_arr) / sizeof(squares_arr[0]);
+    for (size_t i = 0; i < squares_num; i++) {
+        objects.push_back(new Square(squares_arr[i]));
+    }
+
+    size_t pyramids_num = sizeof(pyramids) / sizeof(pyramids[0]);
+    for (size_t i = 0; i < pyramids_num; i++) {
+        objects.push_back(new Pyramid(pyramids[i]));
     }
 
     std::vector<Widget*> desktop_children;

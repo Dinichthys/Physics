@@ -1,20 +1,22 @@
-#ifndef TRIANGLE_HPP
-#define TRIANGLE_HPP
+#ifndef SQUARE_HPP
+#define SQUARE_HPP
 
 #include "plane.hpp"
 
-class Triangle : public Plane {
+class Square : public Plane {
     private:
         Coordinates point_a_;
         Coordinates point_b_;
         Coordinates point_c_;
+        Coordinates point_d_;
 
     public:
-        explicit Triangle(const Plane& plane,
+        explicit Square(const Plane& plane,
                  const Coordinates& point_a,
                  const Coordinates& point_b,
-                 const Coordinates& point_c)
-            :Plane(plane), point_a_(point_a), point_b_(point_b), point_c_(point_c) {};
+                 const Coordinates& point_c,
+                 const Coordinates& point_d)
+            :Plane(plane), point_a_(point_a), point_b_(point_b), point_c_(point_c), point_d_(point_d) {};
 
         virtual bool GetIntersection(const Coordinates& start_pos,
                                      const Coordinates& vec,
@@ -27,9 +29,10 @@ class Triangle : public Plane {
             Coordinates inter_point = start_pos + vec * tmp;
             Coordinates vec_1 = !((inter_point - point_a_) || (point_b_ - point_a_));
             Coordinates vec_2 = !((inter_point - point_b_) || (point_c_ - point_b_));
-            Coordinates vec_3 = !((inter_point - point_c_) || (point_a_ - point_c_));
+            Coordinates vec_3 = !((inter_point - point_c_) || (point_d_ - point_c_));
+            Coordinates vec_4 = !((inter_point - point_d_) || (point_a_ - point_d_));
 
-            if (((vec_1 && vec_2) > 0) && ((vec_1 && vec_3) > 0)) {
+            if (((vec_1 && vec_2) > 0) && ((vec_1 && vec_3) > 0) && ((vec_1 && vec_4) > 0)) {
                 coeff = tmp;
                 return true;
             }
@@ -38,4 +41,4 @@ class Triangle : public Plane {
         };
 };
 
-#endif // TRIANGLE_HPP
+#endif // SQUARE_HPP

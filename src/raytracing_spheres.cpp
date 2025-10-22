@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stack>
+#include <thread>
 
 #include "graphics.hpp"
 #include "object.hpp"
@@ -13,6 +14,32 @@
 #include "my_assert.h"
 
 void SceneManager::Draw(graphics::RenderWindow* window) {
+    size_t width = Widget::GetWidth();
+    size_t height = Widget::GetHeight();
+
+    tasks_.push(DrawTask(        0,          0, width / 2, height / 2,                      0));
+    tasks_.push(DrawTask(        0, height / 2, width / 2, height    ,     width * height / 4));
+    tasks_.push(DrawTask(width / 2,          0, width,     height / 2,     width * height / 2));
+    tasks_.push(DrawTask(width / 2, height / 2, width,     height    , 3 * width * height / 4));
+
+    std::thread t1([this](){this->DrawPart();});
+    std::thread t2([this](){this->DrawPart();});
+    std::thread t3([this](){this->DrawPart();});
+    std::thread t4([this](){this->DrawPart();});
+
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+
+    window->Draw(vertices_);
+}
+
+void SceneManager::DrawPart() {
+    if (tasks_.Empty()) {
+        return;
+    }
+
     Coordinates eye_pos = eye_.GetEyePos();
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
@@ -21,16 +48,19 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
     Coordinates hor_vec = !(rt_corner - lt_corner);
     Coordinates ver_vec = !(lb_corner - lt_corner);
 
-    size_t width = Widget::GetWidth();
-    size_t height = Widget::GetHeight();
     Coordinates abs_coors = Widget::GetLTCornerAbs();
 
+    DrawTask task = tasks_.GetElem();
+
     Coordinates pixel_pos(eye_pos + lt_corner);
-    for (size_t i = 0; i < height; i++) {
-        pixel_pos = eye_pos + lt_corner + ver_vec * i;
-        for (size_t j = 0; j < width; j++) {
+    float height = task.GetHeight();
+    float width = task.GetWidth();
+    size_t point_idx = task.GetStartPointIdx();
+    for (size_t i = task.GetStartPixelY(); i < height; i++) {
+        pixel_pos = eye_pos + lt_corner + ver_vec * i + hor_vec * task.GetStartPixelX();
+        for (size_t j = task.GetStartPixelX(); j < width; j++) {
             pixel_pos = pixel_pos + hor_vec;
-            vertices_.SetPixelPosition(i * width + j,
+            vertices_.SetPixelPosition(point_idx,
                                        Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
 
             float coeff = -1;
@@ -39,24 +69,22 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
                 pixel_pos, pixel_pos - eye_pos, coeff, cur_object_idx
             );
             if (coeff < 0) {
-                vertices_.SetPixelColor(i * width + j, kFreeSpaceColor);
+                vertices_.SetPixelColor(point_idx++, kFreeSpaceColor);
                 continue;
             }
             if (object->GetType() == kLight) {
-                vertices_.SetPixelColor(i * width + j, graphics::Color(object->GetColor()));
+                vertices_.SetPixelColor(point_idx++, graphics::Color(object->GetColor()));
                 continue;
             }
 
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
-            vertices_.SetPixelColor(i * width + j,
+            vertices_.SetPixelColor(point_idx++,
                                     GetPointColor(
                                         point, eye_pos, cur_object_idx, kColorCountingDepth
                                     ));
         }
     }
-
-    window->Draw(vertices_);
 }
 
 Object* SceneManager::GetPointIntersection(const Coordinates& pixel_pos, const Coordinates& vec,

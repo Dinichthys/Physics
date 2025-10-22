@@ -2,6 +2,9 @@
 #define SCENE_MANAGER
 
 #include <vector>
+#include <stack>
+#include <mutex>
+#include <unistd.h>
 
 #include "graphics.hpp"
 
@@ -19,6 +22,7 @@ static const float kStepEye = 10;
 static const float kCosRotate = 0.9961947;
 static const float kSinRotate = 0.08715574;
 static const size_t kColorCountingDepth = 5;
+static const size_t kSpinLockTimeOut = 100;
 
 static const graphics::Color kFreeSpaceColor(graphics::kColorCyan);
 
@@ -52,11 +56,65 @@ class Eye {
         void SetEyeRBCorner(Coordinates rb_corner_val) {rb_corner = rb_corner_val;};
 };
 
+class DrawTask {
+    private:
+        size_t start_pixel_x_;
+        size_t start_pixel_y_;
+        float height_;
+        float width_;
+        size_t start_point_idx_;
+
+    public:
+        explicit DrawTask(size_t start_pixel_x, size_t start_pixel_y,
+                          float width, float height,
+                          size_t start_point_idx) {
+            start_pixel_x_ = start_pixel_x;
+            start_pixel_y_ = start_pixel_y;
+            width_ = width;
+            height_ = height;
+            start_point_idx_ = start_point_idx;
+        };
+
+        size_t GetStartPixelX() const {return start_pixel_x_;};
+        size_t GetStartPixelY() const {return start_pixel_y_;};
+        size_t GetHeight() const {return height_;};
+        size_t GetWidth() const {return width_;};
+        size_t GetStartPointIdx() const {return start_point_idx_;};
+};
+
+class Mueue {
+    private:
+        std::mutex mu_;
+        std::stack<DrawTask> stk_;
+
+    public:
+        explicit Mueue(const std::stack<DrawTask>& stk)
+            :stk_(stk), mu_() {}
+
+        DrawTask GetElem() {
+            while(!mu_.try_lock()) {usleep(kSpinLockTimeOut);}
+            DrawTask elem = stk_.top();
+            stk_.pop();
+            mu_.unlock();
+            return elem;
+        };
+
+        void push(const DrawTask elem) {
+            while(!mu_.try_lock()) {usleep(kSpinLockTimeOut);}
+            stk_.push(elem);
+            mu_.unlock();
+            return;
+        };
+
+        bool Empty() const {return stk_.empty();};
+};
+
 class SceneManager : public Widget {
     private:
         graphics::VertexArray vertices_;
         std::vector<Object*> objects_;
         Eye eye_;
+        Mueue tasks_;
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
@@ -66,7 +124,7 @@ class SceneManager : public Widget {
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2),-(float)(height / 2), kWindowDistance),
-                  Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)) {
+                  Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)), tasks_(std::stack<DrawTask>()) {
             size_t objects_num = objects.size();
             for (size_t i = 0; i < objects_num; i++) {
                 objects_.push_back(objects[i]);
@@ -107,6 +165,8 @@ class SceneManager : public Widget {
                                             size_t cur_object_idx, size_t depth_counting);
         graphics::Color GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
                                             size_t cur_object_idx, size_t depth_counting);
+
+        void DrawPart();
 };
 
 #endif // SCENE_MANAGER
