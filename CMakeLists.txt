@@ -63,7 +63,7 @@ target_compile_options (${PROJECT_NAME}
 
         $<$<CONFIG:Release>:
             -O2
-            -flto
+            # -flto=auto
             -DNDEBUG
         >
 )
@@ -82,7 +82,7 @@ target_link_options (${PROJECT_NAME}
 
         $<$<CONFIG:Release>:
             -O2
-            -flto
+            -flto=auto
         >
 )
 

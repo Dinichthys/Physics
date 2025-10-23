@@ -45,7 +45,7 @@ class Plane : public Object {
         virtual Coordinates GetReflectionVec(__attribute_maybe_unused__ const Coordinates& point,
                                              const Coordinates& vec) const override {
             Coordinates before_ref = !vec;
-            return before_ref - normal_ * (before_ref && normal_) * 2;
+            return before_ref - (!normal_) * (before_ref && (!normal_)) * 2;
         };
 
         virtual Coordinates GetRefractionVec(__attribute_maybe_unused__ const Coordinates& point,

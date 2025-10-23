@@ -45,6 +45,27 @@ int main() {
                  Coordinates(3, -400, 500, -500), Coordinates(3, -300, 0, 0)),
     };
 
+    Triangle triangles_pyramid[6] {
+        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), graphics::kColorYellow),
+                  Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200)),
+        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), graphics::kColorYellow),
+                  Coordinates(3, 0, 0, 200), Coordinates(3, 200, 0, 200)),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, -5), graphics::kColorYellow),
+                  Coordinates(3, -100, 500, -100), Coordinates(3, 100, 500, -100)),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 5, -1, 0), graphics::kColorYellow),
+                  Coordinates(3, 100, 500, -100), Coordinates(3, 100, 500, 100)),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, 5), graphics::kColorYellow),
+                  Coordinates(3, 100, 500, 100), Coordinates(3, -100, 500, 100)),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, -5, -1, 0), graphics::kColorYellow),
+                  Coordinates(3, -100, 500, 100), Coordinates(3, -100, 500, -100)),
+    };
+
+    std::vector<Triangle> triangles_pyramid_vec;
+    size_t triangles_pyramid_num = sizeof(triangles_pyramid) / sizeof(triangles_pyramid[0]);
+    for (size_t i = 0; i < triangles_pyramid_num; i++) {
+        triangles_pyramid_vec.push_back(triangles_pyramid[i]);
+    }
+
 //     Square squares_arr[1] = {
 //         Square(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
 //                  Coordinates(3, 0, 100, 0), Coordinates(3, 200, 100, 0),
@@ -58,6 +79,8 @@ int main() {
 //     };
 
     std::vector<Object*> objects;
+    objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
+                                       graphics::kColorYellow, 0.5, 0.5, 2));
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
     for (size_t i = 0; i < circles_num; i++) {

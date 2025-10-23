@@ -159,7 +159,6 @@ class SceneManager : public WidgetContainer {
         virtual void Draw(graphics::RenderWindow* window) override;
 
         void MoveCurrentObject(const Coordinates& move_direction_) const {
-            fprintf(stderr, "%lu - cur object index\n", cur_object_idx_);
             if (cur_object_idx_ >= objects_.size()) {
                 return;
             }
@@ -189,8 +188,6 @@ class SceneManager : public WidgetContainer {
                 GetPointIntersection(eye_.GetEyePos(),
                                      lt_corner + hor_vec * loc_coordinates[0] + ver_vec * loc_coordinates[1],
                                      coeff, cur_object_idx_);
-
-                fprintf(stderr, "mouse_x = %f, mouse_y = %f\n", loc_coordinates[0], loc_coordinates[1]);
 
                 if (coeff < 0) {
                     *widget = NULL;
