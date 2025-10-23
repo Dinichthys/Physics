@@ -5,13 +5,16 @@
 
 #include "draw.hpp"
 #include "scrollbar.hpp"
+#include "button.hpp"
+#include "object_buttons.hpp"
 
 #include "scene_manager.hpp"
+
 #include "circle.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
-#include "square.hpp"
-#include "pyramid.hpp"
+// #include "square.hpp"
+// #include "pyramid.hpp"
 
 #include "logging.h"
 
@@ -39,20 +42,20 @@ int main() {
 
     Triangle triangles_arr[1] = {
         Triangle(Plane(Coordinates(3, 500, 0, 500), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
-                 Coordinates(3, 0, 500, 0), Coordinates(3, 100, 500, 0), Coordinates(3, 200, 0, 500)),
+                 Coordinates(3, -400, 500, -500), Coordinates(3, -300, 0, 0)),
     };
 
-    Square squares_arr[1] = {
-        Square(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
-                 Coordinates(3, 0, 100, 0), Coordinates(3, 200, 100, 0),
-                 Coordinates(3, 400, 50, 50), Coordinates(3, 200, 50, 50)),
-    };
-
-    Pyramid pyramids[1] = {
-        Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow, 0, 0.5, 2),
-                 Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200),
-                 Coordinates(3, 0, 0, 200), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
-    };
+//     Square squares_arr[1] = {
+//         Square(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
+//                  Coordinates(3, 0, 100, 0), Coordinates(3, 200, 100, 0),
+//                  Coordinates(3, 400, 50, 50), Coordinates(3, 200, 50, 50)),
+//     };
+//
+//     Pyramid pyramids[1] = {
+//         Pyramid(Plane(Coordinates(3, 100, 0, 100), Coordinates(3, 0, -1, 0), graphics::kColorYellow, 0, 0.5, 2),
+//                  Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200),
+//                  Coordinates(3, 0, 0, 200), Coordinates(3, 0, 0, 0), Coordinates(3, 100, -500, 100)),
+//     };
 
     std::vector<Object*> objects;
 
@@ -71,18 +74,41 @@ int main() {
         objects.push_back(new Triangle(triangles_arr[i]));
     }
 
-    size_t squares_num = sizeof(squares_arr) / sizeof(squares_arr[0]);
-    for (size_t i = 0; i < squares_num; i++) {
-        objects.push_back(new Square(squares_arr[i]));
-    }
+    // size_t squares_num = sizeof(squares_arr) / sizeof(squares_arr[0]);
+    // for (size_t i = 0; i < squares_num; i++) {
+    //     objects.push_back(new Square(squares_arr[i]));
+    // }
 
-    size_t pyramids_num = sizeof(pyramids) / sizeof(pyramids[0]);
-    for (size_t i = 0; i < pyramids_num; i++) {
-        objects.push_back(new Pyramid(pyramids[i]));
-    }
+    // size_t pyramids_num = sizeof(pyramids) / sizeof(pyramids[0]);
+    // for (size_t i = 0; i < pyramids_num; i++) {
+    //     objects.push_back(new Pyramid(pyramids[i]));
+    // }
 
     std::vector<Widget*> desktop_children;
-    desktop_children.push_back(new SceneManager(Coordinates(3, 100, 100), 800, 400, objects));
+    desktop_children.push_back(new SceneManager(Coordinates(2, 100, 100), 800, 400, objects));
+    SceneManager* scene_manager = dynamic_cast<SceneManager*>(desktop_children.back());
+    MoveButton buttons[6] = {
+        MoveButton(Button(Coordinates(2, 5, 5), 50, 40, "X+", kFontFileNameScrollBar), Coordinates(3, 100, 0, 0),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+        MoveButton(Button(Coordinates(2, 65, 5), 50, 40, "X-", kFontFileNameScrollBar), Coordinates(3, -100, 0, 0),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+        MoveButton(Button(Coordinates(2, 5, 50), 50, 40, "Y+", kFontFileNameScrollBar), Coordinates(3, 0, 100, 0),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+        MoveButton(Button(Coordinates(2, 65, 50), 50, 40, "Y-", kFontFileNameScrollBar), Coordinates(3, 0, -100, 0),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+        MoveButton(Button(Coordinates(2, 5, 95), 50, 40, "Z+", kFontFileNameScrollBar), Coordinates(3, 0, 0, 100),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+        MoveButton(Button(Coordinates(2, 65, 95), 50, 40, "Z-", kFontFileNameScrollBar), Coordinates(3, 0, 0, -100),
+                   [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
+    };
+
+    std::vector<Widget*> buttons_on_panel;
+    size_t buttons_num = sizeof(buttons) / sizeof(buttons[0]);
+    for (size_t i = 0; i < buttons_num; i++) {
+        buttons_on_panel.push_back(new MoveButton(buttons[i]));
+    }
+    desktop_children.push_back(new PanelControl(Coordinates(2, 900, 110), 120, 140, &buttons_on_panel));
+
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 
     enum RendererError result = renderer.ShowWindow();

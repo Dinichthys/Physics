@@ -107,17 +107,22 @@ class Mueue : public std::stack<T> {
         };
 };
 
-class SceneManager : public Widget {
+class SceneManager : public WidgetContainer {
     private:
         graphics::VertexArray vertices_;
+
         std::vector<Object*> objects_;
+
         Eye eye_;
+
         Mueue<DrawTask> tasks_;
+
+        size_t cur_object_idx_;
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
-                     const std::vector<Object*> objects)
-            :Widget(lt_corner, width, height), vertices_(width * height),
+                     const std::vector<Object*> objects, const std::vector<Widget*>* children = NULL)
+            :WidgetContainer(lt_corner, width, height, children), vertices_(width * height),
              eye_(Coordinates(start_eye_pos),
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
@@ -127,6 +132,10 @@ class SceneManager : public Widget {
             for (size_t i = 0; i < objects_num; i++) {
                 objects_.push_back(objects[i]);
             }
+
+            cur_object_idx_ = -1;
+
+            WidgetContainer::SetParentToChildren();
         };
 
         ~SceneManager() {
@@ -148,6 +157,53 @@ class SceneManager : public Widget {
         virtual bool OnArrowRight() override;
 
         virtual void Draw(graphics::RenderWindow* window) override;
+
+        void MoveCurrentObject(const Coordinates& move_direction_) const {
+            fprintf(stderr, "%lu - cur object index\n", cur_object_idx_);
+            if (cur_object_idx_ >= objects_.size()) {
+                return;
+            }
+            objects_[cur_object_idx_]->Move(move_direction_);
+        };
+
+        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+            const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
+            float width = WidgetContainer::GetWidth();
+            float height = WidgetContainer::GetHeight();
+
+            Coordinates loc_coordinates = mouse_pos - widget_lt_corner;
+
+            if ((loc_coordinates[0] > 0)
+                && (loc_coordinates[1] > 0)
+                && (loc_coordinates[0] < width)
+                && (loc_coordinates[1] < height)) {
+                float coeff = -1;
+
+                Coordinates lt_corner = eye_.GetEyeLTCorner();
+                Coordinates lb_corner = eye_.GetEyeLBCorner();
+                Coordinates rt_corner = eye_.GetEyeRTCorner();
+
+                Coordinates hor_vec = !(rt_corner - lt_corner);
+                Coordinates ver_vec = !(lb_corner - lt_corner);
+
+                GetPointIntersection(eye_.GetEyePos(),
+                                     lt_corner + hor_vec * loc_coordinates[0] + ver_vec * loc_coordinates[1],
+                                     coeff, cur_object_idx_);
+
+                fprintf(stderr, "mouse_x = %f, mouse_y = %f\n", loc_coordinates[0], loc_coordinates[1]);
+
+                if (coeff < 0) {
+                    *widget = NULL;
+                    cur_object_idx_ = -1;
+                } else {
+                    *widget = this;
+                }
+
+                return true;
+            }
+
+            return WidgetContainer::OnMousePress(mouse_pos, widget);
+        };
 
     private:
         bool CameraRotationInTwoAxis(size_t ace_1, size_t ace_2, float direction);

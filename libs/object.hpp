@@ -33,6 +33,10 @@ class Object : public ObjectInfo{
         virtual const Coordinates& GetCenterCoordinates() const {return center_;};
         virtual Coordinates GetColor() const {return Coordinates(color_);};
 
+        virtual void Move(const Coordinates& move_direction) {
+            center_ = center_ + move_direction;
+        };
+
         virtual bool GetIntersection(const Coordinates& start_pos,
                                      const Coordinates& vec,
                                      float& coeff) const = 0;
