@@ -50,7 +50,7 @@ class TrianglesSet : public Object {
                               const graphics::Color& color = kIBase,
                               float coeff_reflection = NAN, float coeff_absorption = NAN,
                               float coeff_refraction = NAN)
-            :Object(center, kObjectsInfo.at(kPlane), color), triangles_(triangles) {
+            :Object(center, kObjectsInfo.at(kTrianglesSet), color), triangles_(triangles) {
             if (!isnan(coeff_refraction)) {
                 Object::SetCoeffRefraction(coeff_refraction);
             }
