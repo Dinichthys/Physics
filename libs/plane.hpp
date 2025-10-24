@@ -78,8 +78,8 @@ class Plane : public Object {
 
             float new_cos = sqrt(1 - new_sin * new_sin);
 
-            return (old_cos < 0) ? (normal_ * new_cos) + (normal_radius * new_sin)
-                                 : (normal_ * (-new_cos)) + (normal_radius * new_sin);
+            return (old_cos < 0) ? ((!normal_) * new_cos) + (normal_radius * new_sin)
+                                 : ((!normal_) * (-new_cos)) + (normal_radius * new_sin);
         };
 
         virtual Coordinates GetNormal(__attribute_maybe_unused__ const Coordinates& point,
