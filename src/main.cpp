@@ -21,17 +21,18 @@
 int main() {
     set_log_lvl(kError);
 
-    Circle circles_arr[8] = {
+    Circle circles_arr[2] = {
         // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
-        Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
-        Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
-        Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
-        Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
-        Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, graphics::kColorRed, 0, 1),
+        // Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
+        // Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
+        // Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
+        // Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
+        // Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, graphics::kColorRed, 0, 1),
         Circle(Coordinates(3, 500, 0, -7000),  1000, kSphere, graphics::kColorBlue, 0, 1),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
-        Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  graphics::kColorWhite),
+
+        // Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  graphics::kColorWhite),
         Circle(Coordinates(3, 1080, -1000, -500), 50,  kLight,  graphics::kColorWhite),
     };
 
@@ -67,32 +68,22 @@ int main() {
     }
 
     std::vector<Object*> objects;
-    objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
-                                       graphics::kColorYellow, 0.5, 0.5, 2));
+    // objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
+    //                                    graphics::kColorWhite, 0, 1));
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
     for (size_t i = 0; i < circles_num; i++) {
         objects.push_back(new Circle(circles_arr[i]));
     }
 
-    size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
-    for (size_t i = 0; i < planes_num; i++) {
-        objects.push_back(new Plane(planes_arr[i]));
-    }
-
-    size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
-    for (size_t i = 0; i < triangles_num; i++) {
-        objects.push_back(new Triangle(triangles_arr[i]));
-    }
-
-    // size_t squares_num = sizeof(squares_arr) / sizeof(squares_arr[0]);
-    // for (size_t i = 0; i < squares_num; i++) {
-    //     objects.push_back(new Square(squares_arr[i]));
+    // size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
+    // for (size_t i = 0; i < planes_num; i++) {
+    //     objects.push_back(new Plane(planes_arr[i]));
     // }
 
-    // size_t pyramids_num = sizeof(pyramids) / sizeof(pyramids[0]);
-    // for (size_t i = 0; i < pyramids_num; i++) {
-    //     objects.push_back(new Pyramid(pyramids[i]));
+    // size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
+    // for (size_t i = 0; i < triangles_num; i++) {
+    //     objects.push_back(new Triangle(triangles_arr[i]));
     // }
 
     std::vector<Widget*> desktop_children;
@@ -118,7 +109,13 @@ int main() {
     for (size_t i = 0; i < buttons_num; i++) {
         buttons_on_panel.push_back(new MoveButton(buttons[i]));
     }
-    desktop_children.push_back(new PanelControl(Coordinates(2, 900, 110), 120, 140, &buttons_on_panel));
+    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 140), 110, 40, "Del",
+                               kFontFileNameScrollBar),
+                               [scene_manager](){scene_manager->DeleteCurrentObject();}));
+    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 185), 110, 40, "Add",
+                               kFontFileNameScrollBar),
+                               [scene_manager](){scene_manager->AddCopyCurrentObject();}));
+    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, 800, 0), 120, 230, &buttons_on_panel));
 
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 

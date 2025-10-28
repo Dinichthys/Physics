@@ -14,7 +14,11 @@ enum ScrollBarElemIdx {
     kMinusArrow = 2,
 };
 
-static const char* const kFontFileNameScrollBar = "data/font.ttf";
+static const std::string kFontFileNameScrollBar = "data/font.ttf";
+static const std::string kArrowUpStr = "/\\";
+static const std::string kArrowDownStr = "\\/";
+static const std::string kArrowRightStr = ">";
+static const std::string kArrowLeftStr = "<";
 static const float kThumbHeight = 50.f;
 static const float kArrowScrollBarHeight = 20.f;
 static const float kDeltaArrow = 10;
@@ -74,22 +78,22 @@ class ScrollBar : public Button {
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          width, kArrowScrollBarHeight,
-                                                         "/\\", kFontFileNameScrollBar), -kDeltaArrow));
+                                                         kArrowUpStr, kFontFileNameScrollBar), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, height - kArrowScrollBarHeight),
                                                          width, kArrowScrollBarHeight,
-                                                         "\\/", kFontFileNameScrollBar), kDeltaArrow));
+                                                         kArrowDownStr, kFontFileNameScrollBar), kDeltaArrow));
                 } else {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, kArrowScrollBarHeight, 0),
                                                         kThumbHeight, height, true));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         "<", kFontFileNameScrollBar), -kDeltaArrow));
+                                                         kArrowLeftStr, kFontFileNameScrollBar), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, width - kArrowScrollBarHeight, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         ">", kFontFileNameScrollBar), kDeltaArrow));
+                                                         kArrowRightStr, kFontFileNameScrollBar), kDeltaArrow));
                 }
             } catch (const std::bad_alloc& e) {
                 std::cerr << "Memory allocation failed: " << e.what() << std::endl;

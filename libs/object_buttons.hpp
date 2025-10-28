@@ -27,4 +27,21 @@ class MoveButton : public Button {
         };
 };
 
+class ExistenceButton : public Button {
+    private:
+        std::function<void(void)> action_;
+
+    public:
+        explicit ExistenceButton(const Button& button, std::function<void(void)> action)
+            :Button(button), action_(action) {};
+
+        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+            if (!Button::OnMousePress(mouse_pos, widget)) {
+                return false;
+            }
+            action_();
+            return true;
+        };
+};
+
 #endif // OBJECT_BUTTONS_HPP

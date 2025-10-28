@@ -2,6 +2,7 @@
 #define GRAPHICS_HPP
 
 #include <stdlib.h>
+#include <string>
 
 #include "vector.hpp"
 
@@ -81,7 +82,7 @@ namespace graphics {
             void* text_;
 
         public:
-            explicit Text(const char* text, const char* font_file_name, unsigned char height);
+            explicit Text(const std::string& text, const std::string& font_file_name, unsigned char height);
 
             explicit Text(const Text& other);
 
@@ -92,6 +93,9 @@ namespace graphics {
             void* GetText() const {return text_;};
 
             void* GetFont() const {return font_;};
+
+            void SetText(const std::string& text);
+            void SetFont(const std::string& font);
     };
 
     class VertexArray {

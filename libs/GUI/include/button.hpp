@@ -2,6 +2,7 @@
 #define BUTTON_HPP
 
 #include <stdexcept>
+#include <string.h>
 
 #include "graphics.hpp"
 
@@ -46,16 +47,19 @@ class Button : public WidgetContainer {
         };
 
         explicit Button(const Coordinates& lt_corner, float width, float height,
-                        const char* text = NULL, const char* file_name = NULL, Widget* parent = NULL,
+                        const std::string& text = "", const std::string& file_name = "",
+                        Widget* parent = NULL,
                         graphics::Color pressed_color = kPressedColor,
                         graphics::Color released_color = kReleaseColor)
             :WidgetContainer(lt_corner, width, height), button_background_(width, height),
              pressed_color_(pressed_color), released_color_(released_color) {
             pressed_ = false;
 
-            if ((text != NULL) && (file_name != NULL)) {
+            if ((strcmp(text.c_str(), "") != 0) && (strcmp(file_name.c_str(), "") != 0)) {
                 WidgetContainer::AddChild(new(std::nothrow) Text(
-                                                            Coordinates(2, width * kTextInButtonShiftHor, - height * kTextInButtonShiftVer),
+                                                            Coordinates(2,
+                                                            width * kTextInButtonShiftHor,
+                                                            - height * kTextInButtonShiftVer),
                                                             width, height, this, text, file_name));
                 if (WidgetContainer::GetChildren().back() == NULL) {
                     throw std::runtime_error("Bad allocation for text");
@@ -136,7 +140,7 @@ class PanelControl : public WidgetContainer {
             WidgetContainer::SetParentToChildren();
         };
 
-        explicit PanelControl(const Coordinates& lt_corner, float width, float height,
+        explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
             :WidgetContainer(lt_corner, width, height, buttons) {
             Widget::SetParent(parent);

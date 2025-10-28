@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdexcept>
+#include <string.h>
 
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics.hpp>
@@ -14,14 +15,16 @@ namespace graphics {
 
 //-----------------TEXT---------------------------------------------------------------------------------------
 
-    Text::Text(const char* text, const char* font_file_name, unsigned char height) {
+    Text::Text(const std::string& text, const std::string& font_file_name, unsigned char height) {
         font_ = new(std::nothrow) sf::Font();
         if (font_ == NULL) {
             throw std::runtime_error("Can't create font for Text object\n");
         }
 
-        if (!((sf::Font*)font_)->loadFromFile(font_file_name)) {
-            throw std::runtime_error("Can't cload font\n");
+        if (strcmp(font_file_name.c_str(), "") != 0) {
+            if (!((sf::Font*)font_)->loadFromFile(font_file_name)) {
+                throw std::runtime_error("Can't cload font\n");
+            }
         }
 
         text_ = new(std::nothrow) sf::Text(text, *((sf::Font*)font_), height);
@@ -51,6 +54,15 @@ namespace graphics {
 
     void Text::SetPosition(const Coordinates& lt_corner) const {
         ((sf::Text*)text_)->setPosition({lt_corner[0], lt_corner[1]});
+    }
+
+    void Text::SetText(const std::string& text) {
+        ((sf::Text*)text_)->setString(text);
+    }
+
+    void Text::SetFont(const std::string& font) {
+        ((sf::Font*)font_)->loadFromFile(font);
+        ((sf::Text*)text_)->setFont(*((sf::Font*)font_));
     }
 
 //-----------------VERTEX ARRAY-------------------------------------------------------------------------------

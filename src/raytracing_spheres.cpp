@@ -14,6 +14,11 @@
 #include "my_assert.h"
 
 void SceneManager::Draw(graphics::RenderWindow* window) {
+    if (table_ != NULL) {
+        table_->Draw(window);
+        WidgetContainer::Draw(window);
+    }
+
     size_t width = Widget::GetWidth();
     size_t height = Widget::GetHeight();
 

@@ -9,7 +9,13 @@
 #include "graphics.hpp"
 
 #include "object.hpp"
+#include "circle.hpp"
+#include "triangle.hpp"
+#include "plane.hpp"
+#include "button.hpp"
+
 #include "vector.hpp"
+#include "info_table.hpp"
 
 #include "my_assert.h"
 
@@ -23,6 +29,8 @@ static const float kCosRotate = 0.9961947;
 static const float kSinRotate = 0.08715574;
 static const size_t kColorCountingDepth = 5;
 static const size_t kSpinLockTimeOut = 100;
+
+static const float kInfoTableWidth = 200;
 
 static const graphics::Color kFreeSpaceColor(graphics::kColorCyan);
 static const graphics::Color kChoseObjectColor(graphics::kColorBrown);
@@ -121,10 +129,12 @@ class SceneManager : public WidgetContainer {
         size_t cur_object_idx_;
         graphics::Color cur_object_color_;
 
+        InfoTable* table_;
+
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
-                     const std::vector<Object*> objects, const std::vector<Widget*>* children = NULL)
-            :WidgetContainer(lt_corner, width, height, children), vertices_(width * height),
+                     const std::vector<Object*> objects)
+            :WidgetContainer(lt_corner, width, height), vertices_(width * height),
              eye_(Coordinates(start_eye_pos),
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
@@ -137,7 +147,7 @@ class SceneManager : public WidgetContainer {
 
             cur_object_idx_ = -1;
 
-            WidgetContainer::SetParentToChildren();
+            table_ = NULL;
         };
 
         ~SceneManager() {
@@ -146,7 +156,16 @@ class SceneManager : public WidgetContainer {
                 delete objects_.back();
                 objects_.pop_back();
             }
+            if (table_ != NULL) {
+                delete table_;
+                table_ = NULL;
+            }
         };
+
+        void SetPanelControl(PanelControl* panel) {
+            panel->SetParent(this);
+            WidgetContainer::AddChild(panel);
+        }
 
         virtual bool OnLetterA() override;
         virtual bool OnLetterD() override;
@@ -167,10 +186,47 @@ class SceneManager : public WidgetContainer {
             objects_[cur_object_idx_]->Move(move_direction_);
         };
 
+        void DeleteCurrentObject() {
+            if (cur_object_idx_ >= objects_.size()) {
+                return;
+            }
+            delete objects_[cur_object_idx_];
+            objects_.erase(objects_.begin() + cur_object_idx_);
+            if (table_ != NULL) {
+                delete table_;
+                table_ = NULL;
+            }
+        };
+
+        void AddCopyCurrentObject() {
+            if (cur_object_idx_ >= objects_.size()) {
+                return;
+            }
+            switch (objects_[cur_object_idx_]->GetType()) {
+                case kSphere : case kLight :
+                    objects_.push_back(new Circle(*dynamic_cast<Circle*>(objects_[cur_object_idx_])));
+                    break;
+
+                case kPlane :
+                    objects_.push_back(new Plane(*dynamic_cast<Plane*>(objects_[cur_object_idx_])));
+                    break;
+
+                case kTrianglesSet :
+                    objects_.push_back(new TrianglesSet(*dynamic_cast<TrianglesSet*>(objects_[cur_object_idx_])));
+                    break;
+
+                case kAllTypes :
+                    default:
+                    return;
+            }
+            objects_.back()->SetCenterCoordinates(Coordinates(3, 0, 0, 0));
+            objects_.back()->SetColor(cur_object_color_);
+        };
+
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
-            float width = WidgetContainer::GetWidth();
-            float height = WidgetContainer::GetHeight();
+            float width = Widget::GetWidth();
+            float height = Widget::GetHeight();
 
             Coordinates loc_coordinates = mouse_pos - widget_lt_corner;
 
@@ -192,14 +248,34 @@ class SceneManager : public WidgetContainer {
                                      lt_corner + hor_vec * loc_coordinates[0] + ver_vec * loc_coordinates[1],
                                      coeff, tmp);
 
+                if (cur_object_idx_ == tmp) {
+                    return Widget::OnMousePress(mouse_pos, widget);;
+                }
+
                 if (coeff < 0) {
                     *widget = NULL;
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
                     }
                     cur_object_idx_ = -1;
+                    if (table_ != NULL) {
+                        delete table_;
+                        table_ = NULL;
+                    }
+                    return Widget::OnMousePress(mouse_pos, widget);
                 } else {
+                    if (cur_object_idx_ < objects_.size()) {
+                        objects_[cur_object_idx_]->SetColor(cur_object_color_);
+                        if (table_ != NULL) {
+                            delete table_;
+                            table_ = NULL;
+                        }
+                    }
+
                     cur_object_idx_ = tmp;
+                    table_ = new InfoTable(Coordinates(3, -kInfoTableWidth, 0),
+                                           kInfoTableWidth, Widget::GetHeight(),
+                                           objects_[cur_object_idx_], this);
                     cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
                     objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
                     *widget = this;
@@ -208,7 +284,7 @@ class SceneManager : public WidgetContainer {
                 return true;
             }
 
-            return WidgetContainer::OnMousePress(mouse_pos, widget);
+            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos, widget) : true;
         };
 
     private:

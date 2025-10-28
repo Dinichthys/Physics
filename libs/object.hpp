@@ -32,6 +32,7 @@ class Object : public ObjectInfo{
         virtual ~Object() {};
 
         virtual const Coordinates& GetCenterCoordinates() const {return center_;};
+        virtual void SetCenterCoordinates(const Coordinates& center) {center_ = center;};
 
         virtual Coordinates GetColor() const {return Coordinates(color_);};
         virtual void SetColor(graphics::Color color) {color_ = color;};
