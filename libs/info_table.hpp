@@ -163,8 +163,11 @@ class InfoTable : public Widget {
             text_center_.SetText(CoordinatesToStr(object_->GetCenterCoordinates()));
             text_center_.Draw(window);
             text_color_.Draw(window);
+            text_coeff_reflection_.SetText(CoeffReflectionToStr(object_->GetCoeffReflection()));
             text_coeff_reflection_.Draw(window);
+            text_coeff_refraction_.SetText(CoeffRefractionToStr(object_->GetCoeffRefraction()));
             text_coeff_refraction_.Draw(window);
+            text_coeff_absorption_.SetText(CoeffAbsorptionToStr(object_->GetCoeffAbsorption()));
             text_coeff_absorption_.Draw(window);
         };
 };

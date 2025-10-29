@@ -247,6 +247,61 @@ class SceneManager : public WidgetContainer {
             objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
         };
 
+        void ChangeCurObjReflection(float delta) {
+            float new_reflection = objects_[cur_object_idx_]->GetCoeffReflection() + delta;
+            if ((new_reflection > -kEpsilon) && (new_reflection < 1 + kEpsilon)) {
+                if (new_reflection > 1) {
+                    new_reflection = 1;
+                }
+                if (new_reflection < 0) {
+                    new_reflection = 0;
+                }
+
+                float old_reflection = objects_[cur_object_idx_]->GetCoeffReflection();
+                float old_absorption = objects_[cur_object_idx_]->GetCoeffAbsorption();
+                objects_[cur_object_idx_]->SetCoeffReflection(new_reflection);
+
+                if ((old_absorption > kEpsilon) || (1 - old_reflection > kEpsilon)) {
+                    objects_[cur_object_idx_]->SetCoeffAbsorption(
+                        old_absorption - (new_reflection - old_reflection) * old_absorption / (1 - old_reflection)
+                    );
+                } else {
+                    objects_[cur_object_idx_]->SetCoeffAbsorption(old_reflection - new_reflection);
+                }
+            }
+        };
+
+        void ChangeCurObjRefraction(float delta) {
+            float new_coeff = objects_[cur_object_idx_]->GetCoeffRefraction() + delta;
+            if (new_coeff >= 0) {
+                objects_[cur_object_idx_]->SetCoeffRefraction(new_coeff);
+            }
+        };
+
+        void ChangeCurObjAbsorption(float delta) {
+            float new_absorption = objects_[cur_object_idx_]->GetCoeffAbsorption() + delta;
+            if ((new_absorption > -kEpsilon) && (new_absorption < 1 + kEpsilon)) {
+                if (new_absorption > 1) {
+                    new_absorption = 1;
+                }
+                if (new_absorption < 0) {
+                    new_absorption = 0;
+                }
+
+                float old_reflection = objects_[cur_object_idx_]->GetCoeffReflection();
+                float old_absorption = objects_[cur_object_idx_]->GetCoeffAbsorption();
+                objects_[cur_object_idx_]->SetCoeffAbsorption(new_absorption);
+
+                if ((old_reflection > kEpsilon) || (1 - old_absorption > kEpsilon)) {
+                    objects_[cur_object_idx_]->SetCoeffReflection(
+                        old_reflection - (new_absorption - old_absorption) * old_reflection / (1 - old_absorption)
+                    );
+                } else {
+                    objects_[cur_object_idx_]->SetCoeffReflection(old_absorption - new_absorption);
+                }
+            }
+        };
+
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
             float width = Widget::GetWidth();

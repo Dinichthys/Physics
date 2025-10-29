@@ -67,23 +67,23 @@ int main() {
     }
 
     std::vector<Object*> objects;
-    objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
-                                       graphics::kColorWhite, 0, 1));
+    // objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
+    //                                    graphics::kColorWhite, 0, 1));
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
     for (size_t i = 0; i < circles_num; i++) {
         objects.push_back(new Circle(circles_arr[i]));
     }
 
-    size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
-    for (size_t i = 0; i < planes_num; i++) {
-        objects.push_back(new Plane(planes_arr[i]));
-    }
-
-    size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
-    for (size_t i = 0; i < triangles_num; i++) {
-        objects.push_back(new Triangle(triangles_arr[i]));
-    }
+//     size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
+//     for (size_t i = 0; i < planes_num; i++) {
+//         objects.push_back(new Plane(planes_arr[i]));
+//     }
+//
+//     size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
+//     for (size_t i = 0; i < triangles_num; i++) {
+//         objects.push_back(new Triangle(triangles_arr[i]));
+//     }
 
     std::vector<Widget*> desktop_children;
     desktop_children.push_back(new SceneManager(Coordinates(2, 100, 100), 800, 400, objects));
@@ -103,18 +103,47 @@ int main() {
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
     };
 
+    CoeffChangingButton coeff_changing_buttons[6] = {
+        CoeffChangingButton(Button(Coordinates(2, 120, 11), 110, 25, "Reflect +",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, 0.1),
+        CoeffChangingButton(Button(Coordinates(2, 120, 47), 110, 25, "Reflect -",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, -0.1),
+        CoeffChangingButton(Button(Coordinates(2, 120, 83), 110, 25, "Refract +",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, 0.1),
+        CoeffChangingButton(Button(Coordinates(2, 120, 119), 110, 25, "Refract -",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, -0.1),
+        CoeffChangingButton(Button(Coordinates(2, 120, 155), 110, 25, "Absorb +",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, 0.1),
+        CoeffChangingButton(Button(Coordinates(2, 120, 191), 110, 25, "Absorb -",
+                        kFontFileNameScrollBar),
+                        [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, -0.1),
+    };
+
     std::vector<Widget*> buttons_on_panel;
+
     size_t buttons_num = sizeof(buttons) / sizeof(buttons[0]);
     for (size_t i = 0; i < buttons_num; i++) {
         buttons_on_panel.push_back(new MoveButton(buttons[i]));
     }
+
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 140), 110, 40, "Del",
                                kFontFileNameScrollBar),
                                [scene_manager](){scene_manager->DeleteCurrentObject();}));
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 185), 110, 40, "Add",
                                kFontFileNameScrollBar),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
-    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 400), 120, 230, &buttons_on_panel));
+
+    size_t buttons_coeff_num = sizeof(coeff_changing_buttons) / sizeof(coeff_changing_buttons[0]);
+    for (size_t i = 0; i < buttons_coeff_num; i++) {
+        buttons_on_panel.push_back(new CoeffChangingButton(coeff_changing_buttons[i]));
+    }
+
+    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -235, 400), 235, 230, &buttons_on_panel));
 
     scene_manager->AddChild(new ListObjectsTitle(Coordinates(2, 0, 400), scene_manager->GetObjectsVec(),
                                 [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));
