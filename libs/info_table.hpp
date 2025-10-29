@@ -28,7 +28,7 @@ static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorption: ";
 static const size_t kNumLenInfoTable = 30;
 static const size_t kHexBase = 16;
 
-static const graphics::Color kInfoTableColor = graphics::Color(170, 170, 170);
+static const graphics::Color kInfoTableColor = graphics::Color(100, 100, 100);
 
 class InfoTable : public Widget {
     private:

@@ -20,8 +20,8 @@
 int main() {
     set_log_lvl(kError);
 
-    Circle circles_arr[9] = {
-        Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
+    Circle circles_arr[8] = {
+        // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
         Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
         Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
         Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
@@ -67,23 +67,23 @@ int main() {
     }
 
     std::vector<Object*> objects;
-    // objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
-    //                                    graphics::kColorWhite, 0, 1));
+    objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
+                                       graphics::kColorWhite, 0, 1));
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
     for (size_t i = 0; i < circles_num; i++) {
         objects.push_back(new Circle(circles_arr[i]));
     }
 
-    // size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
-    // for (size_t i = 0; i < planes_num; i++) {
-    //     objects.push_back(new Plane(planes_arr[i]));
-    // }
+    size_t planes_num = sizeof(planes_arr) / sizeof(planes_arr[0]);
+    for (size_t i = 0; i < planes_num; i++) {
+        objects.push_back(new Plane(planes_arr[i]));
+    }
 
-    // size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
-    // for (size_t i = 0; i < triangles_num; i++) {
-    //     objects.push_back(new Triangle(triangles_arr[i]));
-    // }
+    size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
+    for (size_t i = 0; i < triangles_num; i++) {
+        objects.push_back(new Triangle(triangles_arr[i]));
+    }
 
     std::vector<Widget*> desktop_children;
     desktop_children.push_back(new SceneManager(Coordinates(2, 100, 100), 800, 400, objects));
@@ -116,7 +116,7 @@ int main() {
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
     scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 400), 120, 230, &buttons_on_panel));
 
-    scene_manager->AddChild(new ListObjects(Coordinates(2, 0, 400), scene_manager->GetObjectsVec(),
+    scene_manager->AddChild(new ListObjectsTitle(Coordinates(2, 0, 400), scene_manager->GetObjectsVec(),
                                 [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));
 
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");

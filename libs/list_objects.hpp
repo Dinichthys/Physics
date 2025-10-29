@@ -15,15 +15,20 @@
 #include "scrollbar.hpp"
 
 static const std::string kFontFileNameListObject = "data/font.ttf";
+static const std::string kListObjectsTitleStr = "Objects";
+static const std::string kListTitleHeightClosedButtonText = "\\/";
+static const std::string kListTitleHeightOpenedButtonText = "/\\";
 
-static const graphics::Color kListColor = graphics::Color(170, 170, 170);
+static const graphics::Color kListColor = graphics::Color(100, 100, 100);
 
 static const size_t kNumLenListObjects = 30;
 
 static const size_t kMaxNumLines = 5;
 
-static const size_t kWidth = 300;
+static const size_t kWidth = 500;
 static const size_t kHeight = 200;
+static const size_t kListObjectsTitleHeight = 25;
+static const float kTextScaleTitleHeight = 1.2;
 
 static const size_t kScrollBarWidth = 10;
 
@@ -150,6 +155,81 @@ class ListObjects : public WidgetContainer {
             }
 
             WidgetContainer::Draw(window);
+        };
+};
+
+class ListObjectsTitle : public Widget {
+    private:
+        ListObjects list_;
+        Text text_;
+        Button button_;
+        graphics::RectangleShape rect_;
+        bool opened_;
+
+    public:
+        explicit ListObjectsTitle(const Coordinates& lt_corner, const std::vector<Object*>& objects,
+                                  std::function<void(size_t)> action)
+            :Widget(lt_corner, kWidth, kListObjectsTitleHeight),
+             list_(Coordinates(2, 0, kListObjectsTitleHeight), objects, action),
+             text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight / kTextScaleTitleHeight, this, kListObjectsTitleStr, kFontFileNameListObject),
+             button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight, kListObjectsTitleHeight,
+             kListTitleHeightClosedButtonText, kFontFileNameListObject, this),
+             rect_(kWidth, kListObjectsTitleHeight) {
+            opened_ = false;
+            rect_.SetFillColor(kListColor);
+            list_.SetParent(this);
+        };
+
+        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+            if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget)) {
+                if (opened_) {
+                    opened_ = false;
+                    button_.SetText(kListTitleHeightClosedButtonText);
+                } else {
+                    opened_ = true;
+                    button_.SetText(kListTitleHeightOpenedButtonText);
+                }
+                return true;
+            }
+
+            if ((opened_) && (list_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget))) {
+                return true;
+            }
+
+            return Widget::OnMousePress(mouse_pos, widget);
+        };
+
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
+            if ((opened_) && (list_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc()))) {
+                return true;
+            }
+            if (button_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc())) {
+                return true;
+            }
+
+            return false;
+        };
+
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
+            if ((opened_) && (list_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc()))) {
+                return true;
+            }
+            if (button_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc())) {
+                return true;
+            }
+
+            return false;
+        };
+
+        virtual void Draw(graphics::RenderWindow* window) override {
+            rect_.SetPosition(Widget::GetLTCornerAbs());
+            window->Draw(rect_);
+
+            button_.Draw(window);
+            text_.Draw(window);
+            if(opened_) {
+                list_.Draw(window);
+            }
         };
 };
 
