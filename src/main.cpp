@@ -20,18 +20,18 @@
 int main() {
     set_log_lvl(kError);
 
-    Circle circles_arr[2] = {
-        // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
-        // Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
-        // Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
-        // Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
-        // Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
-        // Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, graphics::kColorRed, 0, 1),
+    Circle circles_arr[9] = {
+        Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
+        Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
+        Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
+        Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
+        Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
+        Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, graphics::kColorRed, 0, 1),
         Circle(Coordinates(3, 500, 0, -7000),  1000, kSphere, graphics::kColorBlue, 0, 1),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
 
-        // Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  graphics::kColorWhite),
+        Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  graphics::kColorWhite),
         Circle(Coordinates(3, 1080, -1000, -500), 50,  kLight,  graphics::kColorWhite),
     };
 
@@ -114,9 +114,9 @@ int main() {
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 185), 110, 40, "Add",
                                kFontFileNameScrollBar),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
-    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, 800, 0), 120, 230, &buttons_on_panel));
+    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 400), 120, 230, &buttons_on_panel));
 
-    scene_manager->AddChild(new ListObjects(Coordinates(2, 0, 400), objects,
+    scene_manager->AddChild(new ListObjects(Coordinates(2, 0, 400), scene_manager->GetObjectsVec(),
                                 [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));
 
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");

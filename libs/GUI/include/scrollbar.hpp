@@ -19,7 +19,6 @@ static const std::string kArrowUpStr = "/\\";
 static const std::string kArrowDownStr = "\\/";
 static const std::string kArrowRightStr = ">";
 static const std::string kArrowLeftStr = "<";
-static const float kThumbHeight = 50.f;
 static const float kArrowScrollBarHeight = 20.f;
 static const float kDeltaArrow = 10;
 
@@ -44,7 +43,7 @@ class Thumb : public Button {
 
     public:
         explicit Thumb(const Coordinates& lt_corner, float width, float height, bool horizontal)
-            :Button(lt_corner, width, height, NULL, NULL, NULL, graphics::kColorBrown, graphics::kColorBrown) {
+            :Button(lt_corner, width, height, "", "", NULL, graphics::kColorBrown, graphics::kColorBrown) {
             horizontal_ = horizontal;
         };
 
@@ -66,7 +65,7 @@ class ScrollBar : public Button {
         std::function<void(float)> action_;
 
     public:
-        explicit ScrollBar(const Coordinates& lt_corner, float width, float height,
+        explicit ScrollBar(const Coordinates& lt_corner, float width, float height, float thumb_height,
                            std::function<void(float)> action, float delta = kDeltaArrow)
             :Button(lt_corner, width, height), action_(action) {
             delta_ = delta;
@@ -74,7 +73,7 @@ class ScrollBar : public Button {
             try {
                 if (width < height) {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, 0, kArrowScrollBarHeight),
-                                                        width, kThumbHeight, false));
+                                                        width, thumb_height, false));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          width, kArrowScrollBarHeight,
@@ -85,7 +84,7 @@ class ScrollBar : public Button {
                                                          kArrowDownStr, kFontFileNameScrollBar), kDeltaArrow));
                 } else {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, kArrowScrollBarHeight, 0),
-                                                        kThumbHeight, height, true));
+                                                        thumb_height, height, true));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          kArrowScrollBarHeight, height,
@@ -110,6 +109,10 @@ class ScrollBar : public Button {
         };
         void AddPercentage(float delta) {
             SetPercentage(percentage_ + delta);
+        };
+
+        float GetPercentage() const {
+            return percentage_;
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {

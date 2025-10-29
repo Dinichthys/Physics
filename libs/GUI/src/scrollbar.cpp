@@ -12,7 +12,6 @@ bool ArrowScrollBar::OnMousePress(const Coordinates& mouse_pos, Widget** widget)
         return true;
     }
     parent->MoveThumb(delta_);
-    parent->AddPercentage(delta_);
 
     return true;
 };
@@ -37,11 +36,13 @@ void Thumb::Move(float shift_x, float shift_y) {
             return;
         }
         if ((shift_x > 0) && (lt_corner[0] + shift_x + width > parent_width - kArrowScrollBarHeight)) {
-            parent->SetPercentage(100);
+            parent->SetPercentage(100 * (parent_width - 2 * kArrowScrollBarHeight - width)
+                                         / (parent_width - 2 * kArrowScrollBarHeight));
             Widget::Move(parent_width - kArrowScrollBarHeight - width - lt_corner[0], 0);
             return;
         }
-        parent->SetPercentage(100 * (lt_corner[0] + shift_x) / (parent_width - kArrowScrollBarHeight));
+        parent->SetPercentage(100 * (lt_corner[0] + shift_x - kArrowScrollBarHeight)
+                                     / (parent_width - 2 * kArrowScrollBarHeight));
         Widget::Move(shift_x, 0);
     } else {
         if ((shift_y < 0) && (lt_corner[1] + shift_y < kArrowScrollBarHeight)) {
@@ -50,11 +51,13 @@ void Thumb::Move(float shift_x, float shift_y) {
             return;
         }
         if ((shift_y > 0) && (lt_corner[1] + shift_y + height > parent_height - kArrowScrollBarHeight)) {
-            parent->SetPercentage(100);
+            parent->SetPercentage(100 * (parent_height - 2 * kArrowScrollBarHeight - height)
+                                         / (parent_height - 2 * kArrowScrollBarHeight));
             Widget::Move(0, parent_height - kArrowScrollBarHeight - height - lt_corner[1]);
             return;
         }
-        parent->SetPercentage(100 * (lt_corner[1] + shift_y) / (parent_height - kArrowScrollBarHeight));
+        parent->SetPercentage(100 * (lt_corner[1] + shift_y - kArrowScrollBarHeight)
+                                     / (parent_height - 2 * kArrowScrollBarHeight));
         Widget::Move(0, shift_y);
     }
 };

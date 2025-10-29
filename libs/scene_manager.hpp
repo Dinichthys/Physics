@@ -170,6 +170,10 @@ class SceneManager : public WidgetContainer {
             WidgetContainer::AddChild(panel);
         }
 
+        std::vector<Object*>& GetObjectsVec() {
+            return objects_;
+        }
+
         virtual bool OnLetterA() override;
         virtual bool OnLetterD() override;
         virtual bool OnLetterS() override;
@@ -199,6 +203,7 @@ class SceneManager : public WidgetContainer {
                 delete table_;
                 table_ = NULL;
             }
+            cur_object_idx_ = -1;
         };
 
         void AddCopyCurrentObject() {
