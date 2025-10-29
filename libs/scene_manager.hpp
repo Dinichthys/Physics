@@ -16,6 +16,7 @@
 
 #include "vector.hpp"
 #include "info_table.hpp"
+#include "list_objects.hpp"
 
 #include "my_assert.h"
 
@@ -31,6 +32,8 @@ static const size_t kColorCountingDepth = 5;
 static const size_t kSpinLockTimeOut = 100;
 
 static const float kInfoTableWidth = 200;
+
+static const size_t kListIdx = 1;
 
 static const graphics::Color kFreeSpaceColor(graphics::kColorCyan);
 static const graphics::Color kChoseObjectColor(graphics::kColorBrown);
@@ -223,6 +226,22 @@ class SceneManager : public WidgetContainer {
             objects_.back()->SetColor(cur_object_color_);
         };
 
+        void ChooseObject(size_t idx) {
+            if (cur_object_idx_ < objects_.size()) {
+                objects_[cur_object_idx_]->SetColor(cur_object_color_);
+                if (table_ != NULL) {
+                    delete table_;
+                    table_ = NULL;
+                }
+            }
+            cur_object_idx_ = idx;
+            table_ = new InfoTable(Coordinates(3, -kInfoTableWidth, 0),
+                                    kInfoTableWidth, Widget::GetHeight(),
+                                    objects_[cur_object_idx_], this);
+            cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
+            objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
+        };
+
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
             float width = Widget::GetWidth();
@@ -284,7 +303,8 @@ class SceneManager : public WidgetContainer {
                 return true;
             }
 
-            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos, widget) : true;
+            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos, widget)
+                                    : WidgetContainer::GetChild(kListIdx)->OnMousePress(loc_coordinates, widget);
         };
 
     private:

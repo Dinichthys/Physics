@@ -156,7 +156,7 @@ class WidgetContainer : public Widget {
 
         std::vector<Widget*>& GetChildren() {return children_;};
         size_t GetChildrenNum() const {return children_.size();};
-        void AddChild(Widget* child) {children_.push_back(child);};
+        void AddChild(Widget* child) {children_.push_back(child); child->SetParent(this);};
         Widget* GetChild(size_t index) const {return children_[index];};
         void SetChild(size_t index, Widget* child) {
             children_[index] = child;

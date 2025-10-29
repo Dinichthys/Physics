@@ -13,8 +13,7 @@
 #include "circle.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
-// #include "square.hpp"
-// #include "pyramid.hpp"
+#include "list_objects.hpp"
 
 #include "logging.h"
 
@@ -116,6 +115,9 @@ int main() {
                                kFontFileNameScrollBar),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
     scene_manager->SetPanelControl(new PanelControl(Coordinates(2, 800, 0), 120, 230, &buttons_on_panel));
+
+    scene_manager->AddChild(new ListObjects(Coordinates(2, 0, 400), objects,
+                                [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));
 
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 

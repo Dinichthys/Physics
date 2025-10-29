@@ -25,7 +25,7 @@ static const std::string kCoeffRefractionFieldStartStr = "Coeff Refraction: ";
 
 static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorption: ";
 
-static const size_t kNumLen = 30;
+static const size_t kNumLenInfoTable = 30;
 static const size_t kHexBase = 16;
 
 static const graphics::Color kInfoTableColor = graphics::Color(170, 170, 170);
@@ -99,7 +99,7 @@ class InfoTable : public Widget {
             std::string str;
             str.append(kCoordinatesFieldStartStr);
             str.append(kXCoorStartStr);
-            char num[kNumLen] = "";
+            char num[kNumLenInfoTable] = "";
             sprintf(num, "%10.2f", center[0]);
             str.append(num);
             str.append(kYCoorStartStr);
@@ -115,7 +115,7 @@ class InfoTable : public Widget {
         const std::string ColorToStr(const graphics::Color& color) {
             std::string str;
             str.append(kColorFieldStartStr);
-            char num[kNumLen] = "";
+            char num[kNumLenInfoTable] = "";
             sprintf(num, "%x%x", uint8_t(color[0] / kHexBase), uint8_t(uint8_t(color[0]) % kHexBase));
             str.append(num);
             sprintf(num, "%x%x", uint8_t(color[1] / kHexBase), uint8_t(uint8_t(color[1]) % kHexBase));
@@ -128,7 +128,7 @@ class InfoTable : public Widget {
 
         const std::string CoeffReflectionToStr(float coeff_reflection) {
             std::string str;
-            char num[kNumLen] = "";
+            char num[kNumLenInfoTable] = "";
             str.append(kCoeffReflectionFieldStartStr);
             sprintf(num, "%10.2f", coeff_reflection);
             str.append(num);
@@ -138,7 +138,7 @@ class InfoTable : public Widget {
 
         const std::string CoeffRefractionToStr(float coeff_refraction) {
             std::string str;
-            char num[kNumLen] = "";
+            char num[kNumLenInfoTable] = "";
             str.append(kCoeffRefractionFieldStartStr);
             sprintf(num, "%10.2f", coeff_refraction);
             str.append(num);
@@ -148,7 +148,7 @@ class InfoTable : public Widget {
 
         const std::string CoeffAbsorptionToStr(float coeff_absorption) {
             std::string str;
-            char num[kNumLen] = "";
+            char num[kNumLenInfoTable] = "";
             str.append(kCoeffAbsorptionFieldStartStr);
             sprintf(num, "%10.2f", coeff_absorption);
             str.append(num);

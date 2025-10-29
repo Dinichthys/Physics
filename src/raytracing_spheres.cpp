@@ -17,6 +17,8 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
     if (table_ != NULL) {
         table_->Draw(window);
         WidgetContainer::Draw(window);
+    } else {
+        WidgetContainer::GetChild(kListIdx)->Draw(window);
     }
 
     size_t width = Widget::GetWidth();

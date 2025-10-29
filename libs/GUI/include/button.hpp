@@ -17,6 +17,8 @@ static const graphics::Color kPanelColor = graphics::kColorWhite;
 
 static uint8_t kHoveredColorScale = 2;
 
+static const float kButtonTextScale = 1.2;
+
 static const float kTextInButtonShiftVer = 0.05f;
 static const float kTextInButtonShiftHor = 0.1f;
 
@@ -60,7 +62,7 @@ class Button : public WidgetContainer {
                                                             Coordinates(2,
                                                             width * kTextInButtonShiftHor,
                                                             - height * kTextInButtonShiftVer),
-                                                            width, height, this, text, file_name));
+                                                            width, height / kButtonTextScale, this, text, file_name));
                 if (WidgetContainer::GetChildren().back() == NULL) {
                     throw std::runtime_error("Bad allocation for text");
                 }
@@ -69,6 +71,14 @@ class Button : public WidgetContainer {
             Widget::SetParent(parent);
             WidgetContainer::SetParentToChildren();
         };
+
+        void SetText(const std::string& text_str) {
+            Text* text = dynamic_cast<Text*>(GetChild(0));
+            if (text == NULL) {
+                return;
+            }
+            text->SetText(text_str);
+        }
 
         bool GetPressedInfo() const {return pressed_;};
         void SetPressedInfo(bool new_pressed) {pressed_ = new_pressed;};
