@@ -8,6 +8,7 @@ enum ObjectType {
     kLight,
     kPlane,
     kTrianglesSet,
+    kBorder,
 
     kAllTypes
 };

@@ -4,6 +4,8 @@ project (physics CXX)
 add_executable (${PROJECT_NAME}
     src/main.cpp
     src/raytracing_spheres.cpp
+    src/plane.cpp
+    src/triangles_set.cpp
     src/movement.cpp
 
     libs/GUI/src/draw.cpp

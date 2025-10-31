@@ -17,7 +17,10 @@ static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
     {kLight,        ObjectInfo{kLight,        INFINITY, 0, 1}},
     {kPlane,        ObjectInfo{kPlane,        INFINITY, 0, 1}},
     {kTrianglesSet, ObjectInfo{kTrianglesSet, INFINITY, 0, 1}},
+    {kBorder,       ObjectInfo{kBorder,       INFINITY, 0, 1}},
 };
+
+class Border;
 
 class Object : public ObjectInfo{
     private:
@@ -55,6 +58,10 @@ class Object : public ObjectInfo{
                                              bool& stop) const = 0;
 
         virtual Coordinates GetNormal(const Coordinates& point, const Coordinates& vec) const = 0;
+
+        virtual Object* GetCopy() const = 0;
+
+        virtual Border* GetBorder() const = 0;
 };
 
 #endif // OBJECT_HPP

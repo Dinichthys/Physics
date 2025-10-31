@@ -4,6 +4,8 @@
 #include "button.hpp"
 #include "scene_manager.hpp"
 
+static const graphics::Color kColorButtons = graphics::Color(214, 158, 70);
+
 class MoveButton : public Button {
     private:
         Coordinates move_direction_;
@@ -12,7 +14,9 @@ class MoveButton : public Button {
     public:
         explicit MoveButton(const Button& button, const Coordinates& move_direction,
                             const std::function<void(const Coordinates&)>& action)
-            :Button(button), move_direction_(move_direction), action_(action) {};
+            :Button(button), move_direction_(move_direction), action_(action) {
+
+        };
 
         virtual void Action(const SceneManager* scene_manager) {
             scene_manager->MoveCurrentObject(move_direction_);

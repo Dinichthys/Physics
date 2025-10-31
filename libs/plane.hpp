@@ -85,7 +85,13 @@ class Plane : public Object {
         virtual Coordinates GetNormal(__attribute_maybe_unused__ const Coordinates& point,
                                       __attribute_maybe_unused__ const Coordinates& vec) const override {
             return !(normal_ * ((!normal_) && (!vec)) * (-1));
-        }
+        };
+
+        virtual Object* GetCopy() const override {
+            return new Plane(*this);
+        };
+
+        virtual Border* GetBorder() const override;
 };
 
 #endif // PLANE_HPP

@@ -19,16 +19,16 @@ static const std::string kZCoorStartStr = "\n\t Z = ";
 
 static const std::string kColorFieldStartStr = "Color: #";
 
-static const std::string kCoeffReflectionFieldStartStr = "Coeff Reflection: ";
+static const std::string kCoeffReflectionFieldStartStr = "Coeff Reflect: ";
 
-static const std::string kCoeffRefractionFieldStartStr = "Coeff Refraction: ";
+static const std::string kCoeffRefractionFieldStartStr = "Coeff Refract: ";
 
-static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorption: ";
+static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorb: ";
 
 static const size_t kNumLenInfoTable = 30;
 static const size_t kHexBase = 16;
 
-static const graphics::Color kInfoTableColor = graphics::Color(100, 100, 100);
+static const graphics::Color kInfoTableColor = graphics::Color(30, 30, 32);
 
 class InfoTable : public Widget {
     private:
@@ -87,6 +87,7 @@ class InfoTable : public Widget {
                 CASE_TYPE_TO_STRING_(Light);
                 CASE_TYPE_TO_STRING_(Plane);
                 CASE_TYPE_TO_STRING_(TrianglesSet);
+                CASE_TYPE_TO_STRING_(Border);
 
                 case kAllTypes :
                 default:

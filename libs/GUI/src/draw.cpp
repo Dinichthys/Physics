@@ -15,7 +15,7 @@
 RendererError UI::ShowWindow() {
     graphics::RectangleShape background((float)GetWidth(), (float)GetHeight());
     background.SetPosition(Coordinates(2, 0.f, 0.f));
-    background.SetFillColor(graphics::kColorBlack);
+    background.SetFillColor(kBackgroundColor);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto start_time = end_time;

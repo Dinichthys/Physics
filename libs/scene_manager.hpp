@@ -18,6 +18,8 @@
 #include "info_table.hpp"
 #include "list_objects.hpp"
 
+#include "border.hpp"
+
 #include "my_assert.h"
 
 static const float kEyeHeight = 2000;
@@ -31,11 +33,11 @@ static const float kSinRotate = 0.08715574;
 static const size_t kColorCountingDepth = 5;
 static const size_t kSpinLockTimeOut = 100;
 
-static const float kInfoTableWidth = 200;
+static const float kInfoTableWidth = 160;
 
 static const size_t kListIdx = 1;
 
-static const graphics::Color kFreeSpaceColor(graphics::kColorCyan);
+static const graphics::Color kFreeSpaceColor(graphics::Color(30, 28, 29));
 static const graphics::Color kChoseObjectColor(graphics::kColorBrown);
 
 class Eye {
@@ -130,8 +132,8 @@ class SceneManager : public WidgetContainer {
         Mueue<DrawTask> tasks_;
 
         size_t cur_object_idx_;
+        size_t border_idx_;
         graphics::Color cur_object_color_;
-
         InfoTable* table_;
 
     public:
@@ -149,6 +151,7 @@ class SceneManager : public WidgetContainer {
             }
 
             cur_object_idx_ = -1;
+            border_idx_ = -1;
 
             table_ = NULL;
         };
@@ -191,6 +194,9 @@ class SceneManager : public WidgetContainer {
                 return;
             }
             objects_[cur_object_idx_]->Move(move_direction_);
+            if (objects_[border_idx_] != NULL) {
+                objects_[border_idx_]->Move(move_direction_);
+            }
         };
 
         void DeleteCurrentObject() {
@@ -204,29 +210,17 @@ class SceneManager : public WidgetContainer {
                 table_ = NULL;
             }
             cur_object_idx_ = -1;
+            if (objects_[border_idx_] != NULL) {
+                delete objects_[border_idx_];
+            }
+            objects_.erase(objects_.begin() + border_idx_);
         };
 
         void AddCopyCurrentObject() {
             if (cur_object_idx_ >= objects_.size()) {
                 return;
             }
-            switch (objects_[cur_object_idx_]->GetType()) {
-                case kSphere : case kLight :
-                    objects_.push_back(new Circle(*dynamic_cast<Circle*>(objects_[cur_object_idx_])));
-                    break;
-
-                case kPlane :
-                    objects_.push_back(new Plane(*dynamic_cast<Plane*>(objects_[cur_object_idx_])));
-                    break;
-
-                case kTrianglesSet :
-                    objects_.push_back(new TrianglesSet(*dynamic_cast<TrianglesSet*>(objects_[cur_object_idx_])));
-                    break;
-
-                case kAllTypes :
-                    default:
-                    return;
-            }
+            objects_.push_back(objects_[cur_object_idx_]->GetCopy());
             objects_.back()->SetCenterCoordinates(Coordinates(3, 0, 0, 0));
             objects_.back()->SetColor(cur_object_color_);
         };
@@ -238,13 +232,19 @@ class SceneManager : public WidgetContainer {
                     delete table_;
                     table_ = NULL;
                 }
+                if (objects_[border_idx_] != NULL) {
+                    delete objects_[border_idx_];
+                }
+                objects_.erase(objects_.begin() + border_idx_);
             }
             cur_object_idx_ = idx;
-            table_ = new InfoTable(Coordinates(3, -kInfoTableWidth, 0),
+            table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
                                     kInfoTableWidth, Widget::GetHeight(),
                                     objects_[cur_object_idx_], this);
             cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
             objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
+            objects_.push_back(objects_[cur_object_idx_]->GetBorder());
+            border_idx_ = objects_.size() - 1;
         };
 
         void ChangeCurObjReflection(float delta) {
@@ -302,6 +302,10 @@ class SceneManager : public WidgetContainer {
             }
         };
 
+        void ChangeCurObjColor(const graphics::Color& color) {
+            cur_object_color_ = cur_object_color_ + color;
+        };
+
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
             float width = Widget::GetWidth();
@@ -313,6 +317,8 @@ class SceneManager : public WidgetContainer {
                 && (loc_coordinates[1] > 0)
                 && (loc_coordinates[0] < width)
                 && (loc_coordinates[1] < height)) {
+                *widget = NULL;
+
                 float coeff = -1;
 
                 Coordinates lt_corner = eye_.GetEyeLTCorner();
@@ -332,7 +338,6 @@ class SceneManager : public WidgetContainer {
                 }
 
                 if (coeff < 0) {
-                    *widget = NULL;
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
                     }
@@ -352,12 +357,13 @@ class SceneManager : public WidgetContainer {
                     }
 
                     cur_object_idx_ = tmp;
-                    table_ = new InfoTable(Coordinates(3, -kInfoTableWidth, 0),
+                    table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
                                            kInfoTableWidth, Widget::GetHeight(),
                                            objects_[cur_object_idx_], this);
                     cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
                     objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
-                    *widget = this;
+                    objects_.push_back(objects_[cur_object_idx_]->GetBorder());
+                    border_idx_ = objects_.size() - 1;
                 }
 
                 return true;

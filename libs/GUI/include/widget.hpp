@@ -235,9 +235,7 @@ class WidgetContainer : public Widget {
 
             int64_t children_num = children_.size();
             for (int64_t i = children_num - 1; i > -1; i--) {
-                if (children_[i]->OnMouseEnter(mouse_pos - lt_corner)) {
-                    break;
-                }
+                children_[i]->OnMouseEnter(mouse_pos - lt_corner);
             }
 
             if ((mouse_pos[0] > lt_corner[0])

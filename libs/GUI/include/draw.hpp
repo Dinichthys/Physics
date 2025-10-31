@@ -14,6 +14,8 @@ static const char* const kWindowName = "Window";
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
 static const size_t kCharacterSize = 100;
 
+static const graphics::Color kBackgroundColor = graphics::Color(42, 40, 41);
+
 enum RendererError {
     kDoneRenderer = 0,
     kBadAllocReactionRenderer,

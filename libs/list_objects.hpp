@@ -19,7 +19,11 @@ static const std::string kListObjectsTitleStr = "Objects";
 static const std::string kListTitleHeightClosedButtonText = "\\/";
 static const std::string kListTitleHeightOpenedButtonText = "/\\";
 
-static const graphics::Color kListColor = graphics::Color(100, 100, 100);
+static const graphics::Color kElemInListColor = graphics::Color(90, 75, 60);
+
+static const graphics::Color kListColor = graphics::Color(62, 62, 66);
+
+static const graphics::Color kListArrowColor = graphics::Color(180, 180, 180);
 
 static const size_t kNumLenListObjects = 30;
 
@@ -53,12 +57,13 @@ class ListObjects : public WidgetContainer {
             start_index_ = 0;
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects.size()); idx++) {
                 WidgetContainer::AddChild(new Button(Coordinates(2, 0, idx * kHeight / kMaxNumLines),
-                                                     kWidth, kHeight / kMaxNumLines,
-                                                     ObjectInList(idx), kFontFileNameListObject));
+                                                     kWidth - kScrollBarWidth, kHeight / kMaxNumLines,
+                                                     ObjectInList(idx), kFontFileNameListObject, this,
+                                                     kElemInListColor, kElemInListColor));
             }
             collected_delta_ = 0;
 
-            WidgetContainer::AddChild(new ScrollBar(Coordinates(2, lt_corner[0] + kWidth, 0),
+            WidgetContainer::AddChild(new ScrollBar(Coordinates(2, lt_corner[0] + kWidth - kScrollBarWidth, 0),
                                         kScrollBarWidth, kHeight,
                                         (kHeight - 2 * kArrowScrollBarHeight)
                                         * WidgetContainer::GetChildrenNum() / objects.size(),
@@ -103,6 +108,7 @@ class ListObjects : public WidgetContainer {
                 CASE_TYPE_TO_STRING_(Light);
                 CASE_TYPE_TO_STRING_(Plane);
                 CASE_TYPE_TO_STRING_(TrianglesSet);
+                CASE_TYPE_TO_STRING_(Border);
 
                 case kAllTypes :
                 default:
@@ -173,7 +179,7 @@ class ListObjectsTitle : public Widget {
              list_(Coordinates(2, 0, kListObjectsTitleHeight), objects, action),
              text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight / kTextScaleTitleHeight, this, kListObjectsTitleStr, kFontFileNameListObject),
              button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight, kListObjectsTitleHeight,
-             kListTitleHeightClosedButtonText, kFontFileNameListObject, this),
+             kListTitleHeightClosedButtonText, kFontFileNameListObject, this, kListArrowColor, kListArrowColor),
              rect_(kWidth, kListObjectsTitleHeight) {
             opened_ = false;
             rect_.SetFillColor(kListColor);

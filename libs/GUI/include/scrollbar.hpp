@@ -22,6 +22,10 @@ static const std::string kArrowLeftStr = "<";
 static const float kArrowScrollBarHeight = 20.f;
 static const float kDeltaArrow = 10;
 
+static const graphics::Color kThumbColor = graphics::Color(85, 85, 89);
+static const graphics::Color kScrollBarColor = graphics::Color(56, 56, 59);
+static const graphics::Color kArrowsColor = graphics::Color(140, 140, 140);
+
 class ScrollBar;
 
 class ArrowScrollBar : public Button {
@@ -43,7 +47,7 @@ class Thumb : public Button {
 
     public:
         explicit Thumb(const Coordinates& lt_corner, float width, float height, bool horizontal)
-            :Button(lt_corner, width, height, "", "", NULL, graphics::kColorBrown, graphics::kColorBrown) {
+            :Button(lt_corner, width, height, "", "", NULL, kThumbColor, kThumbColor) {
             horizontal_ = horizontal;
         };
 
@@ -67,7 +71,7 @@ class ScrollBar : public Button {
     public:
         explicit ScrollBar(const Coordinates& lt_corner, float width, float height, float thumb_height,
                            std::function<void(float)> action, float delta = kDeltaArrow)
-            :Button(lt_corner, width, height), action_(action) {
+            :Button(lt_corner, width, height, "", "", NULL, kScrollBarColor, kScrollBarColor), action_(action) {
             delta_ = delta;
 
             try {
@@ -77,22 +81,26 @@ class ScrollBar : public Button {
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          width, kArrowScrollBarHeight,
-                                                         kArrowUpStr, kFontFileNameScrollBar), -kDeltaArrow));
+                                                         kArrowUpStr, kFontFileNameScrollBar,
+                                                         this, kArrowsColor, kArrowsColor), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, height - kArrowScrollBarHeight),
                                                          width, kArrowScrollBarHeight,
-                                                         kArrowDownStr, kFontFileNameScrollBar), kDeltaArrow));
+                                                         kArrowDownStr, kFontFileNameScrollBar,
+                                                         this, kArrowsColor, kArrowsColor), kDeltaArrow));
                 } else {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, kArrowScrollBarHeight, 0),
                                                         thumb_height, height, true));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         kArrowLeftStr, kFontFileNameScrollBar), -kDeltaArrow));
+                                                         kArrowLeftStr, kFontFileNameScrollBar,
+                                                         this, kArrowsColor, kArrowsColor), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, width - kArrowScrollBarHeight, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         kArrowRightStr, kFontFileNameScrollBar), kDeltaArrow));
+                                                         kArrowRightStr, kFontFileNameScrollBar,
+                                                         this, kArrowsColor, kArrowsColor), kDeltaArrow));
                 }
             } catch (const std::bad_alloc& e) {
                 std::cerr << "Memory allocation failed: " << e.what() << std::endl;

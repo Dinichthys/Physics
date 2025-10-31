@@ -3,6 +3,8 @@
 
 #include "plane.hpp"
 
+static const float kBorderLenTrianglesSet = 100;
+
 class Triangle : public Plane {
     private:
         Coordinates point_b_;
@@ -39,6 +41,10 @@ class Triangle : public Plane {
             return ((abs((vec_1 && vec_2) - kNormModule) < kEpsilon)
                     && (abs((vec_1 && vec_3) - kNormModule) < kEpsilon));
         };
+
+        virtual Object* GetCopy() const override {
+            return new Triangle(*this);
+        };
 };
 
 class TrianglesSet : public Object {
@@ -60,6 +66,10 @@ class TrianglesSet : public Object {
             if (!isnan(coeff_reflection)) {
                 Object::SetCoeffReflection(coeff_reflection);
             }
+        };
+
+        void AddTriangle(const Triangle& triangle) {
+            triangles_.push_back(Triangle(triangle));
         };
 
         virtual void Move(const Coordinates& move_direction) {
@@ -121,6 +131,21 @@ class TrianglesSet : public Object {
             }
 
             return Coordinates(3);
+        };
+
+        virtual Object* GetCopy() const override {
+            return new TrianglesSet(*this);
+        };
+
+        virtual Border* GetBorder() const override;
+
+        bool IsInhere(const Coordinates& point) const {
+            for (size_t triangle_idx = 0; triangle_idx < triangles_.size(); triangle_idx++) {
+                if (triangles_[triangle_idx].IsInhere(point)) {
+                    return true;
+                }
+            }
+            return false;
         };
 };
 

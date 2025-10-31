@@ -3,6 +3,8 @@
 
 #include "object.hpp"
 
+#include "border.hpp"
+
 class Circle : public Object {
     private:
         float radius_;
@@ -98,6 +100,14 @@ class Circle : public Object {
         virtual Coordinates GetNormal(const Coordinates& point, const Coordinates& vec) const override {
             Coordinates normal = point - Object::GetCenterCoordinates();
             return !(normal * ((!normal) && (!vec)) * (-1));
+        };
+
+        virtual Object* GetCopy() const override {
+            return new Circle(*this);
+        };
+
+        virtual Border* GetBorder() const override {
+            return new Border(Object::GetCenterCoordinates(), 2 * radius_, 2 * radius_, 2 * radius_);
         };
 
     private:

@@ -13,7 +13,7 @@
 static const graphics::Color kDefaultButtonColor = graphics::kColorBlue;
 static const graphics::Color kPressedColor = graphics::kColorGreen;
 static const graphics::Color kReleaseColor = graphics::kColorRed;
-static const graphics::Color kPanelColor = graphics::kColorWhite;
+static const graphics::Color kPanelColor = graphics::Color(60, 56, 54);
 
 static uint8_t kHoveredColorScale = 2;
 
