@@ -1,0 +1,3 @@
+[submodule "libs/mipt-ded-zemax"]
+	path = libs/mipt-ded-zemax
+	url = https://github.com/random-username-here/mipt-ded-zemax

@@ -38,6 +38,7 @@ class Widget {
         virtual Coordinates GetRBCornerAbs() const {return GetLTCornerAbs() + Coordinates(2, width_, height_);};
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
+        virtual void SetSize(float width, float height) {width_ = width; height_ = height;};
 
         virtual Widget* GetParent() const {return parent_;};
 

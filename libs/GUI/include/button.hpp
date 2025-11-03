@@ -72,6 +72,14 @@ class Button : public WidgetContainer {
             WidgetContainer::SetParentToChildren();
         };
 
+        virtual void SetSize(float width, float height) override {
+            Widget::SetSize(width, height);
+            if (WidgetContainer::GetChildrenNum() != 0) {
+                WidgetContainer::GetChild(0)->SetSize(width, height);
+            };
+            button_background_.SetSize(width, height);
+        };
+
         void SetText(const std::string& text_str) {
             Text* text = dynamic_cast<Text*>(GetChild(0));
             if (text == NULL) {

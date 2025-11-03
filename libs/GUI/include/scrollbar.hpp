@@ -69,8 +69,10 @@ class ScrollBar : public Button {
         std::function<void(float)> action_;
 
     public:
-        explicit ScrollBar(const Coordinates& lt_corner, float width, float height, float thumb_height,
-                           std::function<void(float)> action, float delta = kDeltaArrow)
+        explicit ScrollBar(const Coordinates& lt_corner = Coordinates(3),
+                           float width = 0, float height = 0, float thumb_height = 0,
+                           std::function<void(float)> action = std::function<void(float)>(),
+                           float delta = kDeltaArrow)
             :Button(lt_corner, width, height, "", "", NULL, kScrollBarColor, kScrollBarColor), action_(action) {
             delta_ = delta;
 
@@ -121,6 +123,20 @@ class ScrollBar : public Button {
 
         float GetPercentage() const {
             return percentage_;
+        };
+
+        void SetThumbSize(float width, float height) {
+            WidgetContainer::GetChild(kThumb)->SetSize(width, height);
+        };
+        void SetArrowsSize(float width, float height) {
+            WidgetContainer::GetChild(kPlusArrow)->SetSize(width, height);
+            WidgetContainer::GetChild(kMinusArrow)->SetSize(width, height);
+        };
+        void SetAction(const std::function<void(float)>& action) {
+            action_ = action;
+        };
+        void SetDelta(float delta) {
+            delta_ = delta;
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {

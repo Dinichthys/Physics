@@ -6,7 +6,7 @@
 #include "object.hpp"
 #include "triangle.hpp"
 
-static const graphics::Color kBorderColor = graphics::kColorBrown;
+static const graphics::Color kBorderColor = graphics::kColorRed;
 static const float kBorderWidth = 10;
 
 class Square : public TrianglesSet {

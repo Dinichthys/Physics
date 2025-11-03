@@ -38,7 +38,7 @@ static const float kInfoTableWidth = 160;
 static const size_t kListIdx = 1;
 
 static const graphics::Color kFreeSpaceColor(graphics::Color(30, 28, 29));
-static const graphics::Color kChoseObjectColor(graphics::kColorBrown);
+static const graphics::Color kChoseObjectColor(graphics::kColorRed);
 
 class Eye {
     private:
@@ -353,6 +353,11 @@ class SceneManager : public WidgetContainer {
                         if (table_ != NULL) {
                             delete table_;
                             table_ = NULL;
+                        }
+                        if (objects_[border_idx_] != NULL) {
+                            delete objects_[border_idx_];
+                            objects_.erase(objects_.begin() + border_idx_);
+                            border_idx_ = -1;
                         }
                     }
 
