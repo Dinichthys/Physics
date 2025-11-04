@@ -38,7 +38,7 @@ class ArrowScrollBar : public Button {
             delta_ = delta;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override;
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override;
 };
 
 class Thumb : public Button {
@@ -51,8 +51,8 @@ class Thumb : public Button {
             horizontal_ = horizontal;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            return Widget::OnMousePress(mouse_pos, widget);
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            return Widget::OnMousePress(mouse_pos);
         };
 
         virtual void Move(float shift_x, float shift_y) override;
@@ -139,10 +139,10 @@ class ScrollBar : public Button {
             delta_ = delta;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            if (WidgetContainer::OnMousePress(mouse_pos, widget)) {
-                if (*widget == this) {
-                    *widget = NULL;
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (WidgetContainer::OnMousePress(mouse_pos)) {
+                if (state->target_widget_ == this) {
+                    state->target_widget_ = NULL;
                     Button::SetPressedInfo(true);
 
                     Thumb* thumb = GetThumb();

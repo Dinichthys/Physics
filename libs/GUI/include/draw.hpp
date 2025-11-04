@@ -25,6 +25,7 @@ enum RendererError {
 class UI : public WidgetContainer {
     private:
         graphics::RenderWindow window;
+        hui::State state_;
 
     public:
         explicit UI(unsigned int width, unsigned int height,
@@ -36,10 +37,15 @@ class UI : public WidgetContainer {
             size_t children_num = children.size();
             for (size_t i = 0; i < children_num; i++) {
                 children_.push_back(children[i]);
+                children_[i]->SetState(&state_);
             }
+
+            state_.hovered_widget_ = NULL;
+            state_.target_widget_ = NULL;
 
             WidgetContainer::SetParentToChildren();
         };
+
         ~UI() {
             if (window.IsOpen()) {
                 window.Close();
@@ -48,18 +54,18 @@ class UI : public WidgetContainer {
 
         RendererError ShowWindow();
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             ASSERT(widget != NULL, "");
 
-            WidgetContainer::OnMousePress(mouse_pos, widget);
+            WidgetContainer::OnMousePress(mouse_pos);
 
-            *widget = (*widget == this) ? NULL : *widget;
+            state->target_widget_ = (state->target_widget_ == this) ? NULL : state->target_widget_;
 
             return false;
         };
 
     private:
-        RendererError AnalyzeKey(const graphics::Event& event);
+        RendererError AnalyzeKey(const dr4::Event& event);
         void GetMousePosition(Coordinates& mouse_pos);
 };
 

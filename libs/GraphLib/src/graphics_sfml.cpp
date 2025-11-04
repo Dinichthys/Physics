@@ -13,6 +13,30 @@
 
 namespace graphics {
 
+//-----------------FONT---------------------------------------------------------------------------------------
+
+    class FontImpl : public sf::Font {
+        public:
+            explicit FontImpl()
+                :sf::Font() {};
+
+            virtual bool loadFromFile(const std::string& path) {
+                return sf::Font::loadFromFile(path);
+            };
+    };
+
+    Font::Font() {
+        impl_ = new FontImpl;
+    };
+
+    void Font::loadFromFile(const std::string& path) const {
+        if (impl_->loadFromFile(path) == NULL) {
+            throw std::runtime_error("No files for font uploading");
+        }
+    };
+
+//------------------------------------------------------------------------------------------------------------
+
 //-----------------TEXT---------------------------------------------------------------------------------------
 
     Text::Text(const std::string& text, const std::string& font_file_name, unsigned char height) {
@@ -23,7 +47,7 @@ namespace graphics {
 
         if (strcmp(font_file_name.c_str(), "") != 0) {
             if (!((sf::Font*)font_)->loadFromFile(font_file_name)) {
-                throw std::runtime_error("Can't cload font\n");
+                throw std::runtime_error("No such file with fonts");
             }
         }
 
@@ -34,12 +58,12 @@ namespace graphics {
     }
 
     Text::Text(const Text& other) {
-        font_ = new(std::nothrow) sf::Font(*((sf::Font*)other.GetFont()));
+        font_ = new(std::nothrow) sf::Font(*((sf::Font*)other.font_));
         if (font_ == NULL) {
             throw std::runtime_error("Can't create font for Text object\n");
         }
 
-        text_ = new(std::nothrow) sf::Text(*((sf::Text*)other.GetText()));
+        text_ = new(std::nothrow) sf::Text(*((sf::Text*)other.text_));
         if (text_ == NULL) {
             throw std::runtime_error("Can't create Text object\n");
         }
@@ -63,6 +87,12 @@ namespace graphics {
     void Text::SetFont(const std::string& font) {
         ((sf::Font*)font_)->loadFromFile(font);
         ((sf::Text*)text_)->setFont(*((sf::Font*)font_));
+    }
+
+    dr4::Rect2f Text::GetBounds() const {
+        sf::FloatRect rect = ((sf::Text*)text_)->getLocalBounds();
+        return dr4::Rect2f(dr4::Vec2f(rect.getPosition().x, rect.getPosition().y),
+                           dr4::Vec2f(rect.getSize().x, rect.getSize().y));
     }
 
 //-----------------VERTEX ARRAY-------------------------------------------------------------------------------
@@ -95,8 +125,18 @@ namespace graphics {
 
 //-----------------RECTANGLE SHAPE----------------------------------------------------------------------------
 
-    RectangleShape::RectangleShape(float width, float height) {
-        rectangle_ = new(std::nothrow) sf::RectangleShape(sf::Vector2f(width, height));
+    RectangleShape::RectangleShape(const dr4::Vec2f& pos, const dr4::Vec2f& size)
+        :dr4::Rectangle(dr4::Rect2f(pos, size), dr4::Color(0, 0, 0, 0))  {
+        rectangle_ = new(std::nothrow) sf::RectangleShape(sf::Vector2f(size.x, size.y));
+        if (rectangle_ == NULL) {
+            throw std::runtime_error("Can't create RectangleShape\n");
+        }
+        ((sf::RectangleShape*)rectangle_)->setPosition({pos.x, pos.y});
+    }
+
+    RectangleShape::RectangleShape(const dr4::Rectangle& rect)
+        :dr4::Rectangle(rect) {
+        rectangle_ = new(std::nothrow) sf::RectangleShape(sf::Vector2f(rect.rect.size.x, rect.rect.size.y));
         if (rectangle_ == NULL) {
             throw std::runtime_error("Can't create RectangleShape\n");
         }
@@ -113,12 +153,14 @@ namespace graphics {
         delete ((sf::RectangleShape*)rectangle_);
     }
 
-    void RectangleShape::SetSize(float width, float height) const {
+    void RectangleShape::SetSize(float width, float height) {
         ((sf::RectangleShape*)rectangle_)->setSize({width, height});
+        rect.size = {width, height};
     }
 
-    void RectangleShape::SetPosition(const Coordinates& lt_corner) const {
+    void RectangleShape::SetPosition(const Coordinates& lt_corner) {
         ((sf::RectangleShape*)rectangle_)->setPosition(lt_corner[0], lt_corner[1]);
+        rect.pos = {lt_corner[0], lt_corner[1]};
     }
 
     void RectangleShape::SetRotation(float angle) const {
@@ -128,18 +170,121 @@ namespace graphics {
         ((sf::RectangleShape*)rectangle_)->rotate(angle);
     }
 
-    void RectangleShape::SetOutlineColor(const graphics::Color color) const {
+    void RectangleShape::SetOutlineColor(const graphics::Color color) {
         ((sf::RectangleShape*)rectangle_)->setOutlineColor(
             sf::Color(color.GetRedPart(), color.GetGreenPart(), color.GetBluePart(), color.GetBrightness()));
+        borderColor = color;
     }
-    void RectangleShape::SetFillColor(const graphics::Color color) const {
+    void RectangleShape::SetFillColor(const graphics::Color color) {
         ((sf::RectangleShape*)rectangle_)->setFillColor(
             sf::Color(color.GetRedPart(), color.GetGreenPart(), color.GetBluePart(), color.GetBrightness()));
+        fill = color;
+    }
+
+//-----------------IMAGE--------------------------------------------------------------------------------------
+
+    Image::Image(float width, float height)
+        :dr4::Image(width, height) {
+        image_ = new sf::Image();
+        ((sf::Image*) image_)->create(width, height);
+        width_ = width;
+        height_ = height;
+    }
+
+    Image::~Image() {
+        delete ((sf::Image*) image_);
+    }
+
+    void Image::SetPixel(unsigned x, unsigned y, Color color) {
+        ((sf::Image*) image_)->setPixel(x, y,
+             sf::Color(color.GetRedPart(), color.GetGreenPart(), color.GetBluePart(), color.GetBrightness()));
+    }
+
+    void Image::SetPixel(unsigned x, unsigned y, dr4::Color color) {
+        ((sf::Image*) image_)->setPixel(x, y, sf::Color(color.r, color.b, color.g, color.a));
+    }
+
+    dr4::Color Image::GetPixel(unsigned x, unsigned y) const {
+        sf::Color color = ((sf::Image*) image_)->getPixel(x, y);
+        return dr4::Color(color.r, color.b, color.g, color.a);
+    }
+
+    Color Image::GetPixelColor(unsigned x, unsigned y) const {
+        return Color(GetPixel(x, y));
+    }
+
+    void Image::SetSize(dr4::Vec2f size) {
+        width_ = size.x;
+        height_ = size.y;
+    }
+
+    dr4::Vec2f Image::GetSize() const {
+        return dr4::Vec2f(width_, height_);
+    }
+
+    float Image::GetWidth() const {
+        return width_;
+    }
+
+    float Image::GetHeight() const {
+        return height_;
+    }
+
+//-----------------TEXTURE------------------------------------------------------------------------------------
+
+    Texture::Texture(float width, float height) {
+        texture_ = new sf::RenderTexture();
+        ((sf::RenderTexture*) texture_)->create(width, height);
+        width_ = width;
+        height_ = height;
+    }
+
+    void Texture::SetSize(dr4::Vec2f size) {
+        width_ = size.x;
+        height_ = size.y;
+    }
+
+    dr4::Vec2f Texture::GetSize() const {
+        return dr4::Vec2f(width_, height_);
+    }
+
+    float Texture::GetWidth() const {
+        return width_;
+    }
+
+    float Texture::GetHeight() const {
+        return height_;
+    }
+
+    void Texture::Draw(const dr4::Rectangle &rect) {
+        sf::RectangleShape sf_rect({rect.rect.size.x, rect.rect.size.y});
+        sf_rect.setFillColor(sf::Color(rect.fill.r, rect.fill.g, rect.fill.g, rect.fill.a));
+        sf_rect.setSize({rect.rect.pos.x, rect.rect.pos.y});
+        sf_rect.setOutlineColor(sf::Color(rect.borderColor.r, rect.borderColor.g, rect.borderColor.b, rect.borderColor.a));
+        ((sf::RenderTexture*)texture_)->draw(sf_rect);
+    }
+
+    void Texture::Draw(const dr4::Text &text) {
+        sf::Text sf_text(sf::String(text.text), *((dynamic_cast<const Font*>(text.font))->GetFont()), text.fontSize);
+       ((sf::RenderTexture*)texture_)->draw(sf_text);
+    }
+
+    void Texture::Draw(const dr4::Image &img, const dr4::Vec2f &pos) {
+        sf::Texture txtr(((sf::RenderTexture*)texture_)->getTexture());
+        txtr.update(*((sf::Image*)(dynamic_cast<const Image&>(img).GetImage())), pos.x, pos.y);
+        sf::Sprite sprite(txtr);
+        ((sf::RenderTexture*)texture_)->draw(sprite);
+    }
+    void Texture::Draw(const dr4::Texture &texture, const dr4::Vec2f &pos) {
+        sf::Sprite sprite(((sf::RenderTexture*)(dynamic_cast<const Texture&>(texture).texture_))->getTexture());
+        sprite.setPosition({pos.x, pos.y});
+        ((sf::RenderTexture*)texture_)->draw(sprite);
     }
 
 //-----------------RENDER WINDOW------------------------------------------------------------------------------
 
-    RenderWindow::RenderWindow(size_t width, size_t height, const char* window_name) {
+    RenderWindow::RenderWindow(size_t width, size_t height, const char* window_name)
+        :title_(window_name) {
         width_ = width;
         height_ = height;
         window_ = new(std::nothrow) sf::RenderWindow(sf::VideoMode(width, height), window_name);
@@ -152,78 +297,113 @@ namespace graphics {
         delete ((sf::RenderWindow*)window_);
     }
 
-    bool RenderWindow::PollEvent(graphics::Event& event) const {
+    std::optional<dr4::Event> RenderWindow::PollEvent() {
         sf::Event sf_event;
         if (!(((sf::RenderWindow*)window_)->pollEvent(sf_event))) {
-            return false;
+            return {};
         }
+
+        dr4::Event event;
 
         switch (sf_event.type) {
             case sf::Event::Closed : {
-                event.SetType(graphics::kClosed);
+                event.type = dr4::Event::Type::QUIT;
                 break;
             }
             case sf::Event::MouseButtonPressed : {
-                event.SetType(graphics::kMouseButtonPressed);
+                event.type = dr4::Event::Type::MOUSE_DOWN;
+                switch(sf_event.mouseButton.button) {
+                    case sf::Mouse::Button::Left :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_LEFT;
+                        break;
+                    case sf::Mouse::Button::Right :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_RIGHT;
+                        break;
+                    case sf::Mouse::Button::Middle :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_MIDDLE;
+                        break;
+                    default:
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_UNKNOWN;
+                }
+                Coordinates pos(GetMousePos());
+                event.mouseButton.pos = {pos[0], pos[1]};
                 break;
             }
             case sf::Event::MouseButtonReleased : {
-                event.SetType(graphics::kMouseButtonReleased);
+                event.type = dr4::Event::Type::MOUSE_UP;
+                switch(sf_event.mouseButton.button) {
+                    case sf::Mouse::Button::Left :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_LEFT;
+                        break;
+                    case sf::Mouse::Button::Right :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_RIGHT;
+                        break;
+                    case sf::Mouse::Button::Middle :
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_MIDDLE;
+                        break;
+                    default:
+                        event.mouseButton.button = dr4::MouseCode::MOUSECODE_UNKNOWN;
+                }
+                Coordinates pos(GetMousePos());
+                event.mouseButton.pos = {pos[0], pos[1]};
                 break;
             }
             case sf::Event::MouseMoved : {
-                event.SetType(graphics::kMouseMoved);
+                event.type = dr4::Event::Type::MOUSE_MOVE;
+                Coordinates pos(GetMousePos());
+                event.mouseMove.pos = {pos[0], pos[1]};
                 break;
             }
             case sf::Event::KeyPressed : {
+                event.type = dr4::Event::Type::KEY_DOWN;
                 switch(sf_event.key.scancode) {
                     case sf::Keyboard::Scan::Scancode::A : {
-                        event.SetType(graphics::kLetterA);
+                        event.key.sym = dr4::KeyCode::KEYCODE_A;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::D : {
-                        event.SetType(graphics::kLetterD);
+                        event.key.sym = dr4::KeyCode::KEYCODE_D;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::S : {
-                        event.SetType(graphics::kLetterS);
+                        event.key.sym = dr4::KeyCode::KEYCODE_S;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::W : {
-                        event.SetType(graphics::kLetterW);
+                        event.key.sym = dr4::KeyCode::KEYCODE_W;
                         break;
                     }
 
                     case sf::Keyboard::Scan::Scancode::Right : {
-                        event.SetType(graphics::kRightArrow);
+                        event.key.sym = dr4::KeyCode::KEYCODE_RIGHT;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::Left : {
-                        event.SetType(graphics::kLeftArrow);
+                        event.key.sym = dr4::KeyCode::KEYCODE_LEFT;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::Up : {
-                        event.SetType(graphics::kUpArrow);
+                        event.key.sym = dr4::KeyCode::KEYCODE_UP;
                         break;
                     }
                     case sf::Keyboard::Scan::Scancode::Down : {
-                        event.SetType(graphics::kDownArrow);
+                        event.key.sym = dr4::KeyCode::KEYCODE_DOWN;
                         break;
                     }
                     default : {
-                        event.SetType(graphics::kNoneEvent);
+                        event.key.sym = dr4::KeyCode::KEYCODE_UNKNOWN;
                         break;
                     }
                 }
                 break;
             }
             default : {
-                event.SetType(graphics::kNoneEvent);
+                event.type = dr4::Event::Type::UNKNOWN;
                 break;
             }
         }
 
-        return true;
+        return event;
     }
 
     float RenderWindow::GetWidth() const {
@@ -233,6 +413,45 @@ namespace graphics {
     float RenderWindow::GetHeight() const {
         return ((sf::RenderWindow*)window_)->getSize().y;
     };
+
+    dr4::Vec2f RenderWindow::GetSize() const {
+        return {((sf::RenderWindow*)window_)->getSize().x, ((sf::RenderWindow*)window_)->getSize().y};
+    }
+
+    void RenderWindow::SetSize(const ::dr4::Vec2f& size) {
+        width_ = size.x;
+        height_ = size.y;
+        ((sf::RenderWindow*)window_)->setSize({width_, height_});
+    }
+
+    void RenderWindow::SetTitle(const std::string &title) {
+        ((sf::RenderWindow*)window_)->setTitle(title);
+        title_ = title;
+    }
+
+    const std::string &RenderWindow::GetTitle() const {
+        return title_;
+    }
+
+    dr4::Texture *RenderWindow::CreateTexture() {
+        sf::Texture texture;
+        texture.create(width_, height_);
+        texture.update(*((sf::Image*)(dynamic_cast<Image*>(CreateImage())->GetImage())));
+
+        Texture* my_texture = new Texture(width_, height_);
+        sf::RenderTexture* ptr = (sf::RenderTexture*)my_texture->GetTexture();
+        sf::Sprite sprite(texture);
+        ptr->draw(sprite);
+
+        return my_texture;
+    }
+
+    dr4::Image *RenderWindow::CreateImage() {
+        Image* image = new Image(width_, height_);
+        sf::Image* sf_image = (sf::Image*)image->GetImage();
+        *sf_image = ((sf::RenderWindow*)window_)->capture();
+        return image;
+    }
 
     Coordinates RenderWindow::GetMousePos() const {
         float scale_x = GetWidth() / width_;
@@ -252,7 +471,13 @@ namespace graphics {
         ((sf::RenderWindow*)window_)->draw(*((sf::Text*)text.GetText()));
     }
 
-    void RenderWindow::Display() const {
+    void RenderWindow::Draw(const dr4::Texture &texture, dr4::Vec2f pos) {
+        sf::Sprite sprite(((sf::RenderTexture*)(dynamic_cast<const Texture&>(texture).GetTexture()))->getTexture());
+        sprite.setPosition({pos.x, pos.y});
+        ((sf::RenderWindow*)window_)->draw(sprite);
+    }
+
+    void RenderWindow::Display() {
         ((sf::RenderWindow*)window_)->display();
     }
 
@@ -260,8 +485,12 @@ namespace graphics {
         return ((sf::RenderWindow*)window_)->isOpen();
     }
 
-    void RenderWindow::Close() const {
+    void RenderWindow::Close() {
         ((sf::RenderWindow*)window_)->close();
+    }
+
+    void RenderWindow::Clear(const dr4::Color &color) {
+        ((sf::RenderWindow*)window_)->clear(sf::Color(color.r, color.g, color.b, color.a));
     }
 
 //------------------------------------------------------------------------------------------------------------

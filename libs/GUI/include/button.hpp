@@ -31,7 +31,7 @@ class Button : public WidgetContainer {
 
     public:
         explicit Button(const Button& other)
-            :WidgetContainer(other), button_background_(other.GetWidth(), other.GetHeight()) {
+            :WidgetContainer(other), button_background_(other.relPos, {other.GetWidth(), other.GetHeight()}) {
             pressed_ = other.GetPressedInfo();
 
             pressed_color_ = other.GetPressedColor();
@@ -53,7 +53,8 @@ class Button : public WidgetContainer {
                         Widget* parent = NULL,
                         graphics::Color pressed_color = kPressedColor,
                         graphics::Color released_color = kReleaseColor)
-            :WidgetContainer(lt_corner, width, height), button_background_(width, height),
+            :WidgetContainer(lt_corner, width, height),
+             button_background_({lt_corner[0], lt_corner[1]}, {width, height}),
              pressed_color_(pressed_color), released_color_(released_color) {
             pressed_ = false;
 
@@ -94,12 +95,9 @@ class Button : public WidgetContainer {
         graphics::Color GetPressedColor() const {return pressed_color_;};
         graphics::Color GetReleasedColor() const {return released_color_;};
 
-        virtual void Draw(graphics::RenderWindow* window) {
+        virtual void Redraw() override {
             ASSERT(window != NULL, "");
 
-            Coordinates lt_corner(Widget::GetLTCornerAbs());
-
-            button_background_.SetPosition(lt_corner);
             graphics::Color color = (Button::GetPressedInfo()) ? pressed_color_ : released_color_;
 
             if (Widget::GetHovered()) {
@@ -110,17 +108,17 @@ class Button : public WidgetContainer {
             }
 
             button_background_.SetFillColor(color);
-            window->Draw(button_background_);
+            texture->Draw(button_background_);
 
-            WidgetContainer::Draw(window);
+            WidgetContainer::Redraw();
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
 
-            *widget = NULL;
+            state->target_widget_ = NULL;
 
             if ((mouse_pos[0] > lt_corner[0])
                 && (mouse_pos[1] > lt_corner[1])
@@ -151,34 +149,31 @@ class Button : public WidgetContainer {
 };
 
 class PanelControl : public WidgetContainer {
+    private:
+        graphics::RectangleShape background_;
+
     public:
         explicit PanelControl(const PanelControl& other)
-            :WidgetContainer(other) {
+            :WidgetContainer(other), background_(other.relPos, {other.GetWidth(), other.GetHeight()}) {
             Widget::SetParent(other.GetParent());
             WidgetContainer::SetParentToChildren();
         };
 
         explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
+                              hui::State* state,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
-            :WidgetContainer(lt_corner, width, height, buttons) {
+            :WidgetContainer(lt_corner, width, height, state, buttons),
+             background_({lt_corner[0], lt_corner[1]}, {width, height}) {
+            background_.SetFillColor(kPanelColor);
+
             Widget::SetParent(parent);
             WidgetContainer::SetParentToChildren();
         };
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            ASSERT(window != NULL, "");
+        virtual void Redraw() override {
+            texture->Draw(background_);
 
-            Coordinates lt_corner(Widget::GetLTCornerAbs());
-            float width = Widget::GetWidth();
-            float height = Widget::GetHeight();
-
-            graphics::RectangleShape button_background(width, height);
-            button_background.SetPosition(lt_corner);
-            button_background.SetFillColor(kPanelColor);
-
-            window->Draw(button_background);
-
-            WidgetContainer::Draw(window);
+            WidgetContainer::Redraw();
         };
 };
 

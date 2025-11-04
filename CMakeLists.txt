@@ -9,6 +9,7 @@ add_executable (${PROJECT_NAME}
     src/movement.cpp
 
     libs/GUI/src/draw.cpp
+    libs/GUI/src/event.cpp
     libs/GUI/src/scrollbar.cpp
     libs/GraphLib/src/graphics_sfml.cpp
     libs/geometry/src/vector.cpp

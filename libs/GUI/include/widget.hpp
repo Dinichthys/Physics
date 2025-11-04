@@ -5,12 +5,22 @@
 
 #include <vector>
 
+#include "hui/widget.hpp"
+#include "hui/container.hpp"
+
 #include "vector.hpp"
 #include "logging.h"
 
-class Widget {
+class Widget;
+
+class hui::State {
+    public:
+        Widget* target_widget_;
+        Widget* hovered_widget_;
+};
+
+class Widget : public hui::Widget {
     private:
-        Coordinates lt_corner_;
         float width_;
         float height_;
         Widget* parent_;
@@ -18,21 +28,29 @@ class Widget {
         bool hovered_;
 
     public:
-        explicit Widget(const Coordinates& lt_corner, const float width, float height, Widget* parent = NULL)
-            :lt_corner_(lt_corner) {
+        explicit Widget(const Coordinates& lt_corner, const float width, float height,
+                        hui::State* const state, Widget* parent = NULL)
+            :hui::Widget(width, height, state, parent) {
             hovered_ = false;
             width_ = width;
             height_ = height;
             parent_ = parent;
+
+            hui::Widget::SetRelPos({lt_corner[0], lt_corner[1]});
         };
 
         virtual ~Widget() {};
 
+        virtual void SetState(hui::State* state_) {state = state_;};
+
+        dr4::Texture* GetTexture() const {return texture;};
+
         virtual Coordinates GetLTCornerLoc() const {
-            return Coordinates(lt_corner_);
+            return Coordinates(2, relPos.x, relPos.y);
         };
         virtual Coordinates GetLTCornerAbs() const {
-            return (parent_ == NULL) ? lt_corner_ : lt_corner_ + parent_->GetLTCornerAbs();
+            return (parent_ == NULL) ? Coordinates(2, relPos.x, relPos.y)
+                                     : Coordinates(2, relPos.x, relPos.y) + parent_->GetLTCornerAbs();
         };
         virtual Coordinates GetRBCornerLoc() const {return GetLTCornerLoc() + Coordinates(2, width_, height_);};
         virtual Coordinates GetRBCornerAbs() const {return GetLTCornerAbs() + Coordinates(2, width_, height_);};
@@ -42,16 +60,30 @@ class Widget {
 
         virtual Widget* GetParent() const {return parent_;};
 
-        virtual void SetLTCorner(const Coordinates& coors) {lt_corner_ = coors;};
+        virtual void SetLTCorner(const Coordinates& coors) {relPos = {coors[0], coors[1]};};
         void SetParent(Widget* parent) {parent_ = parent;};
 
         bool GetHovered() const {return hovered_;};
         void SetHovered(bool hovered) {hovered_ = hovered;};
 
-        virtual void Draw(graphics::RenderWindow* window) = 0;
+        virtual void Redraw() override {
+            (dynamic_cast<Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
+        };
+
         virtual void Move(float shift_x, float shift_y) {
-            lt_corner_.SetCoordinate(0, lt_corner_[0] + shift_x);
-            lt_corner_.SetCoordinate(1, lt_corner_[1] + shift_y);
+            relPos.x += shift_x;
+            relPos.y += shift_y;
+        };
+
+        virtual bool OnEvent(hui::Event& event) {
+            return false;
+        }
+
+        bool EventInside(dr4::Vec2f& pos) {
+            return (pos.x > relPos.x)
+                && (pos.y > relPos.y)
+                && (pos.x < relPos.x + width_)
+                && (pos.y < relPos.y + height_);
         };
 
         virtual bool OnMouseMove(float shift_x, float shift_y) {
@@ -60,14 +92,12 @@ class Widget {
             return true;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) {
-            ASSERT(widget != NULL, "");
-
-            if ((mouse_pos[0] > lt_corner_[0])
-                && (mouse_pos[1] > lt_corner_[1])
-                && (mouse_pos[0] < lt_corner_[0] + width_)
-                && (mouse_pos[1] < lt_corner_[1] + height_)) {
-                *widget = this;
+        virtual bool OnMousePress(const Coordinates& mouse_pos) {
+            if ((mouse_pos[0] > relPos.x)
+                && (mouse_pos[1] > relPos.y)
+                && (mouse_pos[0] < relPos.x + width_)
+                && (mouse_pos[1] < relPos.y + height_)) {
+                state->target_widget_ = this;
                 return true;
             }
 
@@ -75,10 +105,10 @@ class Widget {
         };
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
-            if ((mouse_pos[0] > lt_corner_[0])
-                && (mouse_pos[1] > lt_corner_[1])
-                && (mouse_pos[0] < lt_corner_[0] + width_)
-                && (mouse_pos[1] < lt_corner_[1] + height_)) {
+            if ((mouse_pos[0] > relPos.x)
+                && (mouse_pos[1] > relPos.y)
+                && (mouse_pos[0] < relPos.x + width_)
+                && (mouse_pos[1] < relPos.y + height_)) {
                 return true;
             }
 
@@ -86,14 +116,16 @@ class Widget {
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
-            if ((mouse_pos[0] > lt_corner_[0])
-                && (mouse_pos[1] > lt_corner_[1])
-                && (mouse_pos[0] < lt_corner_[0] + width_)
-                && (mouse_pos[1] < lt_corner_[1] + height_)) {
+            if ((mouse_pos[0] > relPos.x)
+                && (mouse_pos[1] > relPos.y)
+                && (mouse_pos[0] < relPos.x + width_)
+                && (mouse_pos[1] < relPos.y + height_)) {
                 hovered_ = true;
+                state->hovered_widget_ = this;
                 return true;
             }
 
+            state->hovered_widget_ = (state->hovered_widget_ == this) ? NULL : state->hovered_widget_;
             hovered_ = false;
             return false;
         };
@@ -129,14 +161,15 @@ class Widget {
         };
 };
 
-class WidgetContainer : public Widget {
+class WidgetContainer : public ::Widget {
     private:
-        std::vector<Widget*> children_;
+        std::vector<::Widget*> children_;
 
     public:
         explicit WidgetContainer(const Coordinates& lt_corner, const float width, float height,
-                                 const std::vector<Widget*>* children = NULL, Widget* parent = NULL)
-            :Widget(lt_corner, width, height, parent) {
+                                 hui::State* state = NULL,
+                                 const std::vector<::Widget*>* children = NULL, ::Widget* parent = NULL)
+            : ::Widget(lt_corner, width, height, state, parent) {
             if (children == NULL) {
                 return;
             }
@@ -152,6 +185,14 @@ class WidgetContainer : public Widget {
             for (size_t i = 0; i < children_num; i++) {
                 delete children_.back();
                 children_.pop_back();
+            }
+        };
+
+        virtual void SetState(hui::State* state_) override {
+            state = state_;
+            size_t children_num = children_.size();
+            for (size_t i = 0; i < children_num; i++) {
+                children_[i]->SetState(state_);
             }
         };
 
@@ -173,25 +214,22 @@ class WidgetContainer : public Widget {
             }
         }
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            ASSERT(window != NULL, "");
-
+        virtual void Redraw() override {
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
-                children_[i]->Draw(window);
+                children_[i]->Redraw();
             }
+            Widget::Redraw();
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            ASSERT(widget != NULL, "");
-
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
 
             int64_t children_num = children_.size();
             for (int64_t i = children_num - 1; i > -1; i--) {
-                if (children_[i]->OnMousePress(mouse_pos - lt_corner, widget)) {
+                if (children_[i]->OnMousePress(mouse_pos - lt_corner)) {
                     return true;
                 }
             }
@@ -200,7 +238,7 @@ class WidgetContainer : public Widget {
                 && (mouse_pos[1] > lt_corner[1])
                 && (mouse_pos[0] < lt_corner[0] + width)
                 && (mouse_pos[1] < lt_corner[1] + height)) {
-                *widget = this;
+                state->target_widget_ = this;
                 return true;
             }
 
@@ -243,11 +281,13 @@ class WidgetContainer : public Widget {
                 && (mouse_pos[1] > lt_corner[1])
                 && (mouse_pos[0] < lt_corner[0] + width)
                 && (mouse_pos[1] < lt_corner[1] + height)) {
-                Widget::SetHovered(true);
+                state->hovered_widget_ = (state->hovered_widget_ == this) ? NULL : state->hovered_widget_;
+                SetHovered(true);
                 return true;
             }
 
-            Widget::SetHovered(false);
+            state->hovered_widget_ = (state->hovered_widget_ == this) ? NULL : state->hovered_widget_;
+            SetHovered(false);
             return false;
         };
 

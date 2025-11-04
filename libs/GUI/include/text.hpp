@@ -10,17 +10,14 @@ class Text : public Widget {
         graphics::Text text_;
 
     public:
-        explicit Text(const Coordinates& lt_corner, float width, float height, Widget* parent = NULL,
-                        const std::string& text = "", const std::string& font_file_name = "")
-            :Widget(lt_corner, width, height, parent), text_(text, font_file_name, height) {};
+        explicit Text(const Coordinates& lt_corner, float width, float height,
+                      Widget* parent = NULL, hui::State* state = NULL,
+                      const std::string& text = "", const std::string& font_file_name = "")
+            :Widget(lt_corner, width, height, state, parent), text_(text, font_file_name, height) {};
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            ASSERT(window != NULL, "");
-
-            Coordinates lt_corner(Widget::GetLTCornerAbs());
-
-            text_.SetPosition(lt_corner);
-            window->Draw(text_);
+        virtual void Redraw() override {
+            texture->Draw(text_);
+            Widget::Redraw();
         };
 
         void SetText(const std::string& str) {text_.SetText(str);};

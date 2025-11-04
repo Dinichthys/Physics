@@ -73,6 +73,16 @@ class Coordinates {
             };
         };
 
+        Coordinates Clump(float a, float b) const {
+            Coordinates copy(*this);
+
+            copy.x = (copy.x < a) ? a : (copy.x > b) ? b : copy.x;
+            copy.y = (copy.y < a) ? a : (copy.y > b) ? b : copy.y;
+            copy.z = (copy.z < a) ? a : (copy.z > b) ? b : copy.z;
+
+            return Coordinates(copy);
+        };
+
         size_t GetDimension() const {
             return dimension;
         };

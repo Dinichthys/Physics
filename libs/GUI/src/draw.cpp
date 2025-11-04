@@ -13,7 +13,7 @@
 #include "my_assert.h"
 
 RendererError UI::ShowWindow() {
-    graphics::RectangleShape background((float)GetWidth(), (float)GetHeight());
+    graphics::RectangleShape background(relPos, {(float)GetWidth(), (float)GetHeight()});
     background.SetPosition(Coordinates(2, 0.f, 0.f));
     background.SetFillColor(kBackgroundColor);
 
@@ -21,10 +21,12 @@ RendererError UI::ShowWindow() {
     auto start_time = end_time;
     size_t duration = 0;
 
-    graphics::Event event;
+    dr4::Event event;
+    std::optional<dr4::Event> event_opt;
     while (window.IsOpen()) {
-        if (window.PollEvent(event)) {
-            if (event.GetType() == graphics::kClosed) {
+        if ((event_opt = window.PollEvent()).has_value()) {
+            event = event_opt.value();
+            if (event.type == dr4::Event::Type::QUIT) {
                 window.Close();
                 break;
             }
@@ -41,7 +43,9 @@ RendererError UI::ShowWindow() {
 
             window.Draw(background);
 
-            WidgetContainer::Draw(&window);
+            WidgetContainer::Redraw();
+
+            window.Draw(*texture, {0, 0});
 
             window.Display();
         }
@@ -50,33 +54,37 @@ RendererError UI::ShowWindow() {
     return kDoneRenderer;
 }
 
-RendererError UI::AnalyzeKey(const graphics::Event& event) {
+RendererError UI::AnalyzeKey(const dr4::Event& event) {
     static Coordinates mouse_pos(2, 0, 0);
     static Widget* moving_window = NULL;
 
-    switch(event.GetType()) {
-        case(graphics::EventType::kMouseButtonPressed) : {
-            GetMousePosition(mouse_pos);
-
-            OnMousePress(mouse_pos, &moving_window);
-
-            break;
-        }
-        case(graphics::EventType::kMouseButtonReleased) : {
-            moving_window = NULL;
-
-            GetMousePosition(mouse_pos);
-
-            OnMouseRelease(mouse_pos);
+    switch(event.type) {
+        case(dr4::Event::Type::MOUSE_DOWN) : {
+            hui::MouseDownEvent hui_event;
+            hui_event.relPos = event.mouseButton.pos;
+            hui_event.Apply(*this);
 
             break;
         }
-        case(graphics::EventType::kMouseMoved) : {
+        case(dr4::Event::Type::MOUSE_UP) : {
+            state_.target_widget_ = NULL;
+
+            hui::MouseUpEvent hui_event;
+            hui_event.relPos = event.mouseButton.pos;
+            hui_event.Apply(*this);
+
+            break;
+        }
+        case(dr4::Event::Type::MOUSE_MOVE) : {
             float old_x = mouse_pos[0];
             float old_y = mouse_pos[1];
-            GetMousePosition(mouse_pos);
 
-            OnMouseEnter(mouse_pos);
+            hui::MouseMoveEvent hui_event;
+            hui_event.rel = event.mouseMove.pos;
+            hui_event.Apply(*this);
+
+            mouse_pos.SetCoordinate(0, event.mouseMove.pos.x);
+            mouse_pos.SetCoordinate(1, event.mouseMove.pos.y);
 
             if (moving_window == NULL) {
                 break;
@@ -86,36 +94,12 @@ RendererError UI::AnalyzeKey(const graphics::Event& event) {
 
             break;
         }
-        case(graphics::EventType::kLetterA) :{
-            OnLetterA();
-            break;
-        }
-        case(graphics::EventType::kLetterD) :{
-            OnLetterD();
-            break;
-        }
-        case(graphics::EventType::kLetterS) :{
-            OnLetterS();
-            break;
-        }
-        case(graphics::EventType::kLetterW) :{
-            OnLetterW();
-            break;
-        }
-        case(graphics::EventType::kRightArrow) :{
-            OnArrowRight();
-            break;
-        }
-        case(graphics::EventType::kLeftArrow) :{
-            OnArrowLeft();
-            break;
-        }
-        case(graphics::EventType::kUpArrow) :{
-            OnArrowUp();
-            break;
-        }
-        case(graphics::EventType::kDownArrow) :{
-            OnArrowDown();
+        case(dr4::Event::Type::KEY_DOWN) : {
+            hui::KeyPressed hui_event;
+            hui_event.mod = event.key.mod;
+            hui_event.sym = event.key.sym;
+            hui_event.Apply(*this);
+
             break;
         }
         default:
