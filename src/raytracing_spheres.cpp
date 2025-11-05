@@ -13,12 +13,12 @@
 #include "logging.h"
 #include "my_assert.h"
 
-void SceneManager::Draw(graphics::RenderWindow* window) {
+void SceneManager::Redraw() {
     if (table_ != NULL) {
-        table_->Draw(window);
-        WidgetContainer::Draw(window);
+        table_->Redraw();
+        WidgetContainer::Redraw();
     } else {
-        WidgetContainer::GetChild(kListIdx)->Draw(window);
+        // WidgetContainer::GetChild(kListIdx)->Redraw();
     }
 
     size_t width = Widget::GetWidth();
@@ -39,7 +39,8 @@ void SceneManager::Draw(graphics::RenderWindow* window) {
     t3.join();
     t4.join();
 
-    window->Draw(vertices_);
+    texture->Draw(image_, {0, 0});
+    Widget::Redraw();
 }
 
 void SceneManager::DrawPart() {
@@ -55,20 +56,16 @@ void SceneManager::DrawPart() {
     Coordinates hor_vec = !(rt_corner - lt_corner);
     Coordinates ver_vec = !(lb_corner - lt_corner);
 
-    Coordinates abs_coors = Widget::GetLTCornerAbs();
-
     DrawTask task = tasks_.GetElem();
 
     Coordinates pixel_pos(eye_pos + lt_corner);
     float height = task.GetHeight();
     float width = task.GetWidth();
-    size_t point_idx = task.GetStartPointIdx();
     for (size_t i = task.GetStartPixelY(); i < height; i++) {
         pixel_pos = eye_pos + lt_corner + ver_vec * i + hor_vec * task.GetStartPixelX();
         for (size_t j = task.GetStartPixelX(); j < width; j++) {
             pixel_pos = pixel_pos + hor_vec;
-            vertices_.SetPixelPosition(point_idx,
-                                       Coordinates(2, abs_coors[0] + (float)j, abs_coors[1] + (float)i));
+            dr4::Vec2f pos((float)j, (float)i);
 
             float coeff = -1;
             size_t cur_object_idx = -1;
@@ -76,17 +73,17 @@ void SceneManager::DrawPart() {
                 pixel_pos, pixel_pos - eye_pos, coeff, cur_object_idx
             );
             if (coeff < 0) {
-                vertices_.SetPixelColor(point_idx++, kFreeSpaceColor);
+                image_.SetPixel(pos.x, pos.y, kFreeSpaceColor);
                 continue;
             }
             if (object->GetType() == kLight) {
-                vertices_.SetPixelColor(point_idx++, graphics::Color(object->GetColor()));
+                image_.SetPixel(pos.x, pos.y, graphics::Color(object->GetColor()));
                 continue;
             }
 
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
-            vertices_.SetPixelColor(point_idx++,
+            image_.SetPixel(pos.x, pos.y,
                                     GetPointColor(
                                         point, eye_pos, cur_object_idx, kColorCountingDepth
                                     ));

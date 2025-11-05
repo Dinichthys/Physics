@@ -30,7 +30,7 @@ namespace graphics {
     };
 
     void Font::loadFromFile(const std::string& path) const {
-        if (impl_->loadFromFile(path) == NULL) {
+        if (impl_->loadFromFile(path)) {
             throw std::runtime_error("No files for font uploading");
         }
     };
@@ -51,6 +51,8 @@ namespace graphics {
             }
         }
 
+        font = (const dr4::Font*)font_;
+
         text_ = new(std::nothrow) sf::Text(text, *((sf::Font*)font_), height);
         if (text_ == NULL) {
             throw std::runtime_error("Can't create Text object\n");
@@ -62,6 +64,8 @@ namespace graphics {
         if (font_ == NULL) {
             throw std::runtime_error("Can't create font for Text object\n");
         }
+
+        font = (const dr4::Font*)font_;
 
         text_ = new(std::nothrow) sf::Text(*((sf::Text*)other.text_));
         if (text_ == NULL) {
@@ -142,7 +146,8 @@ namespace graphics {
         }
     }
 
-    RectangleShape::RectangleShape(const RectangleShape& other) {
+    RectangleShape::RectangleShape(const RectangleShape& other)
+        :dr4::Rectangle(other) {
         rectangle_ = new(std::nothrow) sf::RectangleShape(*((sf::RectangleShape*)other.GetRectangle()));
         if (rectangle_ == NULL) {
             throw std::runtime_error("Can't create RectangleShape\n");
@@ -183,8 +188,7 @@ namespace graphics {
 
 //-----------------IMAGE--------------------------------------------------------------------------------------
 
-    Image::Image(float width, float height)
-        :dr4::Image(width, height) {
+    Image::Image(float width, float height) {
         image_ = new sf::Image();
         ((sf::Image*) image_)->create(width, height);
         width_ = width;
@@ -239,6 +243,17 @@ namespace graphics {
         height_ = height;
     }
 
+    Texture::Texture(const Texture& other) {
+        texture_ = new sf::RenderTexture();
+        ((sf::RenderTexture*) texture_)->create(other.width_, other.height_);
+        width_ = other.width_;
+        height_ = other.height_;
+    }
+
+    Texture::~Texture() {
+        delete ((sf::RenderTexture*) texture_);
+    }
+
     void Texture::SetSize(dr4::Vec2f size) {
         width_ = size.x;
         height_ = size.y;
@@ -265,7 +280,7 @@ namespace graphics {
     }
 
     void Texture::Draw(const dr4::Text &text) {
-        sf::Text sf_text(sf::String(text.text), *((dynamic_cast<const Font*>(text.font))->GetFont()), text.fontSize);
+        sf::Text sf_text(sf::String(text.text), *((sf::Font*)(text.font)), text.fontSize);
        ((sf::RenderTexture*)texture_)->draw(sf_text);
     }
 
@@ -273,6 +288,7 @@ namespace graphics {
         sf::Texture txtr(((sf::RenderTexture*)texture_)->getTexture());
         txtr.update(*((sf::Image*)(dynamic_cast<const Image&>(img).GetImage())), pos.x, pos.y);
         sf::Sprite sprite(txtr);
+        sprite.setPosition({0, 0});
         ((sf::RenderTexture*)texture_)->draw(sprite);
     }
     void Texture::Draw(const dr4::Texture &texture, const dr4::Vec2f &pos) {
@@ -415,13 +431,13 @@ namespace graphics {
     };
 
     dr4::Vec2f RenderWindow::GetSize() const {
-        return {((sf::RenderWindow*)window_)->getSize().x, ((sf::RenderWindow*)window_)->getSize().y};
+        return {((float)((sf::RenderWindow*)window_)->getSize().x), (float)(((sf::RenderWindow*)window_)->getSize().y)};
     }
 
     void RenderWindow::SetSize(const ::dr4::Vec2f& size) {
         width_ = size.x;
         height_ = size.y;
-        ((sf::RenderWindow*)window_)->setSize({width_, height_});
+        ((sf::RenderWindow*)window_)->setSize({(unsigned int)width_, (unsigned int)height_});
     }
 
     void RenderWindow::SetTitle(const std::string &title) {
@@ -434,23 +450,11 @@ namespace graphics {
     }
 
     dr4::Texture *RenderWindow::CreateTexture() {
-        sf::Texture texture;
-        texture.create(width_, height_);
-        texture.update(*((sf::Image*)(dynamic_cast<Image*>(CreateImage())->GetImage())));
-
-        Texture* my_texture = new Texture(width_, height_);
-        sf::RenderTexture* ptr = (sf::RenderTexture*)my_texture->GetTexture();
-        sf::Sprite sprite(texture);
-        ptr->draw(sprite);
-
-        return my_texture;
+        return new Texture(width_, height_);
     }
 
     dr4::Image *RenderWindow::CreateImage() {
-        Image* image = new Image(width_, height_);
-        sf::Image* sf_image = (sf::Image*)image->GetImage();
-        *sf_image = ((sf::RenderWindow*)window_)->capture();
-        return image;
+        return new Image(width_, height_);
     }
 
     Coordinates RenderWindow::GetMousePos() const {

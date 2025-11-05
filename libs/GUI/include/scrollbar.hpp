@@ -46,8 +46,8 @@ class Thumb : public Button {
         bool horizontal_;
 
     public:
-        explicit Thumb(const Coordinates& lt_corner, float width, float height, bool horizontal)
-            :Button(lt_corner, width, height, "", "", NULL, kThumbColor, kThumbColor) {
+        explicit Thumb(const Coordinates& lt_corner, float width, float height, bool horizontal, hui::State* state_)
+            :Button(lt_corner, width, height, "", "", state_, NULL, kThumbColor, kThumbColor) {
             horizontal_ = horizontal;
         };
 
@@ -70,38 +70,38 @@ class ScrollBar : public Button {
 
     public:
         explicit ScrollBar(const Coordinates& lt_corner = Coordinates(3),
-                           float width = 0, float height = 0, float thumb_height = 0,
+                           float width = 0, float height = 0, float thumb_height = 0, hui::State* state_ = NULL,
                            std::function<void(float)> action = std::function<void(float)>(),
                            float delta = kDeltaArrow)
-            :Button(lt_corner, width, height, "", "", NULL, kScrollBarColor, kScrollBarColor), action_(action) {
+            :Button(lt_corner, width, height, "", "", state_, NULL, kScrollBarColor, kScrollBarColor), action_(action) {
             delta_ = delta;
 
             try {
                 if (width < height) {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, 0, kArrowScrollBarHeight),
-                                                        width, thumb_height, false));
+                                                        width, thumb_height, false, state_));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          width, kArrowScrollBarHeight,
-                                                         kArrowUpStr, kFontFileNameScrollBar,
+                                                         kArrowUpStr, kFontFileNameScrollBar, state_,
                                                          this, kArrowsColor, kArrowsColor), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, height - kArrowScrollBarHeight),
                                                          width, kArrowScrollBarHeight,
-                                                         kArrowDownStr, kFontFileNameScrollBar,
+                                                         kArrowDownStr, kFontFileNameScrollBar, state_,
                                                          this, kArrowsColor, kArrowsColor), kDeltaArrow));
                 } else {
                     WidgetContainer::AddChild(new Thumb(Coordinates(2, kArrowScrollBarHeight, 0),
-                                                        thumb_height, height, true));
+                                                        thumb_height, height, true, state_));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, 0, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         kArrowLeftStr, kFontFileNameScrollBar,
+                                                         kArrowLeftStr, kFontFileNameScrollBar, state_,
                                                          this, kArrowsColor, kArrowsColor), -kDeltaArrow));
                     WidgetContainer::AddChild(new ArrowScrollBar(
                                                   Button(Coordinates(2, width - kArrowScrollBarHeight, 0),
                                                          kArrowScrollBarHeight, height,
-                                                         kArrowRightStr, kFontFileNameScrollBar,
+                                                         kArrowRightStr, kFontFileNameScrollBar, state_,
                                                          this, kArrowsColor, kArrowsColor), kDeltaArrow));
                 }
             } catch (const std::bad_alloc& e) {
@@ -126,11 +126,11 @@ class ScrollBar : public Button {
         };
 
         void SetThumbSize(float width, float height) {
-            WidgetContainer::GetChild(kThumb)->SetSize(width, height);
+            WidgetContainer::GetChild(kThumb)->SetSize({width, height});
         };
         void SetArrowsSize(float width, float height) {
-            WidgetContainer::GetChild(kPlusArrow)->SetSize(width, height);
-            WidgetContainer::GetChild(kMinusArrow)->SetSize(width, height);
+            WidgetContainer::GetChild(kPlusArrow)->SetSize({width, height});
+            WidgetContainer::GetChild(kMinusArrow)->SetSize({width, height});
         };
         void SetAction(const std::function<void(float)>& action) {
             action_ = action;

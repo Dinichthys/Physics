@@ -29,8 +29,8 @@ class Widget : public hui::Widget {
 
     public:
         explicit Widget(const Coordinates& lt_corner, const float width, float height,
-                        hui::State* const state, Widget* parent = NULL)
-            :hui::Widget(width, height, state, parent) {
+                        hui::State* const state, ::Widget* parent = NULL)
+            :hui::Widget(state, parent, new graphics::Texture(width, height)) {
             hovered_ = false;
             width_ = width;
             height_ = height;
@@ -39,7 +39,18 @@ class Widget : public hui::Widget {
             hui::Widget::SetRelPos({lt_corner[0], lt_corner[1]});
         };
 
-        virtual ~Widget() {};
+        explicit Widget(const ::Widget& other)
+            :hui::Widget(other) {
+            width_ = other.width_;
+            height_ = other.height_;
+            parent_ = other.parent_;
+            hovered_ = other.hovered_;
+            hui::Widget::texture = new graphics::Texture(*(dynamic_cast<graphics::Texture*>(other.texture)));
+        };
+
+        virtual ~Widget() {
+            delete texture;
+        };
 
         virtual void SetState(hui::State* state_) {state = state_;};
 
@@ -56,28 +67,26 @@ class Widget : public hui::Widget {
         virtual Coordinates GetRBCornerAbs() const {return GetLTCornerAbs() + Coordinates(2, width_, height_);};
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
-        virtual void SetSize(float width, float height) {width_ = width; height_ = height;};
+        virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::Widget::SetSize(size);};
 
-        virtual Widget* GetParent() const {return parent_;};
+        virtual ::Widget* GetParent() const {return parent_;};
 
         virtual void SetLTCorner(const Coordinates& coors) {relPos = {coors[0], coors[1]};};
-        void SetParent(Widget* parent) {parent_ = parent;};
+        void SetParent(::Widget* parent) {parent_ = parent; ::Widget::Widget::parent = parent;};
 
         bool GetHovered() const {return hovered_;};
         void SetHovered(bool hovered) {hovered_ = hovered;};
 
         virtual void Redraw() override {
-            (dynamic_cast<Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
+            if (parent != NULL) {
+                (dynamic_cast<::Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
+            }
         };
 
         virtual void Move(float shift_x, float shift_y) {
             relPos.x += shift_x;
             relPos.y += shift_y;
         };
-
-        virtual bool OnEvent(hui::Event& event) {
-            return false;
-        }
 
         bool EventInside(dr4::Vec2f& pos) {
             return (pos.x > relPos.x)
@@ -167,7 +176,7 @@ class WidgetContainer : public ::Widget {
 
     public:
         explicit WidgetContainer(const Coordinates& lt_corner, const float width, float height,
-                                 hui::State* state = NULL,
+                                 hui::State* state,
                                  const std::vector<::Widget*>* children = NULL, ::Widget* parent = NULL)
             : ::Widget(lt_corner, width, height, state, parent) {
             if (children == NULL) {

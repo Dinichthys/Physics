@@ -28,6 +28,7 @@ target_include_directories (${PROJECT_NAME}
         libs/MyLib/Logger
         libs/MyLib/Assert
         libs/MyLib/My_stdio
+        libs/mipt-ded-zemax/include
 )
 
 find_package(OpenMP REQUIRED)

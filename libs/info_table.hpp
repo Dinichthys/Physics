@@ -45,33 +45,34 @@ class InfoTable : public Widget {
 
     public:
         explicit InfoTable(const Coordinates& lt_corner, float width, float height, const Object* object,
+                           hui::State* state,
                            Widget* parent = NULL)
-            :Widget(lt_corner, width, height, parent),
+            :Widget(lt_corner, width, height, state, parent),
              text_type_            (Coordinates(2, 0, 0),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, TypeToStr(object->GetType()),
                                     kFontFileNameInfoTable),
              text_center_          (Coordinates(2, 0, height / kFieldsNum),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, CoordinatesToStr(object->GetCenterCoordinates()),
                                     kFontFileNameInfoTable),
              text_color_           (Coordinates(2, 0, height / kFieldsNum * 2),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, ColorToStr(graphics::Color(object->GetColor())),
                                     kFontFileNameInfoTable),
              text_coeff_reflection_(Coordinates(2, 0, height / kFieldsNum * 3),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, CoeffReflectionToStr(object->GetCoeffReflection()),
                                     kFontFileNameInfoTable),
              text_coeff_refraction_(Coordinates(2, 0, height / kFieldsNum * 4),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, CoeffRefractionToStr(object->GetCoeffRefraction()),
                                     kFontFileNameInfoTable),
              text_coeff_absorption_(Coordinates(2, 0, height / kFieldsNum * 5),
-                                    width, height / kFieldsNum / kTextScale,
+                                    width, height / kFieldsNum / kTextScale, state,
                                     this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
                                     kFontFileNameInfoTable),
-             rect_(width, height) {
+             rect_({lt_corner[0], lt_corner[1]}, {width, height}) {
             rect_.SetFillColor(kInfoTableColor);
             object_ = object;
         };
@@ -117,11 +118,11 @@ class InfoTable : public Widget {
             std::string str;
             str.append(kColorFieldStartStr);
             char num[kNumLenInfoTable] = "";
-            sprintf(num, "%x%x", uint8_t(color[0] / kHexBase), uint8_t(uint8_t(color[0]) % kHexBase));
+            sprintf(num, "%x%x", uint8_t(color.r / kHexBase), uint8_t(uint8_t(color.r) % kHexBase));
             str.append(num);
-            sprintf(num, "%x%x", uint8_t(color[1] / kHexBase), uint8_t(uint8_t(color[1]) % kHexBase));
+            sprintf(num, "%x%x", uint8_t(color.g / kHexBase), uint8_t(uint8_t(color.g) % kHexBase));
             str.append(num);
-            sprintf(num, "%x%x", uint8_t(color[2] / kHexBase), uint8_t(uint8_t(color[2]) % kHexBase));
+            sprintf(num, "%x%x", uint8_t(color.b / kHexBase), uint8_t(uint8_t(color.b) % kHexBase));
             str.append(num);
 
             return str;
@@ -157,19 +158,20 @@ class InfoTable : public Widget {
             return str;
         };
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            rect_.SetPosition(Widget::GetLTCornerAbs());
-            window->Draw(rect_);
-            text_type_.Draw(window);
+        virtual void Redraw() override {
+            rect_.SetPosition(Coordinates(2));
+            texture->Draw(rect_);
+            text_type_.Redraw();
             text_center_.SetText(CoordinatesToStr(object_->GetCenterCoordinates()));
-            text_center_.Draw(window);
-            text_color_.Draw(window);
+            text_center_.Redraw();
+            text_color_.Redraw();
             text_coeff_reflection_.SetText(CoeffReflectionToStr(object_->GetCoeffReflection()));
-            text_coeff_reflection_.Draw(window);
+            text_coeff_reflection_.Redraw();
             text_coeff_refraction_.SetText(CoeffRefractionToStr(object_->GetCoeffRefraction()));
-            text_coeff_refraction_.Draw(window);
+            text_coeff_refraction_.Redraw();
             text_coeff_absorption_.SetText(CoeffAbsorptionToStr(object_->GetCoeffAbsorption()));
-            text_coeff_absorption_.Draw(window);
+            text_coeff_absorption_.Redraw();
+            Widget::Redraw();
         };
 };
 

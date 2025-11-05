@@ -90,47 +90,47 @@ int main() {
 //     }
 
     std::vector<Widget*> desktop_children;
-    desktop_children.push_back(new SceneManager(Coordinates(2, 120, 0), 800, 410, objects));
+    desktop_children.push_back(new SceneManager(Coordinates(2, 120, 0), 800, 410, objects, NULL));
     SceneManager* scene_manager = dynamic_cast<SceneManager*>(desktop_children.back());
     MoveButton buttons[6] = {
-        MoveButton(Button(Coordinates(2, 5, 5), 50, 40, "X+", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 5, 5), 50, 40, "X+", kFontFileNameScrollBar, NULL,  NULL, kColorButtons, kColorButtons),
                    Coordinates(3, 100, 0, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 65, 5), 50, 40, "X-", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 65, 5), 50, 40, "X-", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                    Coordinates(3, -100, 0, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 50), 50, 40, "Y+", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 5, 50), 50, 40, "Y+", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                    Coordinates(3, 0, 100, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 65, 50), 50, 40, "Y-", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 65, 50), 50, 40, "Y-", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                    Coordinates(3, 0, -100, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 95), 50, 40, "Z+", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 5, 95), 50, 40, "Z+", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                    Coordinates(3, 0, 0, 100),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 65, 95), 50, 40, "Z-", kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+        MoveButton(Button(Coordinates(2, 65, 95), 50, 40, "Z-", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                    Coordinates(3, 0, 0, -100),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
     };
 
     CoeffChangingButton coeff_changing_buttons[6] = {
         CoeffChangingButton(Button(Coordinates(2, 5, 230), 110, 25, "Reflect +",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 5, 260), 110, 25, "Reflect -",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, -0.1),
         CoeffChangingButton(Button(Coordinates(2, 5, 290), 110, 25, "Refract +",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 5, 320), 110, 25, "Refract -",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, -0.1),
         CoeffChangingButton(Button(Coordinates(2, 5, 350), 110, 25, "Absorb +",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 5, 380), 110, 25, "Absorb -",
-                        kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                         [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, -0.1),
     };
 
@@ -142,10 +142,10 @@ int main() {
     }
 
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 140), 110, 40, "Del",
-                               kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                                [scene_manager](){scene_manager->DeleteCurrentObject();}));
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 185), 110, 40, "Add",
-                               kFontFileNameScrollBar, NULL, kColorButtons, kColorButtons),
+                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
 
     size_t buttons_coeff_num = sizeof(coeff_changing_buttons) / sizeof(coeff_changing_buttons[0]);
@@ -153,7 +153,7 @@ int main() {
         buttons_on_panel.push_back(new CoeffChangingButton(coeff_changing_buttons[i]));
     }
 
-    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 0), 120, 410, &buttons_on_panel));
+    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 0), 120, 410, NULL, &buttons_on_panel));
 
     scene_manager->AddChild(new ListObjectsTitle(Coordinates(2, 0, 410), scene_manager->GetObjectsVec(),
                                 [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));

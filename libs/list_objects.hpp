@@ -50,15 +50,15 @@ class ListObjects : public WidgetContainer {
 
     public:
         explicit ListObjects(const Coordinates& lt_corner, const std::vector<Object*>& objects,
-                             std::function<void(size_t)> action)
-                    :WidgetContainer(lt_corner, kWidth, kHeight), objects_(objects),
-                     action_(action), rect_(kWidth, kHeight) {
+                             std::function<void(size_t)> action, hui::State* state = NULL)
+                    :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects),
+                     action_(action), rect_({lt_corner[0], lt_corner[1]}, {kWidth, kHeight}) {
             rect_.SetFillColor(kListColor);
             start_index_ = 0;
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects.size()); idx++) {
                 WidgetContainer::AddChild(new Button(Coordinates(2, 0, idx * kHeight / kMaxNumLines),
                                                      kWidth - kScrollBarWidth, kHeight / kMaxNumLines,
-                                                     ObjectInList(idx), kFontFileNameListObject, this,
+                                                     ObjectInList(idx), kFontFileNameListObject, state, this,
                                                      kElemInListColor, kElemInListColor));
             }
             collected_delta_ = 0;
@@ -66,7 +66,7 @@ class ListObjects : public WidgetContainer {
             WidgetContainer::AddChild(new ScrollBar(Coordinates(2, lt_corner[0] + kWidth - kScrollBarWidth, 0),
                                         kScrollBarWidth, kHeight,
                                         (kHeight - 2 * kArrowScrollBarHeight)
-                                        * WidgetContainer::GetChildrenNum() / objects.size(),
+                                        * WidgetContainer::GetChildrenNum() / objects.size(), state,
                                         [this, objects](float delta){
                                             float& collected_delta = this->GetCollectedDelta();
                                             int64_t idx_delta =
@@ -117,15 +117,15 @@ class ListObjects : public WidgetContainer {
         #undef CASE_TYPE_STRING_
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             for (size_t idx = 0; idx < WidgetContainer::GetChildrenNum() - 1; idx++) {
-                if (WidgetContainer::GetChild(idx)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget)) {
+                if (WidgetContainer::GetChild(idx)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
                     action_(idx + start_index_);
                     return true;
                 }
             }
             return WidgetContainer::GetChild
-                    (WidgetContainer::GetChildrenNum() - 1)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget);
+                    (WidgetContainer::GetChildrenNum() - 1)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc());
         };
 
         void ShiftStartIndex(int64_t shift) {
@@ -149,9 +149,10 @@ class ListObjects : public WidgetContainer {
             }
         };
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            rect_.SetPosition(Widget::GetLTCornerAbs());
-            window->Draw(rect_);
+        virtual void Redraw() override {
+            rect_.SetPosition(Coordinates(3));
+
+            texture->Draw(rect_);
 
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects_.size()); idx++) {
                 (dynamic_cast<Button*>(WidgetContainer::GetChild(idx)))->SetText(ObjectInList(start_index_ + idx));
@@ -160,7 +161,16 @@ class ListObjects : public WidgetContainer {
                 (dynamic_cast<Button*>(WidgetContainer::GetChild(idx)))->SetText("");
             }
 
-            WidgetContainer::Draw(window);
+            WidgetContainer::Redraw();
+        };
+
+        virtual void SetState(hui::State* state_) {
+            state = state_;
+            size_t texts_num = texts_.size();
+            for (size_t i = 0; i < texts_num; i++) {
+                texts_[i].SetState(state_);
+            }
+            WidgetContainer::SetState(state_);
         };
 };
 
@@ -174,20 +184,21 @@ class ListObjectsTitle : public Widget {
 
     public:
         explicit ListObjectsTitle(const Coordinates& lt_corner, const std::vector<Object*>& objects,
-                                  std::function<void(size_t)> action)
-            :Widget(lt_corner, kWidth, kListObjectsTitleHeight),
+                                  std::function<void(size_t)> action, hui::State* state = NULL)
+            :Widget(lt_corner, kWidth, kListObjectsTitleHeight, state),
              list_(Coordinates(2, 0, kListObjectsTitleHeight), objects, action),
-             text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight / kTextScaleTitleHeight, this, kListObjectsTitleStr, kFontFileNameListObject),
+             text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight / kTextScaleTitleHeight,
+                   state, this, kListObjectsTitleStr, kFontFileNameListObject),
              button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight, kListObjectsTitleHeight,
-             kListTitleHeightClosedButtonText, kFontFileNameListObject, this, kListArrowColor, kListArrowColor),
-             rect_(kWidth, kListObjectsTitleHeight) {
+             kListTitleHeightClosedButtonText, kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
+             rect_({lt_corner[0], lt_corner[1]}, {kWidth, kListObjectsTitleHeight}) {
             opened_ = false;
             rect_.SetFillColor(kListColor);
             list_.SetParent(this);
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
                 if (opened_) {
                     opened_ = false;
                     button_.SetText(kListTitleHeightClosedButtonText);
@@ -198,11 +209,11 @@ class ListObjectsTitle : public Widget {
                 return true;
             }
 
-            if ((opened_) && (list_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), widget))) {
+            if ((opened_) && (list_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc()))) {
                 return true;
             }
 
-            return Widget::OnMousePress(mouse_pos, widget);
+            return Widget::OnMousePress(mouse_pos);
         };
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
@@ -227,16 +238,23 @@ class ListObjectsTitle : public Widget {
             return false;
         };
 
-        virtual void Draw(graphics::RenderWindow* window) override {
-            rect_.SetPosition(Widget::GetLTCornerAbs());
-            window->Draw(rect_);
-
-            button_.Draw(window);
-            text_.Draw(window);
+        virtual void Redraw() override {
+            rect_.SetPosition(Coordinates(2, 0, 0));
+            texture->Draw(rect_);
+            button_.Redraw();
+            text_.Redraw();
             if(opened_) {
-                list_.Draw(window);
+                list_.Redraw();
             }
         };
+
+        virtual void SetState(hui::State* state_) {
+            state = state_;
+            list_.SetState(state);
+            text_.SetState(state);
+            button_.SetState(state);
+        };
+
 };
 
 #endif // LIST_OBJECTS_HPP

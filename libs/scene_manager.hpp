@@ -16,7 +16,7 @@
 
 #include "vector.hpp"
 #include "info_table.hpp"
-#include "list_objects.hpp"
+// #include "list_objects.hpp"
 
 #include "border.hpp"
 
@@ -123,7 +123,7 @@ class Mueue : public std::stack<T> {
 
 class SceneManager : public WidgetContainer {
     private:
-        graphics::VertexArray vertices_;
+        graphics::Image image_;
 
         std::vector<Object*> objects_;
 
@@ -138,8 +138,8 @@ class SceneManager : public WidgetContainer {
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
-                     const std::vector<Object*> objects)
-            :WidgetContainer(lt_corner, width, height), vertices_(width * height),
+                     const std::vector<Object*> objects, hui::State* state)
+            :WidgetContainer(lt_corner, width, height, state), image_(width, height),
              eye_(Coordinates(start_eye_pos),
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
@@ -187,7 +187,7 @@ class SceneManager : public WidgetContainer {
         virtual bool OnArrowLeft() override;
         virtual bool OnArrowRight() override;
 
-        virtual void Draw(graphics::RenderWindow* window) override;
+        virtual void Redraw() override;
 
         void MoveCurrentObject(const Coordinates& move_direction_) const {
             if (cur_object_idx_ >= objects_.size()) {
@@ -240,7 +240,7 @@ class SceneManager : public WidgetContainer {
             cur_object_idx_ = idx;
             table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
                                     kInfoTableWidth, Widget::GetHeight(),
-                                    objects_[cur_object_idx_], this);
+                                    objects_[cur_object_idx_], state, this);
             cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
             objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
             objects_.push_back(objects_[cur_object_idx_]->GetBorder());
@@ -306,7 +306,7 @@ class SceneManager : public WidgetContainer {
             cur_object_color_ = cur_object_color_ + color;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
@@ -317,7 +317,7 @@ class SceneManager : public WidgetContainer {
                 && (loc_coordinates[1] > 0)
                 && (loc_coordinates[0] < width)
                 && (loc_coordinates[1] < height)) {
-                *widget = NULL;
+                state->target_widget_ = NULL;
 
                 float coeff = -1;
 
@@ -334,7 +334,7 @@ class SceneManager : public WidgetContainer {
                                      coeff, tmp);
 
                 if (cur_object_idx_ == tmp) {
-                    return Widget::OnMousePress(mouse_pos, widget);;
+                    return Widget::OnMousePress(mouse_pos);;
                 }
 
                 if (coeff < 0) {
@@ -346,7 +346,7 @@ class SceneManager : public WidgetContainer {
                         delete table_;
                         table_ = NULL;
                     }
-                    return Widget::OnMousePress(mouse_pos, widget);
+                    return Widget::OnMousePress(mouse_pos);
                 } else {
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
@@ -364,7 +364,7 @@ class SceneManager : public WidgetContainer {
                     cur_object_idx_ = tmp;
                     table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
                                            kInfoTableWidth, Widget::GetHeight(),
-                                           objects_[cur_object_idx_], this);
+                                           objects_[cur_object_idx_], state, this);
                     cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
                     objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
                     objects_.push_back(objects_[cur_object_idx_]->GetBorder());
@@ -374,8 +374,8 @@ class SceneManager : public WidgetContainer {
                 return true;
             }
 
-            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos, widget)
-                                    : WidgetContainer::GetChild(kListIdx)->OnMousePress(loc_coordinates, widget);
+            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos)
+                                    : WidgetContainer::GetChild(kListIdx)->OnMousePress(loc_coordinates);
         };
 
     private:

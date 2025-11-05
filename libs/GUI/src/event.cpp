@@ -67,7 +67,7 @@ hui::EventResult hui::KeyPressed::Apply(hui::Widget &widget) {
     }
 }
 
-hui::EventResult hui::KeyPressed::Apply(hui::Widget &widget) {
+hui::EventResult hui::IdleEvent::Apply(hui::Widget &widget) {
     if ((dynamic_cast<::Widget&>(widget)).OnIdle()) {
         return hui::EventResult::HANDLED;
     }

@@ -33,6 +33,7 @@ RendererError UI::ShowWindow() {
             AnalyzeKey(event);
         }
 
+
         WidgetContainer::OnIdle();
 
         start_time = end_time;

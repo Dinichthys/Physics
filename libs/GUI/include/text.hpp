@@ -11,9 +11,12 @@ class Text : public Widget {
 
     public:
         explicit Text(const Coordinates& lt_corner, float width, float height,
-                      Widget* parent = NULL, hui::State* state = NULL,
+                      hui::State* state, Widget* parent = NULL,
                       const std::string& text = "", const std::string& font_file_name = "")
             :Widget(lt_corner, width, height, state, parent), text_(text, font_file_name, height) {};
+
+        explicit Text(const Text& other)
+            :Widget(other), text_(other.text_) {};
 
         virtual void Redraw() override {
             texture->Draw(text_);

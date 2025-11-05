@@ -15,10 +15,10 @@ namespace graphics {
 
     static const float kMaxColor = 255;
 
-    class Color : public dr4::Color {
+    class Color : public dr4::Color, public Coordinates {
         public:
             explicit Color(float red = 0, float green = 0, float blue = 0, float brightness = kMaxColor)
-                :dr4::Color(red, green, blue, brightness) {
+                :dr4::Color(red, green, blue, brightness), Coordinates(3, red, green, blue) {
                 a = (brightness > kMaxColor) ? kMaxColor : brightness;
                 if (red > kMaxColor) {
                     r = kMaxColor;
@@ -34,10 +34,11 @@ namespace graphics {
             explicit Color(const Coordinates& coors)
                 :dr4::Color(coors.Clump(0, kMaxColor)[0],
                             coors.Clump(0, kMaxColor)[1],
-                            coors.Clump(0, kMaxColor)[2], kMaxColor) {};
+                            coors.Clump(0, kMaxColor)[2], kMaxColor),
+                 Coordinates(coors) {};
 
             explicit Color(const dr4::Color& color)
-                :dr4::Color(color) {};
+                :dr4::Color(color), Coordinates(color.r, color.g, color.b) {};
 
             uint8_t GetRedPart() const {return r;};
             uint8_t GetGreenPart() const {return g;};
@@ -55,9 +56,15 @@ namespace graphics {
             };
 
             Color operator * (float val) const {
-                return Color(GetRedPart()    * val,
-                             GetGreenPart()  * val,
-                             GetBluePart()   * val);
+                return Color(GetRedPart()   * val,
+                             GetGreenPart() * val,
+                             GetBluePart()  * val);
+            };
+
+            Color operator / (float val) const {
+                return Color(GetRedPart()   / val,
+                             GetGreenPart() / val,
+                             GetBluePart()  / val);
             };
     };
 
@@ -181,8 +188,9 @@ namespace graphics {
 
         public:
             explicit Texture(float width, float height);
+            explicit Texture(const Texture& other);
 
-            virtual ~Texture() {};
+            virtual ~Texture();
 
             virtual void SetSize(dr4::Vec2f size) override;
             virtual dr4::Vec2f GetSize() const override;

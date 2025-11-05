@@ -30,7 +30,7 @@ class UI : public WidgetContainer {
     public:
         explicit UI(unsigned int width, unsigned int height,
                      const std::vector<Widget*>& children, const char* window_name = kWindowName)
-            :WidgetContainer(Coordinates(2, 0, 0), width, height),
+            :WidgetContainer(Coordinates(2, 0, 0), width, height, &state_),
               window(width, height, window_name) {
             std::vector<Widget*>& children_ = WidgetContainer::GetChildren();
 
@@ -42,6 +42,7 @@ class UI : public WidgetContainer {
 
             state_.hovered_widget_ = NULL;
             state_.target_widget_ = NULL;
+            state = &state_;
 
             WidgetContainer::SetParentToChildren();
         };
@@ -55,8 +56,6 @@ class UI : public WidgetContainer {
         RendererError ShowWindow();
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            ASSERT(widget != NULL, "");
-
             WidgetContainer::OnMousePress(mouse_pos);
 
             state->target_widget_ = (state->target_widget_ == this) ? NULL : state->target_widget_;

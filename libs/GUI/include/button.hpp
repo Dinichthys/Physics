@@ -32,8 +32,8 @@ class Button : public WidgetContainer {
     public:
         explicit Button(const Button& other)
             :WidgetContainer(other), button_background_(other.relPos, {other.GetWidth(), other.GetHeight()}) {
-            pressed_ = other.GetPressedInfo();
 
+            pressed_ = other.GetPressedInfo();
             pressed_color_ = other.GetPressedColor();
             released_color_ = other.GetReleasedColor();
 
@@ -50,10 +50,10 @@ class Button : public WidgetContainer {
 
         explicit Button(const Coordinates& lt_corner, float width, float height,
                         const std::string& text = "", const std::string& file_name = "",
-                        Widget* parent = NULL,
+                        hui::State* state = NULL, Widget* parent = NULL,
                         graphics::Color pressed_color = kPressedColor,
                         graphics::Color released_color = kReleaseColor)
-            :WidgetContainer(lt_corner, width, height),
+            :WidgetContainer(lt_corner, width, height, state),
              button_background_({lt_corner[0], lt_corner[1]}, {width, height}),
              pressed_color_(pressed_color), released_color_(released_color) {
             pressed_ = false;
@@ -63,7 +63,8 @@ class Button : public WidgetContainer {
                                                             Coordinates(2,
                                                             width * kTextInButtonShiftHor,
                                                             - height * kTextInButtonShiftVer),
-                                                            width, height / kButtonTextScale, this, text, file_name));
+                                                            width, height / kButtonTextScale, state, this,
+                                                            text, file_name));
                 if (WidgetContainer::GetChildren().back() == NULL) {
                     throw std::runtime_error("Bad allocation for text");
                 }
@@ -73,12 +74,12 @@ class Button : public WidgetContainer {
             WidgetContainer::SetParentToChildren();
         };
 
-        virtual void SetSize(float width, float height) override {
-            Widget::SetSize(width, height);
+        virtual void SetSize(dr4::Vec2f size) override {
+            Widget::SetSize(size);
             if (WidgetContainer::GetChildrenNum() != 0) {
-                WidgetContainer::GetChild(0)->SetSize(width, height);
+                WidgetContainer::GetChild(0)->SetSize(size);
             };
-            button_background_.SetSize(width, height);
+            button_background_.SetSize(size.x, size.y);
         };
 
         void SetText(const std::string& text_str) {
@@ -96,8 +97,6 @@ class Button : public WidgetContainer {
         graphics::Color GetReleasedColor() const {return released_color_;};
 
         virtual void Redraw() override {
-            ASSERT(window != NULL, "");
-
             graphics::Color color = (Button::GetPressedInfo()) ? pressed_color_ : released_color_;
 
             if (Widget::GetHovered()) {
@@ -160,7 +159,7 @@ class PanelControl : public WidgetContainer {
         };
 
         explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
-                              hui::State* state,
+                              hui::State* state = NULL,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
             :WidgetContainer(lt_corner, width, height, state, buttons),
              background_({lt_corner[0], lt_corner[1]}, {width, height}) {

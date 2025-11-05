@@ -14,16 +14,14 @@ class MoveButton : public Button {
     public:
         explicit MoveButton(const Button& button, const Coordinates& move_direction,
                             const std::function<void(const Coordinates&)>& action)
-            :Button(button), move_direction_(move_direction), action_(action) {
-
-        };
+            :Button(button), move_direction_(move_direction), action_(action) {};
 
         virtual void Action(const SceneManager* scene_manager) {
             scene_manager->MoveCurrentObject(move_direction_);
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            if (!Button::OnMousePress(mouse_pos, widget)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (!Button::OnMousePress(mouse_pos)) {
                 return false;
             }
             action_(move_direction_);
@@ -39,8 +37,8 @@ class ExistenceButton : public Button {
         explicit ExistenceButton(const Button& button, const std::function<void(void)>& action)
             :Button(button), action_(action) {};
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            if (!Button::OnMousePress(mouse_pos, widget)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (!Button::OnMousePress(mouse_pos)) {
                 return false;
             }
             action_();
@@ -59,8 +57,8 @@ class CoeffChangingButton : public Button {
             delta_ = delta;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos, Widget** widget) override {
-            if (!Button::OnMousePress(mouse_pos, widget)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (!Button::OnMousePress(mouse_pos)) {
                 return false;
             }
             action_(delta_);
