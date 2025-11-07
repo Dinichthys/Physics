@@ -163,6 +163,9 @@ class InfoTable : public Widget {
 
         void SetObject(const Object* object) {
             object_ = object;
+            if (object == NULL) {
+                return;
+            }
             text_color_.SetText(ColorToStr(colors::Color(object_->GetColor())));
             text_type_.SetText(TypeToStr(object_->GetType()));
         };

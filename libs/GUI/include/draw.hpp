@@ -17,7 +17,7 @@
 static const unsigned int kStartHeight = 720;
 static const unsigned int kStartWidth = 1080;
 static const char* const kWindowName = "Window";
-static const char* const kBackendFileName = "./plugins/build/libbackend.so";
+static const char* const kBackendFileName = "./plugins/MyDR4Backend/build/libbackend.so";
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
 static const size_t kCharacterSize = 100;
 

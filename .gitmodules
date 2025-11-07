@@ -10,3 +10,6 @@
 [submodule "plugins/Egor_dr4_backend"]
 	path = plugins/Egor_dr4_backend
 	url = https://github.com/NeIIor/sfml-dr4-backend.git
+[submodule "plugins/MyDR4Backend"]
+	path = plugins/MyDR4Backend
+	url = https://github.com/Dinichthys/DR4Backend.git
