@@ -1,32 +1,27 @@
 cmake_minimum_required (VERSION 3.20)
-project (scrollbar CXX)
+project (backend CXX)
 
 add_library (${PROJECT_NAME} SHARED
-    plug.cpp
-    ../libs/GUI/src/scrollbar.cpp
-    ../libs/GraphLib/src/graphics_sfml.cpp
+    GraphLib/src/dr4_backend.cpp
+    GraphLib/src/graphics_sfml.cpp
 )
 
 target_include_directories (${PROJECT_NAME}
     PRIVATE
-        ../libs
-        ../libs/GUI/include
-        ../libs/GraphLib/include
+        GraphLib/include
         ../libs/geometry/include
         ../libs/MyLib
         ../libs/MyLib/Logger
         ../libs/MyLib/Assert
         ../libs/MyLib/My_stdio
+        ../libs/mipt-ded-zemax/include
 )
 
-find_package(OpenMP REQUIRED)
 target_link_libraries (${PROJECT_NAME}
     PRIVATE
         sfml-system
         sfml-window
         sfml-graphics
-
-        OpenMP::OpenMP_CXX
 )
 
 target_compile_features (${PROJECT_NAME}

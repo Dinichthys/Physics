@@ -1,8 +1,12 @@
 #ifndef DRAW_HPP
 #define DRAW_HPP
 
+#include <dlfcn.h>
+#include <stdexcept>
+
 #include "colors.hpp"
-#include "graphics.hpp"
+
+#include "misc/dr4_ifc.hpp"
 
 #include "widget.hpp"
 #include "vector.hpp"
@@ -12,6 +16,7 @@
 static const unsigned int kStartHeight = 720;
 static const unsigned int kStartWidth = 1080;
 static const char* const kWindowName = "Window";
+static const char* const kBackendFileName = "./plugins/build/libbackend.so";
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
 static const size_t kCharacterSize = 100;
 
@@ -25,17 +30,18 @@ enum RendererError {
 
 class UI : public WidgetContainer {
     private:
-        dr4::Window* window;
+        dr4::Window* const window_;
         hui::State state_;
+        dr4::DR4Backend* backend_;
 
     public:
-        explicit UI(unsigned int width, unsigned int height,
+        explicit UI(float width, float height,
                      const std::vector<Widget*>& children, const char* window_name = kWindowName)
             :WidgetContainer(Coordinates(2, 0, 0), width, height, NULL),
-              window(new graphics::RenderWindow(width, height, window_name)) {
+             window_(CreateWindow({width, height}, window_name)) {
             state_.hovered_widget_ = NULL;
             state_.target_widget_ = NULL;
-            state_.window_ = window;
+            state_.window_ = window_;
             state = &state_;
 
             Widget::SetState(&state_);
@@ -51,10 +57,11 @@ class UI : public WidgetContainer {
         };
 
         ~UI() {
-            if (window->IsOpen()) {
-                window->Close();
+            if (window_->IsOpen()) {
+                window_->Close();
             }
-            delete window;
+            delete window_;
+            delete backend_;
         };
 
         RendererError ShowWindow();
@@ -69,6 +76,28 @@ class UI : public WidgetContainer {
 
     private:
         RendererError AnalyzeKey(const dr4::Event& event);
+
+        dr4::Window* CreateWindow(const dr4::Vec2f& size, const char* name) {
+            void* dll = dlopen(kBackendFileName, RTLD_NOW | RTLD_NODELETE);
+            if (dll == NULL) {
+                throw std::runtime_error("Can't upload dll with backend\n");
+            }
+
+            typedef dr4::DR4Backend* (*CreateBackend_t) ();
+
+            CreateBackend_t CreateBackend = (CreateBackend_t) dlsym(dll, dr4::DR4BackendFunctionName);
+            if (CreateBackend == NULL) {
+                throw std::runtime_error("Can't find function for backend creation in dll\n");
+            }
+            dlclose(dll);
+
+            backend_ = CreateBackend();
+
+            dr4::Window* window = backend_->CreateWindow();
+            window->SetSize(size);
+            window->SetTitle(name);
+            return window;
+        }
 };
 
 const char* ErrorHandler(enum RendererError error);

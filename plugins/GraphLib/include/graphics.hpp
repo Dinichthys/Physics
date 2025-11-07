@@ -210,6 +210,9 @@ namespace graphics {
             void* GetTexture() const {return texture_;};
     };
 
+    const size_t kStartWindowWidth = 720;
+    const size_t kStartWindowHeight = 480;
+
     class RenderWindow : public dr4::Window {
         private:
             std::string title_;
@@ -220,7 +223,7 @@ namespace graphics {
             float height_;
 
         public:
-            explicit RenderWindow(size_t width, size_t height, const char* window_name);
+            explicit RenderWindow(size_t width = kStartWindowWidth, size_t height = kStartWindowHeight, const char* window_name = "");
 
             ~RenderWindow();
 

@@ -467,6 +467,8 @@ namespace graphics {
         width_ = size.x;
         height_ = size.y;
         ((sf::RenderWindow*)window_)->setSize({(unsigned int)width_, (unsigned int)height_});
+        ((sf::RenderWindow*)window_)->setView(sf::View({width_ / 2, height_ / 2},
+                                                       {width_,     height_    }));
     }
 
     void RenderWindow::SetTitle(const std::string &title) {

@@ -11,9 +11,6 @@ add_executable (${PROJECT_NAME}
     libs/GUI/src/draw.cpp
     libs/GUI/src/event.cpp
     libs/GUI/src/scrollbar.cpp
-
-    libs/GraphLib/src/graphics_sfml.cpp
-
     libs/geometry/src/vector.cpp
     libs/geometry/src/matrix.cpp
     libs/MyLib/Logger/logging.cpp
@@ -25,9 +22,6 @@ target_include_directories (${PROJECT_NAME}
         libs
         libs/GUI/include
         libs/GUI/graphics
-
-        libs/GraphLib/include
-
         libs/geometry/include
         libs/MyLib
         libs/MyLib/Logger
@@ -36,14 +30,9 @@ target_include_directories (${PROJECT_NAME}
         libs/mipt-ded-zemax/include
 )
 
-find_package(OpenMP REQUIRED)
 target_link_libraries (${PROJECT_NAME}
     PRIVATE
-        sfml-system
-        sfml-window
-        sfml-graphics
-
-        OpenMP::OpenMP_CXX
+        -ldl
 )
 
 target_compile_features (${PROJECT_NAME}

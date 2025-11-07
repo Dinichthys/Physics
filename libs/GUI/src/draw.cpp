@@ -21,11 +21,13 @@ RendererError UI::ShowWindow() {
 
     dr4::Event event;
     std::optional<dr4::Event> event_opt;
-    while (window->IsOpen()) {
-        if ((event_opt = window->PollEvent()).has_value()) {
+    while (window_->IsOpen()) {
+        if ((event_opt = window_->PollEvent()).has_value()) {
             event = event_opt.value();
             if (event.type == dr4::Event::Type::QUIT) {
-                window->Close();
+                if (window_->IsOpen()) {
+                    window_->Close();
+                }
                 break;
             }
             AnalyzeKey(event);
@@ -44,11 +46,11 @@ RendererError UI::ShowWindow() {
 
             WidgetContainer::Redraw();
 
-            window->Draw(*texture, {0, 0});
+            window_->Draw(*texture, {0, 0});
 
             texture->Clear(dr4::Color(0, 0, 0, 255));
 
-            window->Display();
+            window_->Display();
         }
     }
 
