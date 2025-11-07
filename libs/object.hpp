@@ -8,7 +8,7 @@
 
 #include "object_info.hpp"
 
-static const graphics::Color kIBase(19, 19, 19);
+static const colors::Color kIBase(19, 19, 19);
 static const float kAirCoeffRefraction = 1;
 static const float kNormModule = 1;
 
@@ -25,11 +25,11 @@ class Border;
 class Object : public ObjectInfo{
     private:
         Coordinates center_;
-        graphics::Color color_;
+        colors::Color color_;
 
     public:
         explicit Object(const Coordinates& center, const ObjectInfo& info,
-                        const graphics::Color& color = kIBase)
+                        const colors::Color& color = kIBase)
             :ObjectInfo(info), center_(center), color_(color) {};
 
         virtual ~Object() {};
@@ -38,7 +38,7 @@ class Object : public ObjectInfo{
         virtual void SetCenterCoordinates(const Coordinates& center) {center_ = center;};
 
         virtual Coordinates GetColor() const {return Coordinates(3, color_.r, color_.g, color_.b);};
-        virtual void SetColor(graphics::Color color) {color_ = color;};
+        virtual void SetColor(colors::Color color) {color_ = color;};
 
         virtual void Move(const Coordinates& move_direction) {
             center_ = center_ + move_direction;

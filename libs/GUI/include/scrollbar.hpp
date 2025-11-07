@@ -22,9 +22,9 @@ static const std::string kArrowLeftStr = "<";
 static const float kArrowScrollBarHeight = 20.f;
 static const float kDeltaArrow = 10;
 
-static const graphics::Color kThumbColor = graphics::Color(85, 85, 89);
-static const graphics::Color kScrollBarColor = graphics::Color(56, 56, 59);
-static const graphics::Color kArrowsColor = graphics::Color(140, 140, 140);
+static const colors::Color kThumbColor = colors::Color(85, 85, 89);
+static const colors::Color kScrollBarColor = colors::Color(56, 56, 59);
+static const colors::Color kArrowsColor = colors::Color(140, 140, 140);
 
 class ScrollBar;
 

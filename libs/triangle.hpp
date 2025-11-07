@@ -53,7 +53,7 @@ class TrianglesSet : public Object {
 
     public:
         explicit TrianglesSet(const Coordinates& center, const std::vector<Triangle> triangles,
-                              const graphics::Color& color = kIBase,
+                              const colors::Color& color = kIBase,
                               float coeff_reflection = NAN, float coeff_absorption = NAN,
                               float coeff_refraction = NAN)
             :Object(center, kObjectsInfo.at(kTrianglesSet), color), triangles_(triangles) {

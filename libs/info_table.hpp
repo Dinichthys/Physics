@@ -3,7 +3,8 @@
 
 #include <string>
 
-#include "graphics.hpp"
+#include "colors.hpp"
+
 #include "widget.hpp"
 #include "text.hpp"
 #include "object.hpp"
@@ -28,7 +29,7 @@ static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorb: ";
 static const size_t kNumLenInfoTable = 30;
 static const size_t kHexBase = 16;
 
-static const graphics::Color kInfoTableColor = graphics::Color(30, 30, 32);
+static const colors::Color kInfoTableColor = colors::Color(30, 30, 32);
 
 class InfoTable : public Widget {
     private:
@@ -41,7 +42,7 @@ class InfoTable : public Widget {
 
         const Object* object_;
 
-        graphics::RectangleShape rect_;
+        dr4::Rectangle rect_;
 
     public:
         explicit InfoTable(const Coordinates& lt_corner, float width, float height, const Object* object,
@@ -49,31 +50,30 @@ class InfoTable : public Widget {
                            Widget* parent = NULL)
             :Widget(lt_corner, width, height, state, parent),
              text_type_            (Coordinates(2, 0, 0),
-                                    width, height / kFieldsNum / kTextScale, state,
+                                    width, height / kFieldsNum, state,
                                     this, TypeToStr(object->GetType()),
-                                    kFontFileNameInfoTable),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_center_          (Coordinates(2, 0, height / kFieldsNum),
-                                    width, height / kFieldsNum / kTextScale, state,
+                                    width, height / kFieldsNum, state,
                                     this, CoordinatesToStr(object->GetCenterCoordinates()),
-                                    kFontFileNameInfoTable),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_color_           (Coordinates(2, 0, height / kFieldsNum * 2),
-                                    width, height / kFieldsNum / kTextScale, state,
-                                    this, ColorToStr(graphics::Color(object->GetColor())),
-                                    kFontFileNameInfoTable),
+                                    width, height / kFieldsNum, state,
+                                    this, ColorToStr(colors::Color(object->GetColor())),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_coeff_reflection_(Coordinates(2, 0, height / kFieldsNum * 3),
-                                    width, height / kFieldsNum / kTextScale, state,
+                                    width, height / kFieldsNum, state,
                                     this, CoeffReflectionToStr(object->GetCoeffReflection()),
-                                    kFontFileNameInfoTable),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_coeff_refraction_(Coordinates(2, 0, height / kFieldsNum * 4),
-                                    width, height / kFieldsNum / kTextScale, state,
+                                    width, height / kFieldsNum, state,
                                     this, CoeffRefractionToStr(object->GetCoeffRefraction()),
-                                    kFontFileNameInfoTable),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_coeff_absorption_(Coordinates(2, 0, height / kFieldsNum * 5),
-                                    width, height / kFieldsNum / kTextScale, state,
+                                    width, height / kFieldsNum, state,
                                     this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
-                                    kFontFileNameInfoTable),
-             rect_({lt_corner[0], lt_corner[1]}, {width, height}) {
-            rect_.SetFillColor(kInfoTableColor);
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+             rect_(dr4::Rect2f({0, 0}, {width, height}), kInfoTableColor) {
             object_ = object;
         };
 
@@ -114,7 +114,7 @@ class InfoTable : public Widget {
             return str;
         };
 
-        const std::string ColorToStr(const graphics::Color& color) {
+        const std::string ColorToStr(const colors::Color& color) {
             std::string str;
             str.append(kColorFieldStartStr);
             char num[kNumLenInfoTable] = "";
@@ -158,8 +158,27 @@ class InfoTable : public Widget {
             return str;
         };
 
+        void SetObject(const Object* object) {
+            object_ = object;
+            text_color_.SetText(ColorToStr(colors::Color(object_->GetColor())));
+            text_type_.SetText(TypeToStr(object_->GetType()));
+        };
+
+        void SetState(hui::State* state_) {
+            state = state_;
+            text_type_.SetState(state);
+            text_color_.SetState(state);
+            text_center_.SetState(state);
+            text_coeff_absorption_.SetState(state);
+            text_coeff_reflection_.SetState(state);
+            text_coeff_refraction_.SetState(state);
+            Widget::SetState(state);
+        };
+
         virtual void Redraw() override {
-            rect_.SetPosition(Coordinates(2));
+            if (Widget::GetHidden()) {
+                return;
+            }
             texture->Draw(rect_);
             text_type_.Redraw();
             text_center_.SetText(CoordinatesToStr(object_->GetCenterCoordinates()));

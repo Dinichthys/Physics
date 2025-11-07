@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <chrono>
 
-#include "graphics.hpp"
+#include "colors.hpp"
 
 #include "object.hpp"
 
@@ -13,9 +13,7 @@
 #include "my_assert.h"
 
 RendererError UI::ShowWindow() {
-    graphics::RectangleShape background(relPos, {(float)GetWidth(), (float)GetHeight()});
-    background.SetPosition(Coordinates(2, 0.f, 0.f));
-    background.SetFillColor(kBackgroundColor);
+    dr4::Rectangle background(dr4::Rect2f({0, 0}, {(float)GetWidth(), (float)GetHeight()}), kBackgroundColor);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto start_time = end_time;
@@ -23,11 +21,11 @@ RendererError UI::ShowWindow() {
 
     dr4::Event event;
     std::optional<dr4::Event> event_opt;
-    while (window.IsOpen()) {
-        if ((event_opt = window.PollEvent()).has_value()) {
+    while (window->IsOpen()) {
+        if ((event_opt = window->PollEvent()).has_value()) {
             event = event_opt.value();
             if (event.type == dr4::Event::Type::QUIT) {
-                window.Close();
+                window->Close();
                 break;
             }
             AnalyzeKey(event);
@@ -42,13 +40,15 @@ RendererError UI::ShowWindow() {
         if (kOneSceneUpdateTimeInMicro <= duration) {
             duration = 0;
 
-            window.Draw(background);
+            texture->Draw(background);
 
             WidgetContainer::Redraw();
 
-            window.Draw(*texture, {0, 0});
+            window->Draw(*texture, {0, 0});
 
-            window.Display();
+            texture->Clear(dr4::Color(0, 0, 0, 255));
+
+            window->Display();
         }
     }
 
@@ -57,7 +57,6 @@ RendererError UI::ShowWindow() {
 
 RendererError UI::AnalyzeKey(const dr4::Event& event) {
     static Coordinates mouse_pos(2, 0, 0);
-    static Widget* moving_window = NULL;
 
     switch(event.type) {
         case(dr4::Event::Type::MOUSE_DOWN) : {
@@ -87,11 +86,11 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
             mouse_pos.SetCoordinate(0, event.mouseMove.pos.x);
             mouse_pos.SetCoordinate(1, event.mouseMove.pos.y);
 
-            if (moving_window == NULL) {
+            if (state_.target_widget_ == NULL) {
                 break;
             }
 
-            moving_window->OnMouseMove(mouse_pos[0] - old_x, mouse_pos[1] - old_y);
+            dynamic_cast<::Widget*>(state_.target_widget_)->OnMouseMove(mouse_pos[0] - old_x, mouse_pos[1] - old_y);
 
             break;
         }
@@ -108,10 +107,6 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
     }
 
     return kDoneRenderer;
-}
-
-void UI::GetMousePosition(Coordinates& mouse_pos) {
-    mouse_pos = window.GetMousePos();
 }
 
 const char* ErrorHandler(enum RendererError error) {

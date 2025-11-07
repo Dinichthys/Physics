@@ -4,7 +4,7 @@
 #include "button.hpp"
 #include "scene_manager.hpp"
 
-static const graphics::Color kColorButtons = graphics::Color(214, 158, 70);
+static const colors::Color kColorButtons = colors::Color(214, 158, 70);
 
 class MoveButton : public Button {
     private:

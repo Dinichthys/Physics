@@ -16,14 +16,14 @@
 
 static const std::string kFontFileNameListObject = "data/font.ttf";
 static const std::string kListObjectsTitleStr = "Objects";
-static const std::string kListTitleHeightClosedButtonText = "\\/";
-static const std::string kListTitleHeightOpenedButtonText = "/\\";
+static const std::string kListTitleHeightClosedButtonText = " \\/";
+static const std::string kListTitleHeightOpenedButtonText = " /\\";
 
-static const graphics::Color kElemInListColor = graphics::Color(90, 75, 60);
+static const colors::Color kElemInListColor = colors::Color(90, 75, 60);
 
-static const graphics::Color kListColor = graphics::Color(62, 62, 66);
+static const colors::Color kListColor = colors::Color(62, 62, 66);
 
-static const graphics::Color kListArrowColor = graphics::Color(180, 180, 180);
+static const colors::Color kListArrowColor = colors::Color(180, 180, 180);
 
 static const size_t kNumLenListObjects = 30;
 
@@ -33,6 +33,7 @@ static const size_t kWidth = 500;
 static const size_t kHeight = 200;
 static const size_t kListObjectsTitleHeight = 25;
 static const float kTextScaleTitleHeight = 1.2;
+static const float kTextScaleButtons = 1.4;
 
 static const size_t kScrollBarWidth = 10;
 
@@ -45,25 +46,25 @@ class ListObjects : public WidgetContainer {
 
         std::function<void(size_t)> action_;
 
-        graphics::RectangleShape rect_;
+        dr4::Rectangle rect_;
         float collected_delta_;
 
     public:
         explicit ListObjects(const Coordinates& lt_corner, const std::vector<Object*>& objects,
                              std::function<void(size_t)> action, hui::State* state = NULL)
                     :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects),
-                     action_(action), rect_({lt_corner[0], lt_corner[1]}, {kWidth, kHeight}) {
-            rect_.SetFillColor(kListColor);
+                     action_(action), rect_(dr4::Rect2f({0, 0}, {kWidth, kHeight}), kListColor) {
             start_index_ = 0;
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects.size()); idx++) {
                 WidgetContainer::AddChild(new Button(Coordinates(2, 0, idx * kHeight / kMaxNumLines),
                                                      kWidth - kScrollBarWidth, kHeight / kMaxNumLines,
                                                      ObjectInList(idx), kFontFileNameListObject, state, this,
-                                                     kElemInListColor, kElemInListColor));
+                                                     kElemInListColor, kElemInListColor,
+                                                     kHeight / kMaxNumLines / kTextScaleButtons));
             }
             collected_delta_ = 0;
 
-            WidgetContainer::AddChild(new ScrollBar(Coordinates(2, lt_corner[0] + kWidth - kScrollBarWidth, 0),
+            WidgetContainer::AddChild(new ScrollBar(Coordinates(2, kWidth - kScrollBarWidth, 0),
                                         kScrollBarWidth, kHeight,
                                         (kHeight - 2 * kArrowScrollBarHeight)
                                         * WidgetContainer::GetChildrenNum() / objects.size(), state,
@@ -118,6 +119,9 @@ class ListObjects : public WidgetContainer {
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (Widget::GetHidden()) {
+                return false;
+            }
             for (size_t idx = 0; idx < WidgetContainer::GetChildrenNum() - 1; idx++) {
                 if (WidgetContainer::GetChild(idx)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
                     action_(idx + start_index_);
@@ -150,7 +154,9 @@ class ListObjects : public WidgetContainer {
         };
 
         virtual void Redraw() override {
-            rect_.SetPosition(Coordinates(3));
+            if (Widget::GetHidden()) {
+                return;
+            }
 
             texture->Draw(rect_);
 
@@ -176,40 +182,34 @@ class ListObjects : public WidgetContainer {
 
 class ListObjectsTitle : public Widget {
     private:
-        ListObjects list_;
+        ListObjects* list_;
         Text text_;
         Button button_;
-        graphics::RectangleShape rect_;
-        bool opened_;
+        dr4::Rectangle rect_;
 
     public:
-        explicit ListObjectsTitle(const Coordinates& lt_corner, const std::vector<Object*>& objects,
-                                  std::function<void(size_t)> action, hui::State* state = NULL)
+        explicit ListObjectsTitle(const Coordinates& lt_corner, ListObjects* list_objects, hui::State* state = NULL)
             :Widget(lt_corner, kWidth, kListObjectsTitleHeight, state),
-             list_(Coordinates(2, 0, kListObjectsTitleHeight), objects, action),
-             text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight / kTextScaleTitleHeight,
-                   state, this, kListObjectsTitleStr, kFontFileNameListObject),
-             button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight, kListObjectsTitleHeight,
-             kListTitleHeightClosedButtonText, kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
-             rect_({lt_corner[0], lt_corner[1]}, {kWidth, kListObjectsTitleHeight}) {
-            opened_ = false;
-            rect_.SetFillColor(kListColor);
-            list_.SetParent(this);
+             list_(list_objects),
+             text_(Coordinates(2, 0, 0), kWidth, kListObjectsTitleHeight,
+                   state, this, kListObjectsTitleStr, kFontFileNameListObject,
+                   kListObjectsTitleHeight / kTextScaleTitleHeight),
+             button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight,
+                     kListObjectsTitleHeight, kListTitleHeightClosedButtonText,
+                     kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
+             rect_(dr4::Rect2f({0, 0}, {kWidth, kListObjectsTitleHeight}), kListColor) {
+            list_->SetHidden(true);
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
-                if (opened_) {
-                    opened_ = false;
-                    button_.SetText(kListTitleHeightClosedButtonText);
-                } else {
-                    opened_ = true;
+                if (list_->GetHidden()) {
+                    list_->SetHidden(false);
                     button_.SetText(kListTitleHeightOpenedButtonText);
+                } else {
+                    list_->SetHidden(true);
+                    button_.SetText(kListTitleHeightClosedButtonText);
                 }
-                return true;
-            }
-
-            if ((opened_) && (list_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc()))) {
                 return true;
             }
 
@@ -217,9 +217,6 @@ class ListObjectsTitle : public Widget {
         };
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
-            if ((opened_) && (list_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc()))) {
-                return true;
-            }
             if (button_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc())) {
                 return true;
             }
@@ -228,9 +225,6 @@ class ListObjectsTitle : public Widget {
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
-            if ((opened_) && (list_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc()))) {
-                return true;
-            }
             if (button_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc())) {
                 return true;
             }
@@ -239,20 +233,17 @@ class ListObjectsTitle : public Widget {
         };
 
         virtual void Redraw() override {
-            rect_.SetPosition(Coordinates(2, 0, 0));
             texture->Draw(rect_);
             button_.Redraw();
             text_.Redraw();
-            if(opened_) {
-                list_.Redraw();
-            }
+            Widget::Redraw();
         };
 
         virtual void SetState(hui::State* state_) {
             state = state_;
-            list_.SetState(state);
             text_.SetState(state);
             button_.SetState(state);
+            Widget::SetState(state);
         };
 
 };

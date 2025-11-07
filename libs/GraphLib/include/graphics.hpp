@@ -85,6 +85,7 @@ namespace graphics {
 
         public:
             explicit Font();
+            virtual ~Font();
 
             virtual void loadFromFile(const std::string& path) const override;
 
@@ -202,6 +203,10 @@ namespace graphics {
             virtual void Draw(const dr4::Image &img, const dr4::Vec2f &pos) override;
             virtual void Draw(const dr4::Texture &texture, const dr4::Vec2f &pos) override;
 
+            virtual void Display();
+
+            virtual void Clear(const dr4::Color& color);
+
             void* GetTexture() const {return texture_;};
     };
 
@@ -235,6 +240,7 @@ namespace graphics {
 
             virtual dr4::Texture *CreateTexture() override;
             virtual dr4::Image *CreateImage() override;
+            virtual dr4::Font *CreateFont() override;
 
             virtual std::optional<dr4::Event> PollEvent() override;
 

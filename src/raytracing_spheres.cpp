@@ -6,7 +6,7 @@
 #include <stack>
 #include <thread>
 
-#include "graphics.hpp"
+#include "colors.hpp"
 #include "object.hpp"
 #include "circle.hpp"
 
@@ -14,13 +14,6 @@
 #include "my_assert.h"
 
 void SceneManager::Redraw() {
-    if (table_ != NULL) {
-        table_->Redraw();
-        WidgetContainer::Redraw();
-    } else {
-        // WidgetContainer::GetChild(kListIdx)->Redraw();
-    }
-
     size_t width = Widget::GetWidth();
     size_t height = Widget::GetHeight();
 
@@ -39,7 +32,7 @@ void SceneManager::Redraw() {
     t3.join();
     t4.join();
 
-    texture->Draw(image_, {0, 0});
+    texture->Draw(*image_, {0, 0});
     Widget::Redraw();
 }
 
@@ -73,17 +66,17 @@ void SceneManager::DrawPart() {
                 pixel_pos, pixel_pos - eye_pos, coeff, cur_object_idx
             );
             if (coeff < 0) {
-                image_.SetPixel(pos.x, pos.y, kFreeSpaceColor);
+                image_->SetPixel(pos.x, pos.y, kFreeSpaceColor);
                 continue;
             }
             if (object->GetType() == kLight) {
-                image_.SetPixel(pos.x, pos.y, graphics::Color(object->GetColor()));
+                image_->SetPixel(pos.x, pos.y, colors::Color(object->GetColor()));
                 continue;
             }
 
             Coordinates point = pixel_pos + (pixel_pos - eye_pos) * coeff;
 
-            image_.SetPixel(pos.x, pos.y,
+            image_->SetPixel(pos.x, pos.y,
                                     GetPointColor(
                                         point, eye_pos, cur_object_idx, kColorCountingDepth
                                     ));
@@ -110,14 +103,14 @@ Object* SceneManager::GetPointIntersection(const Coordinates& pixel_pos, const C
     return object;
 }
 
-graphics::Color SceneManager::GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
+colors::Color SceneManager::GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
                                             size_t cur_object_idx, size_t depth_counting) {
     return GetLightEffect(point, eye_pos, cur_object_idx)
            + GetReflectionEffect(point, eye_pos, cur_object_idx, depth_counting)
            + GetRefractionEffect(point, eye_pos, cur_object_idx, depth_counting);
 }
 
-graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
+colors::Color SceneManager::GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
                                              size_t cur_object_idx) {
     size_t objects_num = objects_.size();
     Coordinates base(objects_[cur_object_idx]->GetColor());
@@ -169,18 +162,18 @@ graphics::Color SceneManager::GetLightEffect(const Coordinates& point, const Coo
     }
 
     float coeff_absorption = objects_[cur_object_idx]->GetCoeffAbsorption();
-    return graphics::Color(color * coeff_absorption);
+    return colors::Color(color * coeff_absorption);
 }
 
-graphics::Color SceneManager::GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
+colors::Color SceneManager::GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
                                                   size_t cur_object_idx, size_t depth_counting) {
     if (depth_counting == 0) {
-        return graphics::Color();
+        return colors::Color();
     }
 
     float coeff_reflection = objects_[cur_object_idx]->GetCoeffReflection();
     if (coeff_reflection < kEpsilon) {
-        return graphics::Color();
+        return colors::Color();
     }
 
     Coordinates new_point(point);
@@ -192,26 +185,26 @@ graphics::Color SceneManager::GetReflectionEffect(const Coordinates& point, cons
     Object* object = GetPointIntersection(new_point, after_ref, coeff, cur_object_idx);
 
     if (coeff < 0) {
-        graphics::Color color = kFreeSpaceColor;
+        colors::Color color = kFreeSpaceColor;
         Coordinates color_coors(3, color.GetRedPart(), color.GetGreenPart(), color.GetBluePart());
-        return graphics::Color(base * color_coors / kMaxColor * coeff_reflection);
+        return colors::Color(base * color_coors / kMaxColor * coeff_reflection);
     }
 
     if (object->GetType() == kLight) {
-        return graphics::Color(base * object->GetColor() / kMaxColor * coeff_reflection);
+        return colors::Color(base * object->GetColor() / kMaxColor * coeff_reflection);
     }
 
     new_eye_pos = new_point;
     new_point = new_point + after_ref * coeff;
 
-    graphics::Color color = GetPointColor(
+    colors::Color color = GetPointColor(
                                 new_point, new_eye_pos, cur_object_idx, depth_counting - 1
                             );
     Coordinates color_coors(3, color.GetRedPart(), color.GetGreenPart(), color.GetBluePart());
-    return graphics::Color(base * color_coors / kMaxColor * coeff_reflection);
+    return colors::Color(base * color_coors / kMaxColor * coeff_reflection);
 }
 
-graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
+colors::Color SceneManager::GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
                                                   size_t cur_object_idx, size_t depth_counting) {
     static thread_local std::stack<float> refractions;
 
@@ -219,7 +212,7 @@ graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, cons
         while (!refractions.empty()) {
             refractions.pop();
         }
-        return graphics::Color();
+        return colors::Color();
     }
 
     float color_scale = 1 - (objects_[cur_object_idx]->GetCoeffAbsorption()
@@ -228,7 +221,7 @@ graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, cons
         while (!refractions.empty()) {
             refractions.pop();
         }
-        return graphics::Color();
+        return colors::Color();
     }
 
     Coordinates new_point(point);
@@ -244,7 +237,7 @@ graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, cons
                                                       );
 
     if (stop) {
-        return graphics::Color();
+        return colors::Color();
     }
 
     if (enter) {
@@ -254,7 +247,7 @@ graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, cons
             while (!refractions.empty()) {
                 refractions.pop();
             }
-            return graphics::Color();
+            return colors::Color();
         } else {
             refractions.pop();
         }
@@ -268,27 +261,27 @@ graphics::Color SceneManager::GetRefractionEffect(const Coordinates& point, cons
         while (refractions.size() != 0) {
             refractions.pop();
         }
-        graphics::Color color = kFreeSpaceColor;
+        colors::Color color = kFreeSpaceColor;
         Coordinates color_coors(3, color.GetRedPart(), color.GetGreenPart(), color.GetBluePart());
-        return graphics::Color(base * color_coors / kMaxColor * color_scale);
+        return colors::Color(base * color_coors / kMaxColor * color_scale);
     }
 
     if (object->GetType() == kLight) {
         while (!refractions.empty()) {
             refractions.pop();
         }
-        return graphics::Color(base * object->GetColor() / kMaxColor * color_scale);
+        return colors::Color(base * object->GetColor() / kMaxColor * color_scale);
     }
 
     new_eye_pos = new_point;
     new_point = new_point + after_ref * coeff;
 
-    graphics::Color color = GetPointColor(
+    colors::Color color = GetPointColor(
                                 new_point, new_eye_pos, cur_object_idx, depth_counting - 1
                             );
     while (!refractions.empty()) {
         refractions.pop();
     }
     Coordinates color_coors(3, color.GetRedPart(), color.GetGreenPart(), color.GetBluePart());
-    return graphics::Color(base * color_coors / kMaxColor * color_scale);
+    return colors::Color(base * color_coors / kMaxColor * color_scale);
 }

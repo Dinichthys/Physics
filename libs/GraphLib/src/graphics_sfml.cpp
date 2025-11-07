@@ -20,6 +20,8 @@ namespace graphics {
             explicit FontImpl()
                 :sf::Font() {};
 
+            virtual ~FontImpl() = default;
+
             virtual bool loadFromFile(const std::string& path) {
                 return sf::Font::loadFromFile(path);
             };
@@ -29,17 +31,19 @@ namespace graphics {
         impl_ = new FontImpl;
     };
 
+    Font::~Font() {
+        delete impl_;
+    };
+
     void Font::loadFromFile(const std::string& path) const {
-        if (impl_->loadFromFile(path)) {
+        if (!(impl_->loadFromFile(path))) {
             throw std::runtime_error("No files for font uploading");
         }
     };
 
-//------------------------------------------------------------------------------------------------------------
-
 //-----------------TEXT---------------------------------------------------------------------------------------
 
-    Text::Text(const std::string& text, const std::string& font_file_name, unsigned char height) {
+    Text::Text(const std::string& str_text, const std::string& font_file_name, unsigned char height) {
         font_ = new(std::nothrow) sf::Font();
         if (font_ == NULL) {
             throw std::runtime_error("Can't create font for Text object\n");
@@ -53,10 +57,16 @@ namespace graphics {
 
         font = (const dr4::Font*)font_;
 
-        text_ = new(std::nothrow) sf::Text(text, *((sf::Font*)font_), height);
+        text_ = new(std::nothrow) sf::Text(str_text, *((sf::Font*)font_), height);
         if (text_ == NULL) {
             throw std::runtime_error("Can't create Text object\n");
         }
+
+        ((sf::Text*)text_)->setFont(*((sf::Font*)font_));
+
+        text = str_text;
+
+        fontSize = height;
     }
 
     Text::Text(const Text& other) {
@@ -73,6 +83,10 @@ namespace graphics {
         }
 
         ((sf::Text*)text_)->setFont(*((sf::Font*)font_));
+
+        text = other.text;
+
+        fontSize = other.fontSize;
     }
 
     Text::~Text() {
@@ -84,13 +98,15 @@ namespace graphics {
         ((sf::Text*)text_)->setPosition({lt_corner[0], lt_corner[1]});
     }
 
-    void Text::SetText(const std::string& text) {
-        ((sf::Text*)text_)->setString(text);
+    void Text::SetText(const std::string& new_text) {
+        ((sf::Text*)text_)->setString(new_text);
+        text = new_text;
     }
 
-    void Text::SetFont(const std::string& font) {
-        ((sf::Font*)font_)->loadFromFile(font);
+    void Text::SetFont(const std::string& font_file_name) {
+        ((sf::Font*)font_)->loadFromFile(font_file_name);
         ((sf::Text*)text_)->setFont(*((sf::Font*)font_));
+        font = (const dr4::Font*) font_;
     }
 
     dr4::Rect2f Text::GetBounds() const {
@@ -220,6 +236,7 @@ namespace graphics {
     void Image::SetSize(dr4::Vec2f size) {
         width_ = size.x;
         height_ = size.y;
+        ((sf::Image*) image_)->create(width_, height_);
     }
 
     dr4::Vec2f Image::GetSize() const {
@@ -257,6 +274,9 @@ namespace graphics {
     void Texture::SetSize(dr4::Vec2f size) {
         width_ = size.x;
         height_ = size.y;
+        delete ((sf::RenderTexture*) texture_);
+        texture_ = new sf::RenderTexture();
+        ((sf::RenderTexture*) texture_)->create(width_, height_);
     }
 
     dr4::Vec2f Texture::GetSize() const {
@@ -273,14 +293,15 @@ namespace graphics {
 
     void Texture::Draw(const dr4::Rectangle &rect) {
         sf::RectangleShape sf_rect({rect.rect.size.x, rect.rect.size.y});
-        sf_rect.setFillColor(sf::Color(rect.fill.r, rect.fill.g, rect.fill.g, rect.fill.a));
-        sf_rect.setSize({rect.rect.pos.x, rect.rect.pos.y});
+        sf_rect.setFillColor(sf::Color(rect.fill.r, rect.fill.g, rect.fill.b, rect.fill.a));
+        sf_rect.setPosition({rect.rect.pos.x, rect.rect.pos.y});
         sf_rect.setOutlineColor(sf::Color(rect.borderColor.r, rect.borderColor.g, rect.borderColor.b, rect.borderColor.a));
         ((sf::RenderTexture*)texture_)->draw(sf_rect);
     }
 
     void Texture::Draw(const dr4::Text &text) {
-        sf::Text sf_text(sf::String(text.text), *((sf::Font*)(text.font)), text.fontSize);
+        sf::Text sf_text(sf::String(text.text), *((sf::Font*)(((graphics::Font*)text.font)->GetFont())), text.fontSize);
+        sf_text.setPosition({0, 0});
        ((sf::RenderTexture*)texture_)->draw(sf_text);
     }
 
@@ -295,6 +316,14 @@ namespace graphics {
         sf::Sprite sprite(((sf::RenderTexture*)(dynamic_cast<const Texture&>(texture).texture_))->getTexture());
         sprite.setPosition({pos.x, pos.y});
         ((sf::RenderTexture*)texture_)->draw(sprite);
+    }
+
+    void Texture::Display() {
+        ((sf::RenderTexture*)texture_)->display();
+    }
+
+    void Texture::Clear(const dr4::Color& color) {
+        ((sf::RenderTexture*)texture_)->clear(sf::Color(color.r, color.g, color.b, color.a));
     }
 
 //-----------------RENDER WINDOW------------------------------------------------------------------------------
@@ -455,6 +484,10 @@ namespace graphics {
 
     dr4::Image *RenderWindow::CreateImage() {
         return new Image(width_, height_);
+    }
+
+    dr4::Font *RenderWindow::CreateFont() {
+        return new Font();
     }
 
     Coordinates RenderWindow::GetMousePos() const {

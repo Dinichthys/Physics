@@ -1,11 +1,12 @@
 #ifndef WIDGET_HPP
 #define WIDGET_HPP
 
-#include "graphics.hpp"
+#include "colors.hpp"
 
 #include <vector>
 
 #include "hui/widget.hpp"
+#include "dr4/window.hpp"
 #include "hui/container.hpp"
 
 #include "vector.hpp"
@@ -17,6 +18,7 @@ class hui::State {
     public:
         Widget* target_widget_;
         Widget* hovered_widget_;
+        dr4::Window* window_;
 };
 
 class Widget : public hui::Widget {
@@ -25,16 +27,25 @@ class Widget : public hui::Widget {
         float height_;
         Widget* parent_;
 
+    protected:
         bool hovered_;
+
+        bool hidden_;
 
     public:
         explicit Widget(const Coordinates& lt_corner, const float width, float height,
                         hui::State* const state, ::Widget* parent = NULL)
-            :hui::Widget(state, parent, new graphics::Texture(width, height)) {
+            :hui::Widget(state, parent,
+                (state != NULL) ? state->window_->CreateTexture() : NULL) {
             hovered_ = false;
+            hidden_ = false;
             width_ = width;
             height_ = height;
             parent_ = parent;
+
+            if (texture != NULL) {
+                texture->SetSize({width, height});
+            }
 
             hui::Widget::SetRelPos({lt_corner[0], lt_corner[1]});
         };
@@ -45,14 +56,34 @@ class Widget : public hui::Widget {
             height_ = other.height_;
             parent_ = other.parent_;
             hovered_ = other.hovered_;
-            hui::Widget::texture = new graphics::Texture(*(dynamic_cast<graphics::Texture*>(other.texture)));
+            hidden_ = other.hidden_;
+            state = other.state;
+            if (state != NULL) {
+                texture = state->window_->CreateTexture();
+                texture->SetSize({width_, height_});
+                texture->Draw(*(other.texture), {0, 0});
+            } else {
+                texture = NULL;
+            }
         };
 
         virtual ~Widget() {
             delete texture;
         };
 
-        virtual void SetState(hui::State* state_) {state = state_;};
+        virtual void SetState(hui::State* state_) {
+            state = state_;
+            dr4::Texture* tmp = texture;
+            texture = state->window_->CreateTexture();
+            texture->SetSize({width_, height_});
+            if (tmp != NULL) {
+                texture->Draw(*tmp, {0, 0});
+                delete tmp;
+            }
+        };
+
+        void SetHidden(bool hidden) {hidden_ = hidden;};
+        bool GetHidden() const {return hidden_;};
 
         dr4::Texture* GetTexture() const {return texture;};
 
@@ -68,18 +99,27 @@ class Widget : public hui::Widget {
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
         virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::Widget::SetSize(size);};
+        virtual dr4::Vec2f GetSize() {return {width_, height_};};
 
         virtual ::Widget* GetParent() const {return parent_;};
 
         virtual void SetLTCorner(const Coordinates& coors) {relPos = {coors[0], coors[1]};};
-        void SetParent(::Widget* parent) {parent_ = parent; ::Widget::Widget::parent = parent;};
+        virtual void SetParent(hui::Widget* parent) override {
+            parent_ = dynamic_cast<::Widget*>(parent);
+            ::Widget::Widget::parent = parent;
+        };
 
         bool GetHovered() const {return hovered_;};
         void SetHovered(bool hovered) {hovered_ = hovered;};
 
         virtual void Redraw() override {
+            if (hidden_) {
+                return;
+            }
+            texture->Display();
             if (parent != NULL) {
                 (dynamic_cast<::Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
+                texture->Clear(dr4::Color(0, 0, 0, 0));
             }
         };
 
@@ -102,6 +142,9 @@ class Widget : public hui::Widget {
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) {
+            if (hidden_) {
+                return false;
+            }
             if ((mouse_pos[0] > relPos.x)
                 && (mouse_pos[1] > relPos.y)
                 && (mouse_pos[0] < relPos.x + width_)
@@ -114,6 +157,9 @@ class Widget : public hui::Widget {
         };
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
+            if (hidden_) {
+                return false;
+            }
             if ((mouse_pos[0] > relPos.x)
                 && (mouse_pos[1] > relPos.y)
                 && (mouse_pos[0] < relPos.x + width_)
@@ -125,6 +171,9 @@ class Widget : public hui::Widget {
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
+            if (hidden_) {
+                return false;
+            }
             if ((mouse_pos[0] > relPos.x)
                 && (mouse_pos[1] > relPos.y)
                 && (mouse_pos[0] < relPos.x + width_)
@@ -203,6 +252,7 @@ class WidgetContainer : public ::Widget {
             for (size_t i = 0; i < children_num; i++) {
                 children_[i]->SetState(state_);
             }
+            Widget::SetState(state_);
         };
 
         std::vector<Widget*>& GetChildren() {return children_;};
@@ -224,6 +274,9 @@ class WidgetContainer : public ::Widget {
         }
 
         virtual void Redraw() override {
+            if (hidden_) {
+                return;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 children_[i]->Redraw();
@@ -232,21 +285,25 @@ class WidgetContainer : public ::Widget {
         };
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (hidden_) {
+                return false;
+            }
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
-
-            int64_t children_num = children_.size();
-            for (int64_t i = children_num - 1; i > -1; i--) {
-                if (children_[i]->OnMousePress(mouse_pos - lt_corner)) {
-                    return true;
-                }
-            }
 
             if ((mouse_pos[0] > lt_corner[0])
                 && (mouse_pos[1] > lt_corner[1])
                 && (mouse_pos[0] < lt_corner[0] + width)
                 && (mouse_pos[1] < lt_corner[1] + height)) {
+
+                int64_t children_num = children_.size();
+                for (int64_t i = children_num - 1; i > -1; i--) {
+                    if (children_[i]->OnMousePress(mouse_pos - lt_corner)) {
+                        return true;
+                    }
+                }
+
                 state->target_widget_ = this;
                 return true;
             }
@@ -255,21 +312,25 @@ class WidgetContainer : public ::Widget {
         };
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+            if (hidden_) {
+                return false;
+            }
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
-
-            int64_t children_num = children_.size();
-            for (int64_t i = children_num - 1; i > -1; i--) {
-                if (children_[i]->OnMouseRelease(mouse_pos - lt_corner)) {
-                    return true;
-                }
-            }
 
             if ((mouse_pos[0] > lt_corner[0])
                 && (mouse_pos[1] > lt_corner[1])
                 && (mouse_pos[0] < lt_corner[0] + width)
                 && (mouse_pos[1] < lt_corner[1] + height)) {
+
+                int64_t children_num = children_.size();
+                for (int64_t i = children_num - 1; i > -1; i--) {
+                    if (children_[i]->OnMouseRelease(mouse_pos - lt_corner)) {
+                        return true;
+                    }
+                }
+
                 return true;
             }
 
@@ -277,19 +338,23 @@ class WidgetContainer : public ::Widget {
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
+            if (hidden_) {
+                return false;
+            }
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
-
-            int64_t children_num = children_.size();
-            for (int64_t i = children_num - 1; i > -1; i--) {
-                children_[i]->OnMouseEnter(mouse_pos - lt_corner);
-            }
 
             if ((mouse_pos[0] > lt_corner[0])
                 && (mouse_pos[1] > lt_corner[1])
                 && (mouse_pos[0] < lt_corner[0] + width)
                 && (mouse_pos[1] < lt_corner[1] + height)) {
+
+                int64_t children_num = children_.size();
+                for (int64_t i = children_num - 1; i > -1; i--) {
+                    children_[i]->OnMouseEnter(mouse_pos - lt_corner);
+                }
+
                 state->hovered_widget_ = (state->hovered_widget_ == this) ? NULL : state->hovered_widget_;
                 SetHovered(true);
                 return true;
@@ -312,6 +377,9 @@ class WidgetContainer : public ::Widget {
         };
 
         virtual bool OnLetterA() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnLetterA()) {
@@ -321,6 +389,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnLetterD() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnLetterD()) {
@@ -330,6 +401,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnLetterS() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnLetterS()) {
@@ -339,6 +413,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnLetterW() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnLetterW()) {
@@ -349,6 +426,9 @@ class WidgetContainer : public ::Widget {
         };
 
         virtual bool OnArrowRight() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnArrowRight()) {
@@ -358,6 +438,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnArrowLeft() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnArrowLeft()) {
@@ -367,6 +450,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnArrowUp() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnArrowUp()) {
@@ -376,6 +462,9 @@ class WidgetContainer : public ::Widget {
             return false;
         };
         virtual bool OnArrowDown() override {
+            if (hidden_) {
+                return false;
+            }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnArrowDown()) {

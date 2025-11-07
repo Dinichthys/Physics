@@ -1,12 +1,12 @@
 #ifndef BORDER_HPP
 #define BORDER_HPP
 
-#include "graphics.hpp"
+#include "colors.hpp"
 
 #include "object.hpp"
 #include "triangle.hpp"
 
-static const graphics::Color kBorderColor = graphics::kColorRed;
+static const colors::Color kBorderColor = colors::kColorRed;
 static const float kBorderWidth = 10;
 
 class Square : public TrianglesSet {

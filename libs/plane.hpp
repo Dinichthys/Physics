@@ -9,7 +9,7 @@ class Plane : public Object {
 
     public:
         explicit Plane(const Coordinates& center, const Coordinates& normal,
-                        const graphics::Color& color = kIBase,
+                        const colors::Color& color = kIBase,
                         float coeff_reflection = NAN, float coeff_absorption = NAN,
                         float coeff_refraction = NAN)
             :Object(center, kObjectsInfo.at(kPlane), color), normal_(!normal) {

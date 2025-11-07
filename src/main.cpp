@@ -21,42 +21,42 @@ int main() {
     set_log_lvl(kError);
 
     Circle circles_arr[8] = {
-        // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, graphics::kColorBlue, 0, 1),
-        Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, graphics::Color(255, 0, 120), 0.5, 0.5),
-        Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, graphics::kColorWhite, 0.5, 0.5),
-        Circle(Coordinates(3, 500, -100, 200),   200, kSphere, graphics::kColorRed, 0, 1),
-        Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, graphics::kColorWhite, 0, 0.2, 2),
-        Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, graphics::kColorRed, 0, 1),
-        Circle(Coordinates(3, 500, 0, -7000),  1000, kSphere, graphics::kColorBlue, 0, 1),
+        // Circle(Coordinates(3, 100, -400, 100),       400, kSphere, colors::kColorBlue, 0, 1),
+        Circle(Coordinates(3, 1000, 600, 100),   400, kSphere, colors::Color(255, 0, 120), 0.5, 0.5),
+        Circle(Coordinates(3, 1000, -400, 100),      400, kSphere, colors::kColorWhite, 0.5, 0.5),
+        Circle(Coordinates(3, 500, -100, 200),   200, kSphere, colors::kColorRed, 0, 1),
+        Circle(Coordinates(3, 400, -200, -2100),   50, kSphere, colors::kColorWhite, 0, 0.2, 2),
+        Circle(Coordinates(3, 500, -2000, -7000),  1000, kSphere, colors::kColorRed, 0, 1),
+        Circle(Coordinates(3, 500, 0, -7000),  1000, kSphere, colors::kColorBlue, 0, 1),
 
         // Circle(Coordinates(3, 100, 450, 0),     50,  kLight,  Coordinates(3, 150, 150, 150)),
 
-        Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  graphics::kColorWhite),
-        Circle(Coordinates(3, 1080, -1000, -500), 50,  kLight,  graphics::kColorWhite),
+        Circle(Coordinates(3, 600, -1000, 2000),  50,  kLight,  colors::kColorWhite),
+        Circle(Coordinates(3, 1080, -1000, -500), 50,  kLight,  colors::kColorWhite),
     };
 
     Plane planes_arr[1] = {
-        Plane(Coordinates(3, 500, 1000, 0), Coordinates(3, 0, -1, 0), graphics::kColorWhite, 0, 1),
-        // Plane(Coordinates(3, 500, 0, 0), Coordinates(3, 0, -1, 0), graphics::kColorWhite, 0, 0.2, 2)
+        Plane(Coordinates(3, 500, 1000, 0), Coordinates(3, 0, -1, 0), colors::kColorWhite, 0, 1),
+        // Plane(Coordinates(3, 500, 0, 0), Coordinates(3, 0, -1, 0), colors::kColorWhite, 0, 0.2, 2)
     };
 
     Triangle triangles_arr[1] = {
-        Triangle(Plane(Coordinates(3, 500, 0, 500), Coordinates(3, 0, 1, 1), graphics::kColorYellow),
+        Triangle(Plane(Coordinates(3, 500, 0, 500), Coordinates(3, 0, 1, 1), colors::kColorYellow),
                  Coordinates(3, -400, 500, -500), Coordinates(3, -300, 0, 0)),
     };
 
     Triangle triangles_pyramid[6] {
-        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), colors::kColorYellow),
                   Coordinates(3, 200, 0, 0), Coordinates(3, 200, 0, 200)),
-        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), colors::kColorYellow),
                   Coordinates(3, 0, 0, 200), Coordinates(3, 200, 0, 200)),
-        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, -5), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, -5), colors::kColorYellow),
                   Coordinates(3, -100, 500, -100), Coordinates(3, 100, 500, -100)),
-        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 5, -1, 0), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 5, -1, 0), colors::kColorYellow),
                   Coordinates(3, 100, 500, -100), Coordinates(3, 100, 500, 100)),
-        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, 5), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, 0, -1, 5), colors::kColorYellow),
                   Coordinates(3, 100, 500, 100), Coordinates(3, -100, 500, 100)),
-        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, -5, -1, 0), graphics::kColorYellow),
+        Triangle (Plane(Coordinates(3, 100, -500, 100), Coordinates(3, -5, -1, 0), colors::kColorYellow),
                   Coordinates(3, -100, 500, 100), Coordinates(3, -100, 500, -100)),
     };
 
@@ -68,11 +68,11 @@ int main() {
 
     std::vector<Object*> objects;
     // objects.push_back(new Border(Coordinates(3, 0, 0, 0), 100, 100, 100));
-    // objects.push_back(new Circle(Coordinates(3, 0, 0, 0), 10, kSphere, graphics::kColorWhite));
-    // objects.push_back(new Circle(Coordinates(3, 100, -200, 0), 10, kLight, graphics::kColorWhite));
+    // objects.push_back(new Circle(Coordinates(3, 0, 0, 0), 10, kSphere, colors::kColorWhite));
+    // objects.push_back(new Circle(Coordinates(3, 100, -200, 0), 10, kLight, colors::kColorWhite));
 
     // objects.push_back(new TrianglesSet(Coordinates(3, 100, 0, 100), triangles_pyramid_vec,
-    //                                    graphics::kColorWhite, 0, 1));
+    //                                    colors::kColorWhite, 0, 1));
 
     size_t circles_num = sizeof(circles_arr) / sizeof(circles_arr[0]);
     for (size_t i = 0; i < circles_num; i++) {
@@ -153,10 +153,16 @@ int main() {
         buttons_on_panel.push_back(new CoeffChangingButton(coeff_changing_buttons[i]));
     }
 
-    scene_manager->SetPanelControl(new PanelControl(Coordinates(2, -120, 0), 120, 410, NULL, &buttons_on_panel));
-
-    scene_manager->AddChild(new ListObjectsTitle(Coordinates(2, 0, 410), scene_manager->GetObjectsVec(),
+    desktop_children.push_back(new PanelControl(Coordinates(2), 120, 410, NULL, &buttons_on_panel));
+    scene_manager->SetPanelControl(dynamic_cast<PanelControl*>(desktop_children.back()));
+    desktop_children.push_back(new ListObjects(Coordinates(2, 120, 410 + kListObjectsTitleHeight),
+                                scene_manager->GetObjectsVec(),
                                 [scene_manager](size_t idx){scene_manager->ChooseObject(idx);}));
+    desktop_children.push_back(new ListObjectsTitle(Coordinates(2, 120, 410),
+                                                    dynamic_cast<ListObjects*>(desktop_children.back())));
+    scene_manager->SetListObjects(dynamic_cast<ListObjectsTitle*>(desktop_children.back()));
+    desktop_children.push_back(new InfoTable(Coordinates(2, 920, 0), 160, 410, circles_arr + 0, NULL));
+    scene_manager->SetInfoTable(dynamic_cast<InfoTable*>(desktop_children.back()));
 
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 

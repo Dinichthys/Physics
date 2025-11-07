@@ -1,6 +1,8 @@
 #ifndef CIRCLE_HPP
 #define CIRCLE_HPP
 
+#include "colors.hpp"
+
 #include "object.hpp"
 
 #include "border.hpp"
@@ -11,7 +13,7 @@ class Circle : public Object {
 
     public:
         explicit Circle(const Coordinates& center, float radius, ObjectType type = kSphere,
-                        const graphics::Color& color = kIBase,
+                        const colors::Color& color = kIBase,
                         float coeff_reflection = NAN, float coeff_absorption = NAN,
                         float coeff_refraction = NAN)
             :Object(center, kObjectsInfo.at(type), color) {

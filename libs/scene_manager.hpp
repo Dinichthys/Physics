@@ -6,7 +6,9 @@
 #include <mutex>
 #include <unistd.h>
 
-#include "graphics.hpp"
+#include "colors.hpp"
+
+#include "widget.hpp"
 
 #include "object.hpp"
 #include "circle.hpp"
@@ -16,7 +18,7 @@
 
 #include "vector.hpp"
 #include "info_table.hpp"
-// #include "list_objects.hpp"
+#include "list_objects.hpp"
 
 #include "border.hpp"
 
@@ -37,8 +39,8 @@ static const float kInfoTableWidth = 160;
 
 static const size_t kListIdx = 1;
 
-static const graphics::Color kFreeSpaceColor(graphics::Color(30, 28, 29));
-static const graphics::Color kChoseObjectColor(graphics::kColorRed);
+static const colors::Color kFreeSpaceColor(colors::Color(30, 28, 29));
+static const colors::Color kChoseObjectColor(colors::kColorRed);
 
 class Eye {
     private:
@@ -121,9 +123,9 @@ class Mueue : public std::stack<T> {
         };
 };
 
-class SceneManager : public WidgetContainer {
+class SceneManager : public Widget {
     private:
-        graphics::Image image_;
+        dr4::Image* image_;
 
         std::vector<Object*> objects_;
 
@@ -133,21 +135,29 @@ class SceneManager : public WidgetContainer {
 
         size_t cur_object_idx_;
         size_t border_idx_;
-        graphics::Color cur_object_color_;
+        colors::Color cur_object_color_;
+        ListObjectsTitle* list_objects_;
         InfoTable* table_;
+        PanelControl* panel_;
 
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
                      const std::vector<Object*> objects, hui::State* state)
-            :WidgetContainer(lt_corner, width, height, state), image_(width, height),
+            :Widget(lt_corner, width, height, state),
+             image_((state != NULL) ? state->window_->CreateImage() : NULL),
              eye_(Coordinates(start_eye_pos),
                   Coordinates(3,-(float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2),-(float)(height / 2), kWindowDistance),
-                  Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)), tasks_(std::stack<DrawTask>()) {
+                  Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)), tasks_(std::stack<DrawTask>()),
+             list_objects_(NULL), table_(NULL), panel_(NULL) {
             size_t objects_num = objects.size();
             for (size_t i = 0; i < objects_num; i++) {
                 objects_.push_back(objects[i]);
+            }
+
+            if (image_ != NULL) {
+                image_->SetSize({width, height});
             }
 
             cur_object_idx_ = -1;
@@ -162,20 +172,41 @@ class SceneManager : public WidgetContainer {
                 delete objects_.back();
                 objects_.pop_back();
             }
-            if (table_ != NULL) {
-                delete table_;
-                table_ = NULL;
+        };
+
+        virtual void SetState(hui::State* state_) {
+            dr4::Image* tmp = image_;
+            image_ = state_->window_->CreateImage();
+            image_->SetSize(::Widget::GetSize());
+            if (tmp != NULL) {
+                float width = Widget::GetWidth();
+                float height = Widget::GetHeight();
+                for (float i = 0; i < height; i++) {
+                    for (float j = 0; j < width; j++) {
+                        image_->SetPixel(j, i, tmp->GetPixel(j, i));
+                    }
+                }
+                delete tmp;
             }
+            Widget::SetState(state_);
         };
 
         void SetPanelControl(PanelControl* panel) {
-            panel->SetParent(this);
-            WidgetContainer::AddChild(panel);
-        }
+            panel_ = panel;
+            panel_->SetHidden(true);
+        };
+        void SetListObjects(ListObjectsTitle* list_objects) {
+            list_objects_ = list_objects;
+            list_objects_->SetHidden(false);
+        };
+        void SetInfoTable(InfoTable* table) {
+            table_ = table;
+            table_->SetHidden(true);
+        };
 
         std::vector<Object*>& GetObjectsVec() {
             return objects_;
-        }
+        };
 
         virtual bool OnLetterA() override;
         virtual bool OnLetterD() override;
@@ -205,10 +236,9 @@ class SceneManager : public WidgetContainer {
             }
             delete objects_[cur_object_idx_];
             objects_.erase(objects_.begin() + cur_object_idx_);
-            if (table_ != NULL) {
-                delete table_;
-                table_ = NULL;
-            }
+            table_->SetHidden(true);
+            panel_->SetHidden(true);
+            table_->SetObject(NULL);
             cur_object_idx_ = -1;
             if (objects_[border_idx_] != NULL) {
                 delete objects_[border_idx_];
@@ -228,20 +258,16 @@ class SceneManager : public WidgetContainer {
         void ChooseObject(size_t idx) {
             if (cur_object_idx_ < objects_.size()) {
                 objects_[cur_object_idx_]->SetColor(cur_object_color_);
-                if (table_ != NULL) {
-                    delete table_;
-                    table_ = NULL;
-                }
                 if (objects_[border_idx_] != NULL) {
                     delete objects_[border_idx_];
                 }
                 objects_.erase(objects_.begin() + border_idx_);
             }
             cur_object_idx_ = idx;
-            table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
-                                    kInfoTableWidth, Widget::GetHeight(),
-                                    objects_[cur_object_idx_], state, this);
-            cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
+            table_->SetObject(objects_[cur_object_idx_]);
+            table_->SetHidden(false);
+            panel_->SetHidden(false);
+            cur_object_color_ = colors::Color(objects_[cur_object_idx_]->GetColor());
             objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
             objects_.push_back(objects_[cur_object_idx_]->GetBorder());
             border_idx_ = objects_.size() - 1;
@@ -302,7 +328,7 @@ class SceneManager : public WidgetContainer {
             }
         };
 
-        void ChangeCurObjColor(const graphics::Color& color) {
+        void ChangeCurObjColor(const colors::Color& color) {
             cur_object_color_ = cur_object_color_ + color;
         };
 
@@ -342,18 +368,15 @@ class SceneManager : public WidgetContainer {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
                     }
                     cur_object_idx_ = -1;
-                    if (table_ != NULL) {
-                        delete table_;
-                        table_ = NULL;
-                    }
+                    table_->SetHidden(true);
+                    panel_->SetHidden(true);
+                    table_->SetObject(NULL);
+                    delete objects_[border_idx_];
+                    objects_.erase(objects_.begin() + border_idx_);
                     return Widget::OnMousePress(mouse_pos);
                 } else {
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
-                        if (table_ != NULL) {
-                            delete table_;
-                            table_ = NULL;
-                        }
                         if (objects_[border_idx_] != NULL) {
                             delete objects_[border_idx_];
                             objects_.erase(objects_.begin() + border_idx_);
@@ -362,10 +385,10 @@ class SceneManager : public WidgetContainer {
                     }
 
                     cur_object_idx_ = tmp;
-                    table_ = new InfoTable(Coordinates(3, Widget::GetWidth(), 0),
-                                           kInfoTableWidth, Widget::GetHeight(),
-                                           objects_[cur_object_idx_], state, this);
-                    cur_object_color_ = graphics::Color(objects_[cur_object_idx_]->GetColor());
+                    table_->SetObject(objects_[cur_object_idx_]);
+                    table_->SetHidden(false);
+                    panel_->SetHidden(false);
+                    cur_object_color_ = colors::Color(objects_[cur_object_idx_]->GetColor());
                     objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
                     objects_.push_back(objects_[cur_object_idx_]->GetBorder());
                     border_idx_ = objects_.size() - 1;
@@ -374,8 +397,7 @@ class SceneManager : public WidgetContainer {
                 return true;
             }
 
-            return (table_ != NULL) ? WidgetContainer::OnMousePress(mouse_pos)
-                                    : WidgetContainer::GetChild(kListIdx)->OnMousePress(loc_coordinates);
+            return false;
         };
 
     private:
@@ -384,13 +406,13 @@ class SceneManager : public WidgetContainer {
         Object* GetPointIntersection(const Coordinates& pixel_pos, const Coordinates& vec,
                float& coeff, size_t& cur_object_idx);
 
-        graphics::Color GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
+        colors::Color GetPointColor(const Coordinates& point, const Coordinates& eye_pos,
                                       size_t cur_object_idx, size_t depth_counting);
-        graphics::Color GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
+        colors::Color GetLightEffect(const Coordinates& point, const Coordinates& eye_pos,
                                        size_t cur_object_idx);
-        graphics::Color GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
+        colors::Color GetReflectionEffect(const Coordinates& point, const Coordinates& eye_pos,
                                             size_t cur_object_idx, size_t depth_counting);
-        graphics::Color GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
+        colors::Color GetRefractionEffect(const Coordinates& point, const Coordinates& eye_pos,
                                             size_t cur_object_idx, size_t depth_counting);
 
         void DrawPart();

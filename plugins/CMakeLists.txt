@@ -1,39 +1,22 @@
 cmake_minimum_required (VERSION 3.20)
-project (physics CXX)
+project (scrollbar CXX)
 
-add_executable (${PROJECT_NAME}
-    src/main.cpp
-    src/raytracing_spheres.cpp
-    src/plane.cpp
-    src/triangles_set.cpp
-    src/movement.cpp
-
-    libs/GUI/src/draw.cpp
-    libs/GUI/src/event.cpp
-    libs/GUI/src/scrollbar.cpp
-
-    libs/GraphLib/src/graphics_sfml.cpp
-
-    libs/geometry/src/vector.cpp
-    libs/geometry/src/matrix.cpp
-    libs/MyLib/Logger/logging.cpp
-    libs/MyLib/Assert/print_error.cpp
+add_library (${PROJECT_NAME} SHARED
+    plug.cpp
+    ../libs/GUI/src/scrollbar.cpp
+    ../libs/GraphLib/src/graphics_sfml.cpp
 )
 
 target_include_directories (${PROJECT_NAME}
     PRIVATE
-        libs
-        libs/GUI/include
-        libs/GUI/graphics
-
-        libs/GraphLib/include
-
-        libs/geometry/include
-        libs/MyLib
-        libs/MyLib/Logger
-        libs/MyLib/Assert
-        libs/MyLib/My_stdio
-        libs/mipt-ded-zemax/include
+        ../libs
+        ../libs/GUI/include
+        ../libs/GraphLib/include
+        ../libs/geometry/include
+        ../libs/MyLib
+        ../libs/MyLib/Logger
+        ../libs/MyLib/Assert
+        ../libs/MyLib/My_stdio
 )
 
 find_package(OpenMP REQUIRED)
