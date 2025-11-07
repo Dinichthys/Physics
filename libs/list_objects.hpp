@@ -52,8 +52,11 @@ class ListObjects : public WidgetContainer {
     public:
         explicit ListObjects(const Coordinates& lt_corner, const std::vector<Object*>& objects,
                              std::function<void(size_t)> action, hui::State* state = NULL)
-                    :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects),
-                     action_(action), rect_(dr4::Rect2f({0, 0}, {kWidth, kHeight}), kListColor) {
+                    :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects), action_(action) {
+            rect_.rect.pos = {0, 0}; rect_.rect.size = {kWidth, kHeight};
+            rect_.fill = kListColor;
+            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+
             start_index_ = 0;
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects.size()); idx++) {
                 WidgetContainer::AddChild(new Button(Coordinates(2, 0, idx * kHeight / kMaxNumLines),
@@ -196,8 +199,11 @@ class ListObjectsTitle : public Widget {
                    kListObjectsTitleHeight / kTextScaleTitleHeight),
              button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight,
                      kListObjectsTitleHeight, kListTitleHeightClosedButtonText,
-                     kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
-             rect_(dr4::Rect2f({0, 0}, {kWidth, kListObjectsTitleHeight}), kListColor) {
+                     kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor) {
+            rect_.rect.pos = {0, 0}; rect_.rect.size = {kWidth, kListObjectsTitleHeight};
+            rect_.fill = kListColor;
+            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+
             list_->SetHidden(true);
         };
 

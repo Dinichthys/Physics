@@ -145,8 +145,10 @@ namespace graphics {
 
 //-----------------RECTANGLE SHAPE----------------------------------------------------------------------------
 
-    RectangleShape::RectangleShape(const dr4::Vec2f& pos, const dr4::Vec2f& size)
-        :dr4::Rectangle(dr4::Rect2f(pos, size), dr4::Color(0, 0, 0, 0))  {
+    RectangleShape::RectangleShape(const dr4::Vec2f& pos, const dr4::Vec2f& size) {
+        dr4::Rectangle::rect = dr4::Rect2f(pos, size);
+        dr4::Rectangle::fill = dr4::Color(0, 0, 0, 0);
+
         rectangle_ = new(std::nothrow) sf::RectangleShape(sf::Vector2f(size.x, size.y));
         if (rectangle_ == NULL) {
             throw std::runtime_error("Can't create RectangleShape\n");
@@ -307,22 +309,26 @@ namespace graphics {
 
     void Texture::Draw(const dr4::Image &img, const dr4::Vec2f &pos) {
         sf::Texture txtr(((sf::RenderTexture*)texture_)->getTexture());
+
         txtr.update(*((sf::Image*)(dynamic_cast<const Image&>(img).GetImage())), pos.x, pos.y);
         sf::Sprite sprite(txtr);
         sprite.setPosition({0, 0});
         ((sf::RenderTexture*)texture_)->draw(sprite);
     }
+
     void Texture::Draw(const dr4::Texture &texture, const dr4::Vec2f &pos) {
+        dynamic_cast<const Texture&>(texture).Display();
+
         sf::Sprite sprite(((sf::RenderTexture*)(dynamic_cast<const Texture&>(texture).texture_))->getTexture());
         sprite.setPosition({pos.x, pos.y});
         ((sf::RenderTexture*)texture_)->draw(sprite);
     }
 
-    void Texture::Display() {
+    void Texture::Display() const {
         ((sf::RenderTexture*)texture_)->display();
     }
 
-    void Texture::Clear(const dr4::Color& color) {
+    void Texture::Clear(dr4::Color color) {
         ((sf::RenderTexture*)texture_)->clear(sf::Color(color.r, color.g, color.b, color.a));
     }
 
@@ -332,7 +338,7 @@ namespace graphics {
         :title_(window_name) {
         width_ = width;
         height_ = height;
-        window_ = new(std::nothrow) sf::RenderWindow(sf::VideoMode(width, height), window_name);
+        window_ = new(std::nothrow) sf::RenderWindow();
         if (window_ == NULL) {
             throw std::runtime_error("Can't open a window\n");
         }
@@ -511,9 +517,15 @@ namespace graphics {
     }
 
     void RenderWindow::Draw(const dr4::Texture &texture, dr4::Vec2f pos) {
+        dynamic_cast<const Texture&>(texture).Display();
+
         sf::Sprite sprite(((sf::RenderTexture*)(dynamic_cast<const Texture&>(texture).GetTexture()))->getTexture());
         sprite.setPosition({pos.x, pos.y});
         ((sf::RenderWindow*)window_)->draw(sprite);
+    }
+
+    void RenderWindow::Open() {
+        ((sf::RenderWindow*)window_)->create(sf::VideoMode(width_, height_), title_);
     }
 
     void RenderWindow::Display() {

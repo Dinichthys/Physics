@@ -1,7 +1,7 @@
 #include "dr4_backend.hpp"
 #include "graphics.hpp"
 
-DR4_BACKEND_FUNCTION() {
+extern "C" dr4::DR4Backend* DR4_BACKEND_FUNCTION() {
     return new graphics::Backend();
 }
 

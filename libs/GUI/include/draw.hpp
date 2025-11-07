@@ -3,6 +3,7 @@
 
 #include <dlfcn.h>
 #include <stdexcept>
+#include <iostream>
 
 #include "colors.hpp"
 
@@ -36,9 +37,10 @@ class UI : public WidgetContainer {
 
     public:
         explicit UI(float width, float height,
-                     const std::vector<Widget*>& children, const char* window_name = kWindowName)
+                     const std::vector<Widget*>& children, const char* window_name = kWindowName,
+                     const char* const dll_backend_name = kBackendFileName)
             :WidgetContainer(Coordinates(2, 0, 0), width, height, NULL),
-             window_(CreateWindow({width, height}, window_name)) {
+             window_(CreateWindow({width, height}, window_name, dll_backend_name)) {
             state_.hovered_widget_ = NULL;
             state_.target_widget_ = NULL;
             state_.window_ = window_;
@@ -77,9 +79,10 @@ class UI : public WidgetContainer {
     private:
         RendererError AnalyzeKey(const dr4::Event& event);
 
-        dr4::Window* CreateWindow(const dr4::Vec2f& size, const char* name) {
-            void* dll = dlopen(kBackendFileName, RTLD_NOW | RTLD_NODELETE);
+        dr4::Window* CreateWindow(const dr4::Vec2f& size, const char* name, const char* const dll_backend_name) {
+            void* dll = dlopen(dll_backend_name, RTLD_NOW | RTLD_NODELETE);
             if (dll == NULL) {
+                fprintf(stderr, "aaa \n%s\n", dlerror());
                 throw std::runtime_error("Can't upload dll with backend\n");
             }
 
@@ -96,6 +99,7 @@ class UI : public WidgetContainer {
             dr4::Window* window = backend_->CreateWindow();
             window->SetSize(size);
             window->SetTitle(name);
+            window->Open();
             return window;
         }
 };

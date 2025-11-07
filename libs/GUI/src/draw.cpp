@@ -13,7 +13,8 @@
 #include "my_assert.h"
 
 RendererError UI::ShowWindow() {
-    dr4::Rectangle background(dr4::Rect2f({0, 0}, {(float)GetWidth(), (float)GetHeight()}), kBackgroundColor);
+    dr4::Rectangle background = {.rect = dr4::Rect2f({0, 0}, {(float)GetWidth(), (float)GetHeight()}),
+                                 .fill = kBackgroundColor};
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto start_time = end_time;

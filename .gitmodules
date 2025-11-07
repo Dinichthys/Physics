@@ -1,3 +1,6 @@
 [submodule "libs/mipt-ded-zemax"]
 	path = libs/mipt-ded-zemax
 	url = https://github.com/random-username-here/mipt-ded-zemax
+[submodule "plugins/dr4hui-backend"]
+	path = plugins/dr4hui-backend
+	url = https://github.com/sevaphasol/dr4hui-backend.git

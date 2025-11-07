@@ -172,6 +172,7 @@ class SceneManager : public Widget {
                 delete objects_.back();
                 objects_.pop_back();
             }
+            delete image_;
         };
 
         virtual void SetState(hui::State* state_) {

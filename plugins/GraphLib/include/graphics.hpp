@@ -203,9 +203,9 @@ namespace graphics {
             virtual void Draw(const dr4::Image &img, const dr4::Vec2f &pos) override;
             virtual void Draw(const dr4::Texture &texture, const dr4::Vec2f &pos) override;
 
-            virtual void Display();
+            virtual void Display() const;
 
-            virtual void Clear(const dr4::Color& color);
+            virtual void Clear(dr4::Color color);
 
             void* GetTexture() const {return texture_;};
     };
@@ -259,7 +259,7 @@ namespace graphics {
 
             virtual bool IsOpen() const override;
 
-            virtual void Open() override {};
+            virtual void Open() override;
             virtual void Close() override;
 
             virtual void Clear(const dr4::Color &color) override;

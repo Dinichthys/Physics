@@ -116,7 +116,7 @@ class Widget : public hui::Widget {
             if (hidden_) {
                 return;
             }
-            texture->Display();
+            // texture->Display();
             if (parent != NULL) {
                 (dynamic_cast<::Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
                 texture->Clear(dr4::Color(0, 0, 0, 0));

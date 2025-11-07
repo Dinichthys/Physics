@@ -32,9 +32,7 @@ class Button : public WidgetContainer {
     public:
         explicit Button(const Button& other)
             :WidgetContainer(other),
-             button_background_(dr4::Rect2f({0, 0}, {other.GetWidth(), other.GetHeight()}),
-                                other.released_color_) {
-
+             button_background_(other.button_background_) {
             pressed_ = other.GetPressedInfo();
             pressed_color_ = other.GetPressedColor();
             released_color_ = other.GetReleasedColor();
@@ -57,8 +55,13 @@ class Button : public WidgetContainer {
                         colors::Color released_color = kReleaseColor,
                         float character_size = 0)
             :WidgetContainer(lt_corner, width, height, state),
-             button_background_(dr4::Rect2f({0, 0}, {width, height}), released_color),
              pressed_color_(pressed_color), released_color_(released_color) {
+            button_background_.rect.pos = {0, 0};
+            button_background_.rect.size = {width, height};
+            button_background_.fill = released_color;
+            button_background_.borderColor = dr4::Color(0, 0, 0, 0);
+            button_background_.borderThickness = 0;
+
             pressed_ = false;
 
             if ((strcmp(text.c_str(), "") != 0) && (strcmp(file_name.c_str(), "") != 0)) {
@@ -155,7 +158,7 @@ class PanelControl : public WidgetContainer {
     public:
         explicit PanelControl(const PanelControl& other)
             :WidgetContainer(other),
-             background_(dr4::Rect2f({0, 0}, {other.GetWidth(), other.GetHeight()}), kPanelColor) {
+             background_(other.background_) {
             Widget::SetParent(other.GetParent());
             WidgetContainer::SetParentToChildren();
         };
@@ -163,8 +166,11 @@ class PanelControl : public WidgetContainer {
         explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
                               hui::State* state = NULL,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
-            :WidgetContainer(lt_corner, width, height, state, buttons),
-             background_(dr4::Rect2f({0, 0}, {width, height}), kPanelColor) {
+            :WidgetContainer(lt_corner, width, height, state, buttons) {
+            background_.rect.pos = {0, 0}; background_.rect.size = {width, height};
+            background_.fill = kPanelColor;
+            background_.borderColor = dr4::Color(0, 0, 0, 0); background_.borderThickness = 0;
+
             Widget::SetParent(parent);
             WidgetContainer::SetParentToChildren();
         };

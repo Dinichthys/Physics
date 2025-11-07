@@ -72,8 +72,11 @@ class InfoTable : public Widget {
              text_coeff_absorption_(Coordinates(2, 0, height / kFieldsNum * 5),
                                     width, height / kFieldsNum, state,
                                     this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
-                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
-             rect_(dr4::Rect2f({0, 0}, {width, height}), kInfoTableColor) {
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale) {
+            rect_.rect.pos = {0, 0}; rect_.rect.size = {width, height};
+            rect_.fill = kInfoTableColor;
+            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+
             object_ = object;
         };
 
