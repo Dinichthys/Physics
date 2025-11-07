@@ -1,6 +1,12 @@
 [submodule "libs/mipt-ded-zemax"]
 	path = libs/mipt-ded-zemax
-	url = https://github.com/random-username-here/mipt-ded-zemax
+	url = https://github.com/random-username-here/mipt-ded-zemax.git
+	branch = draft1
+
 [submodule "plugins/dr4hui-backend"]
 	path = plugins/dr4hui-backend
 	url = https://github.com/sevaphasol/dr4hui-backend.git
+
+[submodule "plugins/Egor_dr4_backend"]
+	path = plugins/Egor_dr4_backend
+	url = https://github.com/NeIIor/sfml-dr4-backend.git

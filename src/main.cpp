@@ -164,8 +164,9 @@ int main() {
     desktop_children.push_back(new InfoTable(Coordinates(2, 920, 0), 160, 410, circles_arr + 0, NULL));
     scene_manager->SetInfoTable(dynamic_cast<InfoTable*>(desktop_children.back()));
 
-    UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4.so");
-    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
+    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4.so");
+    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Egor_dr4_backend/build/dr4_sfml_backend.so");
+    UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 
     enum RendererError result = renderer.ShowWindow();
     if (result != kDoneRenderer) {

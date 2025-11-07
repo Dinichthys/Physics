@@ -20,8 +20,9 @@ class Text : public Widget {
             text_.pos = {0, 0};
             text_.fontSize = (character_size > 0) ? character_size : height;
             if ((state != NULL) && (font_file_name.compare("") != 0)) {
-                text_.font = state->window_->CreateFont();
-                text_.font->loadFromFile(font_file_name);
+                dr4::Font* new_font = state->window_->CreateFont();
+                new_font->loadFromFile(font_file_name);
+                text_.font = new_font;
             } else {
                 text_.font = NULL;
             }
@@ -31,8 +32,9 @@ class Text : public Widget {
             :Widget(other), font_file_name_(other.font_file_name_) {
             text_ = other.text_;
             if ((state != NULL) && (font_file_name_.compare("") != 0)) {
-                text_.font = state->window_->CreateFont();
-                text_.font->loadFromFile(font_file_name_);
+                dr4::Font* new_font = state->window_->CreateFont();
+                new_font->loadFromFile(font_file_name_);
+                text_.font = new_font;
             } else {
                 text_.font = NULL;
             }
@@ -50,8 +52,9 @@ class Text : public Widget {
                 if (text_.font != NULL) {
                     delete text_.font;
                 }
-                text_.font = state->window_->CreateFont();
-                text_.font->loadFromFile(font_file_name_);
+                dr4::Font* new_font = state->window_->CreateFont();
+                new_font->loadFromFile(font_file_name_);
+                text_.font = new_font;
             }
         }
 
@@ -67,8 +70,9 @@ class Text : public Widget {
                 if (text_.font != NULL) {
                     delete text_.font;
                 }
-                text_.font = state->window_->CreateFont();
-                text_.font->loadFromFile(font_file_name_);
+                dr4::Font* new_font = state->window_->CreateFont();
+                new_font->loadFromFile(font_file_name_);
+                text_.font = new_font;
             }
         };
 };
