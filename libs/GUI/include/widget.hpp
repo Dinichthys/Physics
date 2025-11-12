@@ -61,7 +61,10 @@ class Widget : public hui::Widget {
             if (state != NULL) {
                 texture = state->window_->CreateTexture();
                 texture->SetSize({width_, height_});
-                texture->Draw(*(other.texture), {0, 0});
+                dr4::Vec2f old_pos = other.texture->GetPos();
+                other.texture->SetPos({0, 0});
+                texture->Draw(*(other.texture));
+                other.texture->SetPos(old_pos);
             } else {
                 texture = NULL;
             }
@@ -77,7 +80,8 @@ class Widget : public hui::Widget {
             texture = state->window_->CreateTexture();
             texture->SetSize({width_, height_});
             if (tmp != NULL) {
-                texture->Draw(*tmp, {0, 0});
+                tmp->SetPos({0, 0});
+                texture->Draw(*tmp);
                 delete tmp;
             }
         };
@@ -90,12 +94,6 @@ class Widget : public hui::Widget {
         virtual Coordinates GetLTCornerLoc() const {
             return Coordinates(2, relPos.x, relPos.y);
         };
-        virtual Coordinates GetLTCornerAbs() const {
-            return (parent_ == NULL) ? Coordinates(2, relPos.x, relPos.y)
-                                     : Coordinates(2, relPos.x, relPos.y) + parent_->GetLTCornerAbs();
-        };
-        virtual Coordinates GetRBCornerLoc() const {return GetLTCornerLoc() + Coordinates(2, width_, height_);};
-        virtual Coordinates GetRBCornerAbs() const {return GetLTCornerAbs() + Coordinates(2, width_, height_);};
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
         virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::Widget::SetSize(size);};
@@ -118,7 +116,8 @@ class Widget : public hui::Widget {
             }
             // texture->Display();
             if (parent != NULL) {
-                (dynamic_cast<::Widget*>(parent))->GetTexture()->Draw(*texture, relPos);
+                texture->SetPos(relPos);
+                (dynamic_cast<::Widget*>(parent))->GetTexture()->Draw(*texture);
                 texture->Clear(dr4::Color(0, 0, 0, 0));
             }
         };

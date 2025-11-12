@@ -13,8 +13,10 @@
 #include "my_assert.h"
 
 RendererError UI::ShowWindow() {
-    dr4::Rectangle background = {.rect = dr4::Rect2f({0, 0}, {(float)GetWidth(), (float)GetHeight()}),
-                                 .fill = kBackgroundColor};
+    dr4::Rectangle* background = window_->CreateRectangle();
+    background->SetPos({0, 0});
+    background->SetSize({(float)GetWidth(), (float)GetHeight()});
+    background->SetFillColor(kBackgroundColor);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto start_time = end_time;
@@ -43,7 +45,7 @@ RendererError UI::ShowWindow() {
         if (kOneSceneUpdateTimeInMicro <= duration) {
             duration = 0;
 
-            texture->Draw(background);
+            texture->Draw(*background);
 
             WidgetContainer::Redraw();
 
@@ -54,6 +56,8 @@ RendererError UI::ShowWindow() {
             window_->Display();
         }
     }
+
+    delete background;
 
     return kDoneRenderer;
 }
@@ -99,7 +103,7 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
         }
         case(dr4::Event::Type::KEY_DOWN) : {
             hui::KeyPressed hui_event;
-            hui_event.mod = event.key.mod;
+            hui_event.mod = event.key.mods;
             hui_event.sym = event.key.sym;
             hui_event.Apply(*this);
 

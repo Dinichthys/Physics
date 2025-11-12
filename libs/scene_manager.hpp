@@ -158,6 +158,7 @@ class SceneManager : public Widget {
 
             if (image_ != NULL) {
                 image_->SetSize({width, height});
+                image_->SetPos({0, 0});
             }
 
             cur_object_idx_ = -1;
@@ -187,6 +188,7 @@ class SceneManager : public Widget {
                         image_->SetPixel(j, i, tmp->GetPixel(j, i));
                     }
                 }
+                image_->SetPos({0, 0});
                 delete tmp;
             }
             Widget::SetState(state_);

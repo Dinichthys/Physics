@@ -32,7 +32,7 @@ void SceneManager::Redraw() {
     t3.join();
     t4.join();
 
-    texture->Draw(*image_, {0, 0});
+    texture->Draw(*image_);
     Widget::Redraw();
 }
 

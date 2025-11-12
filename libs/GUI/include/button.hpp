@@ -25,14 +25,22 @@ static const float kTextInButtonShiftHor = 0.1f;
 class Button : public WidgetContainer {
     private:
         bool pressed_;
-        dr4::Rectangle button_background_;
+        dr4::Rectangle* button_background_;
         colors::Color pressed_color_;
         colors::Color released_color_;
 
     public:
         explicit Button(const Button& other)
             :WidgetContainer(other),
-             button_background_(other.button_background_) {
+             button_background_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+            if (button_background_ != NULL) {
+                button_background_->SetPos(other.button_background_->GetPos());
+                button_background_->SetSize(other.button_background_->GetSize());
+                button_background_->SetFillColor(other.button_background_->GetFillColor());
+                button_background_->SetBorderColor(other.button_background_->GetBorderColor());
+                button_background_->SetBorderThickness(other.button_background_->GetBorderThickness());
+            }
+
             pressed_ = other.GetPressedInfo();
             pressed_color_ = other.GetPressedColor();
             released_color_ = other.GetReleasedColor();
@@ -55,12 +63,15 @@ class Button : public WidgetContainer {
                         colors::Color released_color = kReleaseColor,
                         float character_size = 0)
             :WidgetContainer(lt_corner, width, height, state),
+             button_background_((state == NULL) ? NULL : state->window_->CreateRectangle()),
              pressed_color_(pressed_color), released_color_(released_color) {
-            button_background_.rect.pos = {0, 0};
-            button_background_.rect.size = {width, height};
-            button_background_.fill = released_color;
-            button_background_.borderColor = dr4::Color(0, 0, 0, 0);
-            button_background_.borderThickness = 0;
+            if (button_background_ != NULL) {
+                button_background_->SetPos({0, 0});
+                button_background_->SetSize({width, height});
+                button_background_->SetFillColor(released_color);
+                button_background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                button_background_->SetBorderThickness(0);
+            }
 
             pressed_ = false;
 
@@ -78,12 +89,31 @@ class Button : public WidgetContainer {
             WidgetContainer::SetParentToChildren();
         };
 
+        ~Button() {
+            delete button_background_;
+        };
+
+        virtual void SetState(hui::State* state_) {
+            state = state_;
+
+            if (button_background_ == NULL) {
+                button_background_ = state->window_->CreateRectangle();
+                button_background_->SetPos({0, 0});
+                button_background_->SetSize(Widget::GetSize());
+                button_background_->SetFillColor(pressed_color_);
+                button_background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                button_background_->SetBorderThickness(0);
+            }
+
+            WidgetContainer::SetState(state_);
+        };
+
         virtual void SetSize(dr4::Vec2f size) override {
             Widget::SetSize(size);
             if (WidgetContainer::GetChildrenNum() != 0) {
                 WidgetContainer::GetChild(0)->SetSize(size);
             };
-            button_background_.rect.size = size;
+            button_background_->SetSize(size);
         };
 
         void SetText(const std::string& text_str) {
@@ -110,8 +140,8 @@ class Button : public WidgetContainer {
                                          color.GetBrightness());
             }
 
-            button_background_.fill = color;
-            texture->Draw(button_background_);
+            button_background_->SetFillColor(color);
+            texture->Draw(*button_background_);
 
             WidgetContainer::Redraw();
         };
@@ -153,7 +183,7 @@ class Button : public WidgetContainer {
 
 class PanelControl : public WidgetContainer {
     private:
-        dr4::Rectangle background_;
+        dr4::Rectangle* background_;
 
     public:
         explicit PanelControl(const PanelControl& other)
@@ -166,20 +196,44 @@ class PanelControl : public WidgetContainer {
         explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
                               hui::State* state = NULL,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
-            :WidgetContainer(lt_corner, width, height, state, buttons) {
-            background_.rect.pos = {0, 0}; background_.rect.size = {width, height};
-            background_.fill = kPanelColor;
-            background_.borderColor = dr4::Color(0, 0, 0, 0); background_.borderThickness = 0;
+            :WidgetContainer(lt_corner, width, height, state, buttons),
+             background_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+            if (background_ != NULL) {
+                background_->SetPos({0, 0});
+                background_->SetSize({width, height});
+                background_->SetFillColor(kPanelColor);
+                background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                background_->SetBorderThickness(0);
+            }
 
             Widget::SetParent(parent);
             WidgetContainer::SetParentToChildren();
+        };
+
+        ~PanelControl() {
+            delete background_;
+        };
+
+        virtual void SetState(hui::State* state_) {
+            state = state_;
+
+            if (background_ == NULL) {
+                background_ = state->window_->CreateRectangle();
+                background_->SetPos({0, 0});
+                background_->SetSize(Widget::GetSize());
+                background_->SetFillColor(kPanelColor);
+                background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                background_->SetBorderThickness(0);
+            }
+
+            WidgetContainer::SetState(state_);
         };
 
         virtual void Redraw() override {
             if (Widget::GetHidden()) {
                 return;
             }
-            texture->Draw(background_);
+            texture->Draw(*background_);
 
             WidgetContainer::Redraw();
         };

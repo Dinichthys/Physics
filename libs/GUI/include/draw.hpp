@@ -82,6 +82,7 @@ class UI : public WidgetContainer {
         dr4::Window* CreateWindow(const dr4::Vec2f& size, const char* name, const char* const dll_backend_name) {
             void* dll = dlopen(dll_backend_name, RTLD_NOW | RTLD_NODELETE);
             if (dll == NULL) {
+                fprintf(stderr, "%s\n", dlerror());
                 throw std::runtime_error("Can't upload dll with backend\n");
             }
 
@@ -96,9 +97,9 @@ class UI : public WidgetContainer {
             backend_ = CreateBackend();
 
             dr4::Window* window = backend_->CreateWindow();
+            window->Open();
             window->SetSize(size);
             window->SetTitle(name);
-            window->Open();
             return window;
         }
 };

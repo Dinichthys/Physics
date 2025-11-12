@@ -42,20 +42,24 @@ class ListObjects : public WidgetContainer {
         int64_t start_index_;
 
         const std::vector<Object*>& objects_;
-        std::vector<Text> texts_;
 
         std::function<void(size_t)> action_;
 
-        dr4::Rectangle rect_;
+        dr4::Rectangle* rect_;
         float collected_delta_;
 
     public:
         explicit ListObjects(const Coordinates& lt_corner, const std::vector<Object*>& objects,
                              std::function<void(size_t)> action, hui::State* state = NULL)
-                    :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects), action_(action) {
-            rect_.rect.pos = {0, 0}; rect_.rect.size = {kWidth, kHeight};
-            rect_.fill = kListColor;
-            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+                    :WidgetContainer(lt_corner, kWidth, kHeight, state), objects_(objects), action_(action),
+                    rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+            if (rect_ != NULL) {
+                rect_->SetPos({0, 0});
+                rect_->SetSize({kWidth, kHeight});
+                rect_->SetFillColor(kListColor);
+                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                rect_->SetBorderThickness(0);
+            }
 
             start_index_ = 0;
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects.size()); idx++) {
@@ -84,6 +88,10 @@ class ListObjects : public WidgetContainer {
                                             }
                                         }));
         };
+
+        ~ListObjects() {
+            delete rect_;
+        }
 
         float& GetCollectedDelta() {return collected_delta_;};
 
@@ -161,7 +169,7 @@ class ListObjects : public WidgetContainer {
                 return;
             }
 
-            texture->Draw(rect_);
+            texture->Draw(*rect_);
 
             for (size_t idx = 0; (idx < kMaxNumLines) && (idx < objects_.size()); idx++) {
                 (dynamic_cast<Button*>(WidgetContainer::GetChild(idx)))->SetText(ObjectInList(start_index_ + idx));
@@ -175,10 +183,16 @@ class ListObjects : public WidgetContainer {
 
         virtual void SetState(hui::State* state_) {
             state = state_;
-            size_t texts_num = texts_.size();
-            for (size_t i = 0; i < texts_num; i++) {
-                texts_[i].SetState(state_);
+
+            if (rect_ == NULL) {
+                rect_ = state->window_->CreateRectangle();
+                rect_->SetPos({0, 0});
+                rect_->SetSize({kWidth, kHeight});
+                rect_->SetFillColor(kListColor);
+                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                rect_->SetBorderThickness(0);
             }
+
             WidgetContainer::SetState(state_);
         };
 };
@@ -188,7 +202,7 @@ class ListObjectsTitle : public Widget {
         ListObjects* list_;
         Text text_;
         Button button_;
-        dr4::Rectangle rect_;
+        dr4::Rectangle* rect_;
 
     public:
         explicit ListObjectsTitle(const Coordinates& lt_corner, ListObjects* list_objects, hui::State* state = NULL)
@@ -199,13 +213,22 @@ class ListObjectsTitle : public Widget {
                    kListObjectsTitleHeight / kTextScaleTitleHeight),
              button_(Coordinates(2, kWidth - kListObjectsTitleHeight), kListObjectsTitleHeight,
                      kListObjectsTitleHeight, kListTitleHeightClosedButtonText,
-                     kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor) {
-            rect_.rect.pos = {0, 0}; rect_.rect.size = {kWidth, kListObjectsTitleHeight};
-            rect_.fill = kListColor;
-            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+                     kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
+             rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+            if (rect_ != NULL) {
+                rect_->SetPos({0, 0});
+                rect_->SetSize({kWidth, kListObjectsTitleHeight});
+                rect_->SetFillColor(kListColor);
+                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                rect_->SetBorderThickness(0);
+            }
 
             list_->SetHidden(true);
         };
+
+        ~ListObjectsTitle() {
+            delete rect_;
+        }
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
             if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
@@ -239,7 +262,7 @@ class ListObjectsTitle : public Widget {
         };
 
         virtual void Redraw() override {
-            texture->Draw(rect_);
+            texture->Draw(*rect_);
             button_.Redraw();
             text_.Redraw();
             Widget::Redraw();
@@ -247,6 +270,16 @@ class ListObjectsTitle : public Widget {
 
         virtual void SetState(hui::State* state_) {
             state = state_;
+
+            if (rect_ == NULL) {
+                rect_ = state->window_->CreateRectangle();
+                rect_->SetPos({0, 0});
+                rect_->SetSize({kWidth, kListObjectsTitleHeight});
+                rect_->SetFillColor(kListColor);
+                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                rect_->SetBorderThickness(0);
+            }
+
             text_.SetState(state);
             button_.SetState(state);
             Widget::SetState(state);

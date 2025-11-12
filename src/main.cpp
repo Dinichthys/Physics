@@ -165,10 +165,11 @@ int main() {
     scene_manager->SetInfoTable(dynamic_cast<InfoTable*>(desktop_children.back()));
 
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");
-    UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Artem/plugin/libswuix_sdl3.so");
+    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");
+    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Artem/plugin/libswuix_sdl3.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Egor_dr4_backend/build/dr4_sfml_backend.so");
-    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
+    UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 
     enum RendererError result = renderer.ShowWindow();
     if (result != kDoneRenderer) {

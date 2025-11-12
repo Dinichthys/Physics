@@ -42,7 +42,7 @@ class InfoTable : public Widget {
 
         const Object* object_;
 
-        dr4::Rectangle rect_;
+        dr4::Rectangle* rect_;
 
     public:
         explicit InfoTable(const Coordinates& lt_corner, float width, float height, const Object* object,
@@ -72,13 +72,22 @@ class InfoTable : public Widget {
              text_coeff_absorption_(Coordinates(2, 0, height / kFieldsNum * 5),
                                     width, height / kFieldsNum, state,
                                     this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
-                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale) {
-            rect_.rect.pos = {0, 0}; rect_.rect.size = {width, height};
-            rect_.fill = kInfoTableColor;
-            rect_.borderColor = dr4::Color(0, 0, 0, 0); rect_.borderThickness = 0;
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+            rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+            if (rect_ != NULL) {
+                rect_->SetPos({0, 0});
+                rect_->SetSize({width, height});
+                rect_->SetFillColor(kInfoTableColor);
+                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+                rect_->SetBorderThickness(0);
+            }
 
             object_ = object;
         };
+
+        ~InfoTable() {
+            delete rect_;
+        }
 
         const std::string TypeToStr(ObjectType type) {
         #define CASE_TYPE_TO_STRING_(type) \
@@ -172,6 +181,19 @@ class InfoTable : public Widget {
 
         void SetState(hui::State* state_) {
             state = state_;
+
+            if (rect_ == NULL) {
+                delete rect_;
+            }
+
+            rect_ = state->window_->CreateRectangle();
+
+            rect_->SetPos({0, 0});
+            rect_->SetSize(Widget::GetSize());
+            rect_->SetFillColor(kInfoTableColor);
+            rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
+            rect_->SetBorderThickness(0);
+
             text_type_.SetState(state);
             text_color_.SetState(state);
             text_center_.SetState(state);
@@ -185,7 +207,7 @@ class InfoTable : public Widget {
             if (Widget::GetHidden()) {
                 return;
             }
-            texture->Draw(rect_);
+            texture->Draw(*rect_);
             text_type_.Redraw();
             text_center_.SetText(CoordinatesToStr(object_->GetCenterCoordinates()));
             text_center_.Redraw();
