@@ -24,6 +24,8 @@
 
 #include "my_assert.h"
 
+#include "dorisovka.hpp"
+
 static const float kEyeHeight = 2000;
 static const Coordinates start_eye_pos(3, 0, 0, -1000);
 static const float kPowCosB = 32;
@@ -140,6 +142,8 @@ class SceneManager : public Widget {
         InfoTable* table_;
         PanelControl* panel_;
 
+        Dorisovka* dorisovka_;
+
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
                      const std::vector<Object*> objects, hui::State* state)
@@ -165,6 +169,7 @@ class SceneManager : public Widget {
             border_idx_ = -1;
 
             table_ = NULL;
+            dorisovka_ = NULL;
         };
 
         ~SceneManager() {
@@ -174,6 +179,9 @@ class SceneManager : public Widget {
                 objects_.pop_back();
             }
             delete image_;
+            if (dorisovka_ != NULL) {
+                delete dorisovka_;
+            }
         };
 
         virtual void SetState(hui::State* state_) {
@@ -335,7 +343,25 @@ class SceneManager : public Widget {
             cur_object_color_ = cur_object_color_ + color;
         };
 
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
+            if (dorisovka_ != NULL) {
+                return dorisovka_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc());
+            }
+            return Widget::OnMouseEnter(mouse_pos);
+        }
+
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+            if (dorisovka_ != NULL) {
+                return dorisovka_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc());
+            }
+            return Widget::OnMouseRelease(mouse_pos);
+        }
+
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (dorisovka_ != NULL) {
+                return dorisovka_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc());
+            }
+
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
@@ -401,6 +427,21 @@ class SceneManager : public Widget {
             }
 
             return false;
+        };
+
+        virtual bool OnLetterG() override {
+            if (dorisovka_ == NULL) {
+                dorisovka_ = new Dorisovka(Coordinates(2), Widget::GetSize(), kDorisovkaPlugName, state);
+                dorisovka_->SetParent(this);
+            }
+            return true;
+        };
+        virtual bool OnESC() override {
+            if (dorisovka_ != NULL) {
+                delete dorisovka_;
+                dorisovka_ = NULL;
+            }
+            return true;
         };
 
     private:

@@ -14,6 +14,11 @@ static const colors::Color kDefaultButtonColor = colors::kColorBlue;
 static const colors::Color kPressedColor = colors::kColorGreen;
 static const colors::Color kReleaseColor = colors::kColorRed;
 static const colors::Color kPanelColor = colors::Color(60, 56, 54);
+static const colors::Color kButtonBorderColor = colors::kColorWhite;
+static const colors::Color kPanelBorderColor = colors::kColorWhite;
+
+static const float kButtonBorderThickness = 5;
+static const float kPanelBorderThickness = 7;
 
 static uint8_t kHoveredColorScale = 2;
 
@@ -69,8 +74,8 @@ class Button : public WidgetContainer {
                 button_background_->SetPos({0, 0});
                 button_background_->SetSize({width, height});
                 button_background_->SetFillColor(released_color);
-                button_background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                button_background_->SetBorderThickness(0);
+                button_background_->SetBorderColor(kButtonBorderColor);
+                button_background_->SetBorderThickness(kButtonBorderThickness);
             }
 
             pressed_ = false;
@@ -202,8 +207,8 @@ class PanelControl : public WidgetContainer {
                 background_->SetPos({0, 0});
                 background_->SetSize({width, height});
                 background_->SetFillColor(kPanelColor);
-                background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                background_->SetBorderThickness(0);
+                background_->SetBorderColor(kPanelBorderColor);
+                background_->SetBorderThickness(kPanelBorderThickness);
             }
 
             Widget::SetParent(parent);

@@ -14,6 +14,13 @@
 #include "my_assert.h"
 
 void SceneManager::Redraw() {
+    if (dorisovka_ != NULL) {
+        texture->Draw(*image_);
+        dorisovka_->Redraw();
+        Widget::Redraw();
+        return;
+    }
+
     size_t width = Widget::GetWidth();
     size_t height = Widget::GetHeight();
 

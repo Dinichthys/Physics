@@ -127,7 +127,7 @@ class Widget : public hui::Widget {
             relPos.y += shift_y;
         };
 
-        bool EventInside(dr4::Vec2f& pos) {
+        bool EventInside(dr4::Vec2f pos) {
             return (pos.x > relPos.x)
                 && (pos.y > relPos.y)
                 && (pos.x < relPos.x + width_)
@@ -197,6 +197,9 @@ class Widget : public hui::Widget {
         virtual bool OnLetterD() {
             return false;
         };
+        virtual bool OnLetterG() {
+            return false;
+        };
         virtual bool OnLetterS() {
             return false;
         };
@@ -214,6 +217,9 @@ class Widget : public hui::Widget {
             return false;
         };
         virtual bool OnArrowDown() {
+            return false;
+        };
+        virtual bool OnESC() {
             return false;
         };
 };
@@ -399,6 +405,18 @@ class WidgetContainer : public ::Widget {
             }
             return false;
         };
+        virtual bool OnLetterG() override {
+            if (hidden_) {
+                return false;
+            }
+            size_t children_num = children_.size();
+            for (size_t i = 0; i < children_num; i++) {
+                if (children_[i]->OnLetterG()) {
+                    return true;
+                }
+            }
+            return false;
+        };
         virtual bool OnLetterS() override {
             if (hidden_) {
                 return false;
@@ -467,6 +485,18 @@ class WidgetContainer : public ::Widget {
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
                 if (children_[i]->OnArrowDown()) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        virtual bool OnESC() override {
+            if (hidden_) {
+                return false;
+            }
+            size_t children_num = children_.size();
+            for (size_t i = 0; i < children_num; i++) {
+                if (children_[i]->OnESC()) {
                     return true;
                 }
             }

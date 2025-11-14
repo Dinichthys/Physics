@@ -49,7 +49,7 @@ RendererError UI::ShowWindow() {
 
             WidgetContainer::Redraw();
 
-            window_->Draw(*texture, {0, 0});
+            window_->Draw(*texture);
 
             texture->Clear(dr4::Color(0, 0, 0, 255));
 

@@ -13,3 +13,6 @@
 [submodule "plugins/MyDR4Backend"]
 	path = plugins/MyDR4Backend
 	url = https://github.com/Dinichthys/DR4Backend.git
+[submodule "plugins/MyGeomPrimBackend"]
+	path = plugins/MyGeomPrimBackend
+	url = https://github.com/Dinichthys/GeomPrimitiveBackend.git

@@ -32,7 +32,6 @@ class Text : public Widget {
                 dr4::Font* new_font = state->window_->CreateFont();
                 if (new_font != NULL) { new_font->LoadFromFile(font_file_name); }
                 text_->SetFont(new_font);
-                delete new_font;
             }
         };
 
@@ -52,7 +51,6 @@ class Text : public Widget {
                 dr4::Font* new_font = state->window_->CreateFont();
                 if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
                 text_->SetFont(new_font);
-                delete new_font;
             }
         };
 
@@ -73,7 +71,6 @@ class Text : public Widget {
                 dr4::Font* new_font = state_->window_->CreateFont();
                 if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
                 text_->SetFont(new_font);
-                delete new_font;
             }
             Widget::SetState(state_);
         }
@@ -90,7 +87,6 @@ class Text : public Widget {
                 dr4::Font* new_font = state->window_->CreateFont();
                 if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
                 text_->SetFont(new_font);
-                delete new_font;
             }
         };
 };

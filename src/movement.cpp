@@ -8,34 +8,52 @@
 #include "my_assert.h"
 
 bool SceneManager::OnLetterA() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     eye_.SetEyePos(eye_.GetEyePos() + (!(eye_.GetEyeLTCorner() - eye_.GetEyeRTCorner()))
      * kStepEye);
     return true;
 }
 
 bool SceneManager::OnLetterD() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     eye_.SetEyePos(eye_.GetEyePos() - (!(eye_.GetEyeLTCorner() - eye_.GetEyeRTCorner()))
      * kStepEye);
     return true;
 }
 
 bool SceneManager::OnLetterS() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     eye_.SetEyePos(eye_.GetEyePos() - (!(eye_.GetEyeLTCorner() + eye_.GetEyeRBCorner()))
      * kStepEye);
     return true;
 }
 
 bool SceneManager::OnLetterW() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     eye_.SetEyePos(eye_.GetEyePos() + (!(eye_.GetEyeLTCorner() + eye_.GetEyeRBCorner()))
      * kStepEye);
     return true;
 }
 
 bool SceneManager::OnArrowRight() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     return CameraRotationInTwoAxis(0, 2, 1);
 }
 
 bool SceneManager::OnArrowLeft() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     return CameraRotationInTwoAxis(0, 2, -1);
 }
 
@@ -69,6 +87,9 @@ bool SceneManager::CameraRotationInTwoAxis(size_t axis_1, size_t axis_2, float d
 }
 
 bool SceneManager::OnArrowUp() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
     Coordinates rt_corner = eye_.GetEyeRTCorner();
@@ -107,6 +128,9 @@ bool SceneManager::OnArrowUp() {
 }
 
 bool SceneManager::OnArrowDown() {
+    if (dorisovka_ != NULL) {
+        return false;
+    }
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
     Coordinates rt_corner = eye_.GetEyeRTCorner();

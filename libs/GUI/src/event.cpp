@@ -36,6 +36,10 @@ hui::EventResult hui::KeyPressed::Apply(hui::Widget &widget) {
             return (dynamic_cast<::Widget&>(widget)).OnLetterD() ? hui::EventResult::HANDLED
                                                                  : hui::EventResult::UNHANDLED;
         }
+        case dr4::KeyCode::KEYCODE_G : {
+            return (dynamic_cast<::Widget&>(widget)).OnLetterG() ? hui::EventResult::HANDLED
+                                                                 : hui::EventResult::UNHANDLED;
+        }
         case dr4::KeyCode::KEYCODE_S : {
             return (dynamic_cast<::Widget&>(widget)).OnLetterS() ? hui::EventResult::HANDLED
                                                                  : hui::EventResult::UNHANDLED;
@@ -60,6 +64,10 @@ hui::EventResult hui::KeyPressed::Apply(hui::Widget &widget) {
         case dr4::KeyCode::KEYCODE_DOWN : {
             return (dynamic_cast<::Widget&>(widget)).OnArrowDown() ? hui::EventResult::HANDLED
                                                                    : hui::EventResult::UNHANDLED;
+        }
+        case dr4::KeyCode::KEYCODE_ESCAPE : {
+            return (dynamic_cast<::Widget&>(widget)).OnESC() ? hui::EventResult::HANDLED
+                                                             : hui::EventResult::UNHANDLED;
         }
 
         default:
