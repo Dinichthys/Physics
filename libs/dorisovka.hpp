@@ -91,16 +91,6 @@ class Dorisovka : public WidgetContainer {
                 delete target_;
             }
             target_ = backend_->CreateGeomPrim(id, state->window_);
-
-            dr4::Line* line = state->window_->CreateLine();
-            line->SetThickness(100);
-            line->SetStart({0, 0});
-            line->SetEnd(Widget::GetSize());
-            line->SetColor({255, 0, 0});
-            line->DrawOn(*texture);
-            delete line;
-
-            fprintf(stderr, "geom prim - %lu\ntarget_ = %p\n\n", id, target_);
             is_changing_ = false;
         }
 
