@@ -9,6 +9,8 @@
 #include "dr4/window.hpp"
 #include "hui/container.hpp"
 
+#include "cum/manager.hpp"
+
 #include "vector.hpp"
 #include "logging.h"
 
@@ -19,6 +21,7 @@ class hui::State {
         Widget* target_widget_;
         Widget* hovered_widget_;
         dr4::Window* window_;
+        cum::Manager manager;
 };
 
 class Widget : public hui::Widget {

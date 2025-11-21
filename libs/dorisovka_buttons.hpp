@@ -27,4 +27,24 @@ class GeomPrimCreationButton : public Button {
         };
 };
 
+class GeomPrimToolBar : public PanelControl {
+    public:
+        GeomPrimToolBar(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
+                        hui::State* state = NULL,
+                        const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
+            :PanelControl(lt_corner, width, height, state, buttons, parent) {};
+
+        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (!PanelControl::OnMousePress(mouse_pos)) {
+                return false;
+            }
+
+            if (state->target_widget_ == this) {
+                state->target_widget_ = NULL;
+            }
+
+            return true;
+        };
+};
+
 #endif // DORISOVKA_BUTTONS_HPP

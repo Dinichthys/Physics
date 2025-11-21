@@ -6,7 +6,10 @@
 #include <stdexcept>
 
 #include "widget.hpp"
-#include "cum/geomprim_ifc.hpp"
+#include "pp/canvas.hpp"
+#include "pp/shape.hpp"
+#include "pp/tool.hpp"
+#include "cum/ifc/pp.hpp"
 
 #include "dr4/math/rect.hpp"
 
@@ -15,7 +18,7 @@
 static const size_t kRectangleID = 0;
 static const size_t kCircleID = 1;
 static const size_t kArrowID = 2;
-static const float kGeomButtonWidth = 50;
+static const float kGeomButtonWidth = 60;
 static const float kGeomButtonHeight = 25;
 
 static const std::string kFontFileNameGeomPrim = "data/font.ttf";
@@ -27,25 +30,33 @@ static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build
 
 static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
 
-class Dorisovka : public WidgetContainer {
+class Dorisovka : public WidgetContainer, public pp::Canvas {
     private:
-        hui::GeomPrimBackend* backend_;
-        std::vector<hui::GeomPrim*> prims_;
-        hui::GeomPrim* target_;
+        cum::PPToolPlugin* backend_;
+        std::unordered_map<size_t, pp::Shape*> prims_;
+        std::vector<std::unique_ptr<pp::Tool>> tools_;
+        pp::State pp_state_;
+        size_t unique_id_in_map_;
 
-        bool is_changing_;
+        const pp::ControlsTheme kTheme = {.shapeColor = colors::Color(0, 0, 0, 0),
+                                          .lineColor = colors::kColorGreen,
+                                          .textColor = colors::kColorBlack,
+                                          .baseFontSize = 10,
+                                          .handleColor = colors::kColorYellow};
 
     public:
         explicit Dorisovka(const Coordinates& lt_corner, dr4::Vec2f size,
             const char* plugin_name, hui::State* state = NULL)
             :WidgetContainer(lt_corner,  size.x, size.y, state),
-             backend_(CreateBackendMethod(plugin_name)) {
-
+             backend_(dynamic_cast<cum::PPToolPlugin*>(state->manager.LoadFromFile(plugin_name))),
+             tools_(backend_->CreateTools(this)) {
             std::vector<Widget*> buttons;
+
             buttons.push_back(new GeomPrimCreationButton(Button(
                 lt_corner + Coordinates(2, (size.x - kGeomButtonWidth * 3) / 4,
                 (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
-                kGeomButtonWidth, kGeomButtonHeight, kRectangleButtonName,
+                kGeomButtonWidth, kGeomButtonHeight,
+                std::string(tools_[kRectangleID].get()->Name()),
                 kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
                 [this] (size_t id) {
                 this->CreatePrim(id);
@@ -53,7 +64,8 @@ class Dorisovka : public WidgetContainer {
             buttons.push_back(new GeomPrimCreationButton(Button(
                 lt_corner + Coordinates(2, 2 * (size.x - kGeomButtonWidth * 3) / 4 + kGeomButtonWidth,
                 (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
-                kGeomButtonWidth, kGeomButtonHeight, kCircleButtonName,
+                kGeomButtonWidth, kGeomButtonHeight,
+                std::string(tools_[kCircleID].get()->Name()),
                 kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
                 [this] (size_t id) {
                 this->CreatePrim(id);
@@ -61,7 +73,8 @@ class Dorisovka : public WidgetContainer {
             buttons.push_back(new GeomPrimCreationButton(Button(
                 lt_corner + Coordinates(2, 3 * (size.x - kGeomButtonWidth * 3) / 4 + kGeomButtonWidth * 2,
                 (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
-                kGeomButtonWidth, kGeomButtonHeight, kArrowButtonName,
+                kGeomButtonWidth, kGeomButtonHeight,
+                std::string(tools_[kArrowID].get()->Name()),
                 kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
                 [this] (size_t id) {
                 this->CreatePrim(id);
@@ -71,103 +84,124 @@ class Dorisovka : public WidgetContainer {
                 size.x, kGeomPrimPanelControlHeight, state, &buttons
             ));
 
-            is_changing_ = false;
-            target_ = NULL;
+            unique_id_in_map_ = 0;
+            pp_state_.selectedShape = NULL;
+            pp_state_.selectedTool = NULL;
         };
 
         ~Dorisovka() {
-            for (size_t i = 0; i < prims_.size(); i++) {
-                delete prims_[i];
-            }
-
-            delete backend_;
-            if (target_ != NULL) {
-                delete target_;
+            while (!(prims_.empty())) {
+                delete prims_.begin()->second;
+                prims_.erase(prims_.begin());
             }
         };
 
         void CreatePrim(size_t id) {
-            if (target_ != NULL) {
-                delete target_;
+            if (pp_state_.selectedShape != NULL) {
+                delete pp_state_.selectedShape;
             }
-            target_ = backend_->CreateGeomPrim(id, state->window_);
-            is_changing_ = false;
+            if (pp_state_.selectedTool != NULL) {
+                delete pp_state_.selectedTool;
+            }
+            tools_[id].get()->OnStart();
         }
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if ((target_ == NULL) || (!Widget::OnMousePress(mouse_pos))
-               || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
+            if (((pp_state_.selectedShape == NULL) && (pp_state_.selectedTool == NULL))
+                || (!Widget::OnMousePress(mouse_pos))
+                || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
                 bool res = WidgetContainer::OnMousePress(mouse_pos);
                 if (state->target_widget_ == this) {state->target_widget_ = NULL;}
                 return res;
             }
             if (state->target_widget_ == this) {state->target_widget_ = NULL;}
 
-            hui::MouseDownEvent evt;
-            evt.relPos = {mouse_pos[0], mouse_pos[1]};
-            target_->OnMouseDown(evt);
-            prims_.push_back(target_);
-            is_changing_ = true;
+            dr4::Event::MouseButton evt;
+            evt.button = dr4::MouseButtonType::UNKNOWN;
+            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            if (pp_state_.selectedTool != NULL) {
+                pp_state_.selectedTool->OnMouseDown(evt);
+                return true;
+            }
+
+            for (auto shape : prims_) {
+                if (shape.second->OnMouseDown(evt)) {
+                    return true;
+                }
+            }
+
             return true;
         };
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
-            if ((target_ == NULL) || (!Widget::OnMouseRelease(mouse_pos))
-               || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
+            if (((pp_state_.selectedShape == NULL) && (pp_state_.selectedTool == NULL))
+                || (!Widget::OnMouseRelease(mouse_pos))
+                || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
                 return WidgetContainer::OnMouseRelease(mouse_pos);
             }
 
-            if (!is_changing_) {
-                return false;
+            dr4::Event::MouseButton evt;
+            evt.button = dr4::MouseButtonType::UNKNOWN;
+            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            if (pp_state_.selectedTool != NULL) {
+                pp_state_.selectedTool->OnMouseUp(evt);
+                return true;
             }
 
-            hui::MouseUpEvent evt;
-            evt.relPos = {mouse_pos[0], mouse_pos[1]};
-            target_->OnMouseRelease(evt);
-            target_ = NULL;
-            is_changing_ = false;
+            for (auto shape : prims_) {
+                if (shape.second->OnMouseUp(evt)) {
+                    return true;
+                }
+            }
+
             return true;
         };
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
-            if ((target_ == NULL) || (!Widget::OnMouseEnter(mouse_pos))
-               || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
+            if (((pp_state_.selectedShape == NULL) && (pp_state_.selectedTool == NULL))
+                || (!Widget::OnMouseEnter(mouse_pos))
+                || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
                 return WidgetContainer::OnMouseEnter(mouse_pos);
             }
 
-            if (!is_changing_) {
-                return false;
+            dr4::Event::MouseMove evt;
+            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            if (pp_state_.selectedTool != NULL) {
+                pp_state_.selectedTool->OnMouseMove(evt);
+                return true;
             }
 
-            hui::MouseMoveEvent evt;
-            evt.rel = {mouse_pos[0], mouse_pos[1]};
-            target_->OnMouseMove(evt);
+            for (auto shape : prims_) {
+                if (shape.second->OnMouseMove(evt)) {
+                    return true;
+                }
+            }
+
             return true;
         };
 
         virtual void Redraw() override {
-            for (size_t i = 0; i < prims_.size(); i++) {
-                prims_[i]->DrawOn(*texture);
+            for (auto shape : prims_) {
+                shape.second->DrawOn(*texture);
             }
 
             WidgetContainer::Redraw();
         };
 
-    private:
-        hui::GeomPrimBackend* CreateBackendMethod(const char* const dll_backend_name) {
-            void* dll = dlopen(dll_backend_name, RTLD_NOW | RTLD_NODELETE);
-            if (dll == NULL) {
-                fprintf(stderr, "%s\n", dlerror());
-                throw std::runtime_error("Can't upload dll with backend\n");
-            }
-
-            typedef hui::GeomPrimBackend* (*CreateBackend_t) ();
-
-            CreateBackend_t CreateBackend = (CreateBackend_t) dlsym(dll, hui::GeomPrimBackendFunctionName);
-            if (CreateBackend == NULL) {
-                throw std::runtime_error("Can't find function for backend creation in dll\n");
-            }
-            dlclose(dll);
-
-            return CreateBackend();
+        virtual pp::ControlsTheme GetControlsTheme() const override {
+            return kTheme;
+        };
+        virtual pp::State* GetState() override {
+            return &pp_state_;
+        };
+        virtual size_t AddShape(pp::Shape *shape) override {
+            prims_[unique_id_in_map_++] = shape;
+            return unique_id_in_map_ - 1;
+        };
+        virtual void DelShape(size_t ind) override {
+            delete prims_[ind];
+            prims_.erase(ind);
+        };
+        virtual dr4::Window *GetWindow() override {
+            return state->window_;
         };
 };
 

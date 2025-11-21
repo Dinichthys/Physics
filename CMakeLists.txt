@@ -50,6 +50,12 @@ target_compile_options (${PROJECT_NAME}
         -fcheck-new
         -fstrict-overflow
 
+        -ldl
+
+        -rdynamic
+
+        -Wl,-export-dynamic
+
         -march=native
         $<$<CONFIG:Debug>:
             -Og
@@ -70,6 +76,7 @@ target_link_options (${PROJECT_NAME}
     PRIVATE
         -march=native
         -Wl,-q
+        -export-dynamic
         $<$<CONFIG:Debug>:
             -Og
             -g3

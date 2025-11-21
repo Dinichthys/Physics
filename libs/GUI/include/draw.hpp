@@ -1,13 +1,13 @@
 #ifndef DRAW_HPP
 #define DRAW_HPP
 
-#include <dlfcn.h>
 #include <stdexcept>
 #include <iostream>
 
 #include "colors.hpp"
 
-#include "cum/dr4_ifc.hpp"
+#include "cum/manager.hpp"
+#include "cum/ifc/dr4.hpp"
 
 #include "widget.hpp"
 #include "vector.hpp"
@@ -33,7 +33,7 @@ class UI : public WidgetContainer {
     private:
         dr4::Window* const window_;
         hui::State state_;
-        dr4::DR4Backend* backend_;
+        cum::DR4BackendPlugin* backend_;
 
     public:
         explicit UI(float width, float height,
@@ -63,7 +63,6 @@ class UI : public WidgetContainer {
                 window_->Close();
             }
             delete window_;
-            delete backend_;
         };
 
         RendererError ShowWindow();
@@ -80,21 +79,10 @@ class UI : public WidgetContainer {
         RendererError AnalyzeKey(const dr4::Event& event);
 
         dr4::Window* CreateWindow(const dr4::Vec2f& size, const char* name, const char* const dll_backend_name) {
-            void* dll = dlopen(dll_backend_name, RTLD_NOW | RTLD_NODELETE);
-            if (dll == NULL) {
-                fprintf(stderr, "%s\n", dlerror());
-                throw std::runtime_error("Can't upload dll with backend\n");
+            backend_ = dynamic_cast<cum::DR4BackendPlugin*>(state_.manager.LoadFromFile(dll_backend_name));
+            if (backend_ == NULL) {
+                throw std::runtime_error("Can't load from file dr4backend\n");
             }
-
-            typedef dr4::DR4Backend* (*CreateBackend_t) ();
-
-            CreateBackend_t CreateBackend = (CreateBackend_t) dlsym(dll, dr4::DR4BackendFunctionName);
-            if (CreateBackend == NULL) {
-                throw std::runtime_error("Can't find function for backend creation in dll\n");
-            }
-            dlclose(dll);
-
-            backend_ = CreateBackend();
 
             dr4::Window* window = backend_->CreateWindow();
             window->Open();
