@@ -8,6 +8,7 @@
 class Text : public Widget {
     private:
         dr4::Text* text_;
+        dr4::Font* font_;
         std::string font_file_name_;
         std::string str_;
         size_t font_size_;
@@ -19,6 +20,7 @@ class Text : public Widget {
                       float character_size = 0)
             :Widget(lt_corner, width, height, state, parent),
              text_((state == NULL) ? NULL : state->window_->CreateText()),
+             font_((state == NULL) ? NULL : state->window_->CreateFont()),
              font_file_name_(font_file_name),
              str_(text),
              font_size_((character_size > 0) ? character_size : height) {
@@ -29,15 +31,15 @@ class Text : public Widget {
             text_->SetPos({0, 0});
             text_->SetFontSize((character_size > 0) ? character_size : height);
             if ((state != NULL) && (font_file_name.compare("") != 0)) {
-                dr4::Font* new_font = state->window_->CreateFont();
-                if (new_font != NULL) { new_font->LoadFromFile(font_file_name); }
-                text_->SetFont(new_font);
+                if (font_ != NULL) { font_->LoadFromFile(font_file_name); }
+                text_->SetFont(font_);
             }
         };
 
         explicit Text(const Text& other)
             :Widget(other),
              text_((state == NULL) ? NULL : state->window_->CreateText()),
+             font_((state == NULL) ? NULL : state->window_->CreateFont()),
              font_file_name_(other.font_file_name_),
              str_(other.str_),
              font_size_(other.font_size_) {
@@ -48,14 +50,14 @@ class Text : public Widget {
             text_->SetPos(other.text_->GetPos());
             text_->SetFontSize(other.text_->GetFontSize());
             if ((state != NULL) && (font_file_name_.compare("") != 0)) {
-                dr4::Font* new_font = state->window_->CreateFont();
-                if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
-                text_->SetFont(new_font);
+                if (font_ != NULL) { font_->LoadFromFile(font_file_name_); }
+                text_->SetFont(font_);
             }
         };
 
         ~Text() {
             delete text_;
+            delete font_;
         };
 
         virtual void SetState(hui::State* state_) {
@@ -68,9 +70,9 @@ class Text : public Widget {
                 text_->SetText(str_);
                 text_->SetFontSize(font_size_);
                 text_->SetPos({0, 0});
-                dr4::Font* new_font = state_->window_->CreateFont();
-                if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
-                text_->SetFont(new_font);
+                font_ = state_->window_->CreateFont();
+                if (font_ != NULL) { font_->LoadFromFile(font_file_name_); }
+                text_->SetFont(font_);
             }
             Widget::SetState(state_);
         }
@@ -84,9 +86,8 @@ class Text : public Widget {
         void SetFont(const std::string& font) {
             font_file_name_ = font;
             if (state != NULL) {
-                dr4::Font* new_font = state->window_->CreateFont();
-                if (new_font != NULL) { new_font->LoadFromFile(font_file_name_); }
-                text_->SetFont(new_font);
+                if (font_ != NULL) { font_->LoadFromFile(font_file_name_); }
+                text_->SetFont(font_);
             }
         };
 };
