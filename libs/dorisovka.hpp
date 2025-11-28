@@ -27,6 +27,7 @@ static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
 static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim.so";
+// static const char* const kDorisovkaPlugName = "./plugins/optor/build/source/piska/libpiska.so";
 
 static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
 

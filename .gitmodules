@@ -16,3 +16,6 @@
 [submodule "plugins/MyGeomPrimBackend"]
 	path = plugins/MyGeomPrimBackend
 	url = https://github.com/Dinichthys/GeomPrimitiveBackend.git
+[submodule "plugins/optor"]
+	path = plugins/optor
+	url = https://github.com/kzueirf12345/optor.git
