@@ -16,6 +16,7 @@
 void SceneManager::Redraw() {
     if (dorisovka_ != NULL) {
         texture->Draw(*image_);
+        title_->Redraw();
         dorisovka_->Redraw();
         Widget::Redraw();
         return;
@@ -40,6 +41,7 @@ void SceneManager::Redraw() {
     t4.join();
 
     texture->Draw(*image_);
+    title_->Redraw();
     Widget::Redraw();
 }
 

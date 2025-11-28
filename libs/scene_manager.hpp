@@ -9,6 +9,7 @@
 #include "colors.hpp"
 
 #include "widget.hpp"
+#include "widget_title.hpp"
 
 #include "object.hpp"
 #include "circle.hpp"
@@ -43,6 +44,8 @@ static const size_t kListIdx = 1;
 
 static const colors::Color kFreeSpaceColor(colors::Color(30, 28, 29));
 static const colors::Color kChoseObjectColor(colors::kColorRed);
+
+static const std::string kSceneManagerName = "Ray Tracing";
 
 class Eye {
     private:
@@ -144,6 +147,8 @@ class SceneManager : public Widget {
 
         Dorisovka* dorisovka_;
 
+        Title* title_;
+
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
                      const std::vector<Object*> objects, hui::State* state)
@@ -170,6 +175,8 @@ class SceneManager : public Widget {
 
             table_ = NULL;
             dorisovka_ = NULL;
+
+            title_ = new Title(Coordinates(2), width, state, this, kSceneManagerName, this);
         };
 
         ~SceneManager() {
@@ -181,10 +188,14 @@ class SceneManager : public Widget {
             delete image_;
             if (dorisovka_ != NULL) {
                 delete dorisovka_;
+                dorisovka_ = NULL;
             }
+            delete title_;
         };
 
         virtual void SetState(hui::State* state_) {
+            title_->SetState(state_);
+
             dr4::Image* tmp = image_;
             image_ = state_->window_->CreateImage();
             image_->SetSize(::Widget::GetSize());
@@ -344,6 +355,9 @@ class SceneManager : public Widget {
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
+            if (title_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc())) {
+                return true;
+            }
             if (dorisovka_ != NULL) {
                 return dorisovka_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc());
             }
@@ -351,6 +365,9 @@ class SceneManager : public Widget {
         }
 
         virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+            if (title_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc())) {
+                return true;
+            }
             if (dorisovka_ != NULL) {
                 return dorisovka_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc());
             }
@@ -358,6 +375,9 @@ class SceneManager : public Widget {
         }
 
         virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+            if (title_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
+                return true;
+            }
             if (dorisovka_ != NULL) {
                 return dorisovka_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc());
             }
@@ -431,7 +451,11 @@ class SceneManager : public Widget {
 
         virtual bool OnLetterG() override {
             if (dorisovka_ == NULL) {
-                dorisovka_ = new Dorisovka(Coordinates(2), Widget::GetSize(), kDorisovkaPlugName, state);
+                dorisovka_ = new Dorisovka(
+                    Coordinates(2, 0, kTitleHeight),
+                    {Widget::GetSize().x, Widget::GetSize().y - kTitleHeight},
+                    kDorisovkaPlugName, state
+                );
                 dorisovka_->SetParent(this);
             }
             return true;

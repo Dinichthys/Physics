@@ -21,7 +21,7 @@ static const size_t kArrowID = 2;
 static const float kGeomButtonWidth = 60;
 static const float kGeomButtonHeight = 25;
 
-static const std::string kFontFileNameGeomPrim = "data/font.ttf";
+static const std::string kFontFileNameGeomPrim = "data/FiraCodeNerdFont-Regular.ttf";
 static const std::string kRectangleButtonName = "rect";
 static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
@@ -47,6 +47,8 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
                                           .handleHoverColor = colors::kColorBlue,
                                           .handleActiveColor = colors::kColorRed};
 
+        PanelControl* panel_;
+
     public:
         explicit Dorisovka(const Coordinates& lt_corner, dr4::Vec2f size,
             const char* plugin_name, hui::State* state = NULL)
@@ -55,46 +57,33 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
              tools_(backend_->CreateTools(this)) {
             std::vector<Widget*> buttons;
 
+            for (size_t i = 0; i < tools_.size(); i++) {
             buttons.push_back(new GeomPrimCreationButton(Button(
-                lt_corner + Coordinates(2, (size.x - kGeomButtonWidth * 3) / 4,
+                Coordinates(2,
+                    (i + 1) * (size.x - kGeomButtonWidth * tools_.size()) / (tools_.size() + 1)
+                    + kGeomButtonWidth * i,
                 (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
                 kGeomButtonWidth, kGeomButtonHeight,
-                std::string(tools_[kRectangleID].get()->Name()),
+                std::string(tools_[i].get()->Icon()),
                 kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
                 [this] (size_t id) {
-                this->CreatePrim(id);
-              }, kRectangleID));
-            buttons.push_back(new GeomPrimCreationButton(Button(
-                lt_corner + Coordinates(2, 2 * (size.x - kGeomButtonWidth * 3) / 4 + kGeomButtonWidth,
-                (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
-                kGeomButtonWidth, kGeomButtonHeight,
-                std::string(tools_[kCircleID].get()->Name()),
-                kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
-                [this] (size_t id) {
-                this->CreatePrim(id);
-              }, kCircleID));
-            buttons.push_back(new GeomPrimCreationButton(Button(
-                lt_corner + Coordinates(2, 3 * (size.x - kGeomButtonWidth * 3) / 4 + kGeomButtonWidth * 2,
-                (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
-                kGeomButtonWidth, kGeomButtonHeight,
-                std::string(tools_[kArrowID].get()->Name()),
-                kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
-                [this] (size_t id) {
-                this->CreatePrim(id);
-              }, kArrowID));
-            WidgetContainer::AddChild(
-                new PanelControl(lt_corner + Coordinates(2, 0, size.y - kGeomPrimPanelControlHeight),
+                    this->CreatePrim(id);
+                }, i));
+            }
+
+            panel_ = new PanelControl(
+                Coordinates(2, 0, size.y - kGeomPrimPanelControlHeight),
                 size.x, kGeomPrimPanelControlHeight, state, &buttons
-            ));
+            );
+            WidgetContainer::AddChild(panel_);
 
             selected_shape_ = NULL;
             selected_tool_ = NULL;
         };
 
         ~Dorisovka() {
-            while (!(prims_.empty())) {
-                delete prims_.begin()->second;
-                prims_.erase(prims_.begin());
+            for (auto prim : prims_) {
+                delete prim.second;
             }
         };
 
@@ -111,14 +100,18 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             if ((!Widget::OnMousePress(mouse_pos))
                 || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
                 bool res = WidgetContainer::OnMousePress(mouse_pos);
-                if (state->target_widget_ == this) {state->target_widget_ = NULL;}
+                if ((state->target_widget_ == this) || (state->target_widget_ == panel_)) {
+                    state->target_widget_ = NULL;
+                }
                 return res;
             }
-            if (state->target_widget_ == this) {state->target_widget_ = NULL;}
+            if ((state->target_widget_ == this) || (state->target_widget_ == panel_)) {
+                state->target_widget_ = NULL;
+            }
 
             dr4::Event::MouseButton evt;
             evt.button = dr4::MouseButtonType::UNKNOWN;
-            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
                 selected_tool_->OnMouseDown(evt);
                 return true;
@@ -146,9 +139,10 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
             dr4::Event::MouseButton evt;
             evt.button = dr4::MouseButtonType::UNKNOWN;
-            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
                 selected_tool_->OnMouseUp(evt);
+                selected_tool_ = NULL;
                 return true;
             }
 
@@ -173,7 +167,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
 
             dr4::Event::MouseMove evt;
-            evt.pos = {mouse_pos[0], mouse_pos[1]};
+            evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
                 selected_tool_->OnMouseMove(evt);
                 return true;

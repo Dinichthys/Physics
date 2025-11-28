@@ -100,7 +100,7 @@ class Widget : public hui::Widget {
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
         virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::Widget::SetSize(size);};
-        virtual dr4::Vec2f GetSize() {return {width_, height_};};
+        virtual dr4::Vec2f GetSize() const {return {width_, height_};};
 
         virtual ::Widget* GetParent() const {return parent_;};
 
@@ -112,6 +112,8 @@ class Widget : public hui::Widget {
 
         bool GetHovered() const {return hovered_;};
         void SetHovered(bool hovered) {hovered_ = hovered;};
+
+        hui::State* GetState() const {return state;};
 
         virtual void Redraw() override {
             if (hidden_) {
