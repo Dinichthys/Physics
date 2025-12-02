@@ -67,18 +67,14 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
 
     switch(event.type) {
         case(dr4::Event::Type::MOUSE_DOWN) : {
-            hui::MouseDownEvent hui_event;
-            hui_event.relPos = event.mouseButton.pos;
-            hui_event.Apply(*this);
+            this->OnMousePress(Coordinates(2, event.mouseButton.pos.x, event.mouseButton.pos.y));
 
             break;
         }
         case(dr4::Event::Type::MOUSE_UP) : {
             state_.target_widget_ = NULL;
 
-            hui::MouseUpEvent hui_event;
-            hui_event.relPos = event.mouseButton.pos;
-            hui_event.Apply(*this);
+            this->OnMouseRelease(Coordinates(2, event.mouseButton.pos.x, event.mouseButton.pos.y));
 
             break;
         }
@@ -86,9 +82,7 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
             float old_x = mouse_pos[0];
             float old_y = mouse_pos[1];
 
-            hui::MouseMoveEvent hui_event;
-            hui_event.rel = event.mouseMove.pos;
-            hui_event.Apply(*this);
+            this->OnMouseEnter(Coordinates(2, event.mouseMove.pos.x, event.mouseMove.pos.y));
 
             mouse_pos.SetCoordinate(0, event.mouseMove.pos.x);
             mouse_pos.SetCoordinate(1, event.mouseMove.pos.y);

@@ -9,7 +9,6 @@ add_executable (${PROJECT_NAME}
     src/movement.cpp
 
     libs/GUI/src/draw.cpp
-    libs/GUI/src/event.cpp
     libs/GUI/src/scrollbar.cpp
     libs/geometry/src/vector.cpp
     libs/geometry/src/matrix.cpp
@@ -33,6 +32,14 @@ target_include_directories (${PROJECT_NAME}
 target_link_libraries (${PROJECT_NAME}
     PRIVATE
         dl
+
+        cum
+        hui
+)
+
+target_link_directories(${PROJECT_NAME}
+    PRIVATE
+        ./libs/mipt-ded-zemax/build
 )
 
 target_compile_features (${PROJECT_NAME}

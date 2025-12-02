@@ -14,17 +14,57 @@
 #include "vector.hpp"
 #include "logging.h"
 
+namespace hui {
+
+class State;
+
+class MyWidget {
+
+protected:
+
+    dr4::Vec2f relPos; ///< Relative to parent
+    MyWidget *parent = nullptr;
+    State * state;
+    dr4::Texture * texture;
+    bool textureIsInvalid;
+
+    /// Redraws widget's texture
+    virtual void Redraw() = 0;
+
+public:
+
+    MyWidget(State *state_, MyWidget *parent_, dr4::Texture* texture_)
+        :texture(texture_) {
+        state = state_;
+        parent = parent_;
+        textureIsInvalid = false;
+    };
+
+    // REVIEW : move implementations to cpp files?
+
+    dr4::Vec2f GetRelPos() const { return relPos; };
+    virtual void SetRelPos(dr4::Vec2f pos) { relPos = pos; };
+
+    dr4::Vec2f GetSize() const { return texture->GetSize(); }
+    virtual void SetSize(dr4::Vec2f size) { texture->SetSize(size); }
+
+    virtual MyWidget *GetParent() const { return parent; };
+    virtual void SetParent(MyWidget *parent_) { parent = parent_; }
+};
+
+}; // namespace hui
+
 class Widget;
 
 class hui::State {
     public:
-        Widget* target_widget_;
-        Widget* hovered_widget_;
+        MyWidget* target_widget_;
+        MyWidget* hovered_widget_;
         dr4::Window* window_;
         cum::Manager manager;
 };
 
-class Widget : public hui::Widget {
+class Widget : public hui::MyWidget {
     private:
         float width_;
         float height_;
@@ -38,7 +78,7 @@ class Widget : public hui::Widget {
     public:
         explicit Widget(const Coordinates& lt_corner, const float width, float height,
                         hui::State* const state, ::Widget* parent = NULL)
-            :hui::Widget(state, parent,
+            :hui::MyWidget(state, parent,
                 (state != NULL) ? state->window_->CreateTexture() : NULL) {
             hovered_ = false;
             hidden_ = false;
@@ -50,11 +90,11 @@ class Widget : public hui::Widget {
                 texture->SetSize({width, height});
             }
 
-            hui::Widget::SetRelPos({lt_corner[0], lt_corner[1]});
+            hui::MyWidget::SetRelPos({lt_corner[0], lt_corner[1]});
         };
 
         explicit Widget(const ::Widget& other)
-            :hui::Widget(other) {
+            :hui::MyWidget(other) {
             width_ = other.width_;
             height_ = other.height_;
             parent_ = other.parent_;
@@ -99,15 +139,15 @@ class Widget : public hui::Widget {
         };
         virtual float GetWidth() const {return width_;};
         virtual float GetHeight() const {return height_;};
-        virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::Widget::SetSize(size);};
+        virtual void SetSize(dr4::Vec2f size) {width_ = size.x; height_ = size.y; hui::MyWidget::SetSize(size);};
         virtual dr4::Vec2f GetSize() const {return {width_, height_};};
 
         virtual ::Widget* GetParent() const {return parent_;};
 
         virtual void SetLTCorner(const Coordinates& coors) {relPos = {coors[0], coors[1]};};
-        virtual void SetParent(hui::Widget* parent) override {
+        virtual void SetParent(hui::MyWidget* parent) override {
             parent_ = dynamic_cast<::Widget*>(parent);
-            ::Widget::Widget::parent = parent;
+            ::Widget::MyWidget::parent = parent;
         };
 
         bool GetHovered() const {return hovered_;};
