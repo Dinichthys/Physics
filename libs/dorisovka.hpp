@@ -39,7 +39,7 @@ static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
 class Dorisovka : public WidgetContainer, public pp::Canvas {
     private:
         cum::PPToolPlugin* backend_;
-        std::unordered_map<pp::Shape*, pp::Shape*> prims_;
+        std::vector<pp::Shape*> prims_;
         std::vector<std::unique_ptr<pp::Tool>> tools_;
 
         pp::Shape* selected_shape_;
@@ -89,14 +89,13 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
         ~Dorisovka() {
             for (auto prim : prims_) {
-                // delete prim.second;
+                delete prim;
             }
         };
 
         void CreatePrim(size_t id) {
             if (selected_shape_ != NULL) {
-                delete selected_shape_;
-                prims_.erase(selected_shape_);
+                DelShape(selected_shape_);
             }
             tools_[id].get()->OnStart();
             selected_tool_ = tools_[id].get();
@@ -129,7 +128,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
 
             for (auto shape : prims_) {
-                if (shape.second->OnMouseDown(evt)) {
+                if (shape->OnMouseDown(evt)) {
                     return true;
                 }
             }
@@ -158,7 +157,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
 
             for (auto shape : prims_) {
-                if (shape.second->OnMouseUp(evt)) {
+                if (shape->OnMouseUp(evt)) {
                     return true;
                 }
             }
@@ -185,7 +184,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
 
             for (auto shape : prims_) {
-                if (shape.second->OnMouseMove(evt)) {
+                if (shape->OnMouseMove(evt)) {
                     return true;
                 }
             }
@@ -205,7 +204,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
         virtual void Redraw() override {
             for (auto shape : prims_) {
-                shape.second->DrawOn(*texture);
+                shape->DrawOn(*texture);
             }
 
             WidgetContainer::Redraw();
@@ -215,11 +214,16 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             return kTheme;
         };
         virtual void AddShape(pp::Shape *shape) override {
-            prims_[shape] = shape;
+            prims_.push_back(shape);
         };
         virtual void DelShape(pp::Shape* shape) override {
-            delete prims_[shape];
-            prims_.erase(shape);
+            for (size_t i = 0; i < prims_.size(); i++) {
+                if (prims_[i] == shape) {
+                    delete prims_[i];
+                    prims_.erase(prims_.begin() + i);
+                    return;
+                }
+            }
         };
         virtual void SetSelectedShape(pp::Shape *shape) override {
             selected_shape_ = shape;
