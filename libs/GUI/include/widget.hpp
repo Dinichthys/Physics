@@ -196,35 +196,13 @@ class Widget : public hui::Widget {
             return false;
         };
 
-        virtual bool OnLetterA() {
+        virtual bool OnKeyPressed(const dr4::Event::KeyEvent&) {
             return false;
         };
-        virtual bool OnLetterD() {
+        virtual bool OnKeyUp(const dr4::Event::KeyEvent&) {
             return false;
         };
-        virtual bool OnLetterG() {
-            return false;
-        };
-        virtual bool OnLetterS() {
-            return false;
-        };
-        virtual bool OnLetterW() {
-            return false;
-        };
-
-        virtual bool OnArrowRight() {
-            return false;
-        };
-        virtual bool OnArrowLeft() {
-            return false;
-        };
-        virtual bool OnArrowUp() {
-            return false;
-        };
-        virtual bool OnArrowDown() {
-            return false;
-        };
-        virtual bool OnESC() {
+        virtual bool OnText(const dr4::Event::TextEvent&) {
             return false;
         };
 };
@@ -386,122 +364,37 @@ class WidgetContainer : public ::Widget {
             return res;
         };
 
-        virtual bool OnLetterA() override {
+        virtual bool OnKeyPressed(const dr4::Event::KeyEvent& evt) override {
             if (hidden_) {
                 return false;
             }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnLetterA()) {
+                if (children_[i]->OnKeyPressed(evt)) {
                     return true;
                 }
             }
             return false;
         };
-        virtual bool OnLetterD() override {
+        virtual bool OnKeyUp(const dr4::Event::KeyEvent& evt) override {
             if (hidden_) {
                 return false;
             }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnLetterD()) {
+                if (children_[i]->OnKeyUp(evt)) {
                     return true;
                 }
             }
             return false;
         };
-        virtual bool OnLetterG() override {
+        virtual bool OnText(const dr4::Event::TextEvent& evt) override {
             if (hidden_) {
                 return false;
             }
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnLetterG()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnLetterS() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnLetterS()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnLetterW() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnLetterW()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        virtual bool OnArrowRight() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnArrowRight()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnArrowLeft() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnArrowLeft()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnArrowUp() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnArrowUp()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnArrowDown() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnArrowDown()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        virtual bool OnESC() override {
-            if (hidden_) {
-                return false;
-            }
-            size_t children_num = children_.size();
-            for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnESC()) {
+                if (children_[i]->OnText(evt)) {
                     return true;
                 }
             }

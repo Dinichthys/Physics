@@ -102,11 +102,15 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
             break;
         }
         case(dr4::Event::Type::KEY_DOWN) : {
-            hui::KeyPressed hui_event;
-            hui_event.mod = event.key.mods;
-            hui_event.sym = event.key.sym;
-            hui_event.Apply(*this);
-
+            this->OnKeyPressed(event.key);
+            break;
+        }
+        case(dr4::Event::Type::KEY_UP) : {
+            this->OnKeyUp(event.key);
+            break;
+        }
+        case(dr4::Event::Type::TEXT_EVENT) : {
+            this->OnText(event.text);
             break;
         }
         default:

@@ -230,15 +230,65 @@ class SceneManager : public Widget {
             return objects_;
         };
 
-        virtual bool OnLetterA() override;
-        virtual bool OnLetterD() override;
-        virtual bool OnLetterS() override;
-        virtual bool OnLetterW() override;
+        virtual bool OnKeyPressed(const dr4::Event::KeyEvent& evt) {
+            if (dorisovka_ != NULL) {
+                if (dorisovka_->OnKeyPressed(evt)) {
+                    return true;
+                }
+            }
 
-        virtual bool OnArrowUp() override;
-        virtual bool OnArrowDown() override;
-        virtual bool OnArrowLeft() override;
-        virtual bool OnArrowRight() override;
+            switch(evt.sym) {
+                case dr4::KeyCode::KEYCODE_A :
+                    return OnLetterA();
+                case dr4::KeyCode::KEYCODE_D :
+                    return OnLetterD();
+                case dr4::KeyCode::KEYCODE_S :
+                    return OnLetterS();
+                case dr4::KeyCode::KEYCODE_W :
+                    return OnLetterW();
+
+                case dr4::KeyCode::KEYCODE_G :
+                    return OnLetterG();
+
+                case dr4::KeyCode::KEYCODE_ESCAPE :
+                    return OnESC();
+
+                case dr4::KeyCode::KEYCODE_UP :
+                    return OnArrowUp();
+                case dr4::KeyCode::KEYCODE_DOWN :
+                    return OnArrowDown();
+                case dr4::KeyCode::KEYCODE_LEFT :
+                    return OnArrowLeft();
+                case dr4::KeyCode::KEYCODE_RIGHT :
+                    return OnArrowRight();
+
+                default:
+                    return false;
+            };
+        }
+
+        bool OnLetterA();
+        bool OnLetterD();
+        bool OnLetterS();
+        bool OnLetterW();
+
+        bool OnArrowUp();
+        bool OnArrowDown();
+        bool OnArrowLeft();
+        bool OnArrowRight();
+
+        virtual bool OnKeyUp(const dr4::Event::KeyEvent& evt) {
+            if (dorisovka_ != NULL) {
+                return dorisovka_->OnKeyUp(evt);
+            }
+            return false;
+        }
+        virtual bool OnText(const dr4::Event::TextEvent& evt) {
+            if (dorisovka_ != NULL) {
+                return dorisovka_->OnText(evt);
+            }
+            return false;
+        }
 
         virtual void Redraw() override;
 
@@ -449,7 +499,7 @@ class SceneManager : public Widget {
             return false;
         };
 
-        virtual bool OnLetterG() override {
+        bool OnLetterG() {
             if (dorisovka_ == NULL) {
                 dorisovka_ = new Dorisovka(
                     Coordinates(2, 0, kTitleHeight),
@@ -460,7 +510,7 @@ class SceneManager : public Widget {
             }
             return true;
         };
-        virtual bool OnESC() override {
+        bool OnESC() {
             if (dorisovka_ != NULL) {
                 delete dorisovka_;
                 dorisovka_ = NULL;

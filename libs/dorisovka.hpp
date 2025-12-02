@@ -27,6 +27,11 @@ static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
 static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim.so";
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim_image.so";
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libpiska.so";
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/Artem.so";
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/Fedya.so";
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim_old.so";
 // static const char* const kDorisovkaPlugName = "./plugins/optor/build/source/piska/libpiska.so";
 
 static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
@@ -84,7 +89,7 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
         ~Dorisovka() {
             for (auto prim : prims_) {
-                delete prim.second;
+                // delete prim.second;
             }
         };
 
@@ -187,6 +192,16 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
             return true;
         };
+
+        virtual bool OnKeyPressed(const dr4::Event::KeyEvent& evt) override {
+            return (selected_shape_ == NULL) ? false : selected_shape_->OnKeyDown(evt);
+        }
+        virtual bool OnKeyUp(const dr4::Event::KeyEvent& evt) override {
+            return (selected_shape_ == NULL) ? false : selected_shape_->OnKeyUp(evt);
+        }
+        virtual bool OnText(const dr4::Event::TextEvent& evt) override {
+            return (selected_shape_ == NULL) ? false : selected_shape_->OnText(evt);
+        }
 
         virtual void Redraw() override {
             for (auto shape : prims_) {
