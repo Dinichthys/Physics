@@ -170,6 +170,7 @@ int main() {
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Egor_dr4_backend/build/dr4_sfml_backend.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Artem/plugin_new/libswuix_sdl3.so");
+    // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/MyDR4Backend/build/IvanAbrutin.so");
     UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
 
     enum RendererError result = renderer.ShowWindow();

@@ -504,7 +504,7 @@ class SceneManager : public Widget {
                 dorisovka_ = new Dorisovka(
                     Coordinates(2, 0, kTitleHeight),
                     {Widget::GetSize().x, Widget::GetSize().y - kTitleHeight},
-                    kDorisovkaPlugName, state
+                    state
                 );
                 dorisovka_->SetParent(this);
             }

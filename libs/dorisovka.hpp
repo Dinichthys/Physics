@@ -26,7 +26,11 @@ static const std::string kRectangleButtonName = "rect";
 static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
-static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim.so";
+static const char* const kDorisovkaPlugNames[2] = {
+    "./plugins/MyGeomPrimBackend/build/libgeomprim.so",
+    "./plugins/MyGeomPrimBackend/build/Fedya.so"
+};
+// static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim.so";
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim_image.so";
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libpiska.so";
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/Artem.so";
@@ -38,16 +42,17 @@ static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
 
 class Dorisovka : public WidgetContainer, public pp::Canvas {
     private:
-        cum::PPToolPlugin* backend_;
+        std::vector<cum::PPToolPlugin*> backends_;
         std::vector<pp::Shape*> prims_;
         std::vector<std::unique_ptr<pp::Tool>> tools_;
 
         pp::Shape* selected_shape_;
         pp::Tool* selected_tool_;
 
-        const pp::ControlsTheme kTheme = {.shapeColor = colors::Color(0, 0, 0, 0),
-                                          .lineColor = colors::kColorGreen,
-                                          .textColor = colors::kColorBlack,
+        const pp::ControlsTheme kTheme = {.shapeFillColor = colors::Color(0, 0, 0, 0),
+                                          .shapeBorderColor = colors::kColorRed,
+                                          .selectColor = colors::kColorGreen,
+                                          .textColor = colors::kColorGreen,
                                           .baseFontSize = 10,
                                           .handleColor = colors::kColorYellow,
                                           .handleHoverColor = colors::kColorBlue,
@@ -56,11 +61,10 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
         PanelControl* panel_;
 
     public:
-        explicit Dorisovka(const Coordinates& lt_corner, dr4::Vec2f size,
-            const char* plugin_name, hui::State* state = NULL)
-            :WidgetContainer(lt_corner,  size.x, size.y, state),
-             backend_(dynamic_cast<cum::PPToolPlugin*>(state->manager.LoadFromFile(plugin_name))),
-             tools_(backend_->CreateTools(this)) {
+        explicit Dorisovka(const Coordinates& lt_corner, dr4::Vec2f size, hui::State* state = NULL)
+            :WidgetContainer(lt_corner,  size.x, size.y, state) {
+            LoadPPBackends();
+
             std::vector<Widget*> buttons;
 
             for (size_t i = 0; i < tools_.size(); i++) {
@@ -96,6 +100,10 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
         void CreatePrim(size_t id) {
             if (selected_shape_ != NULL) {
                 DelShape(selected_shape_);
+            }
+            if (selected_tool_ == tools_[id].get()) {
+                selected_tool_ = NULL;
+                return;
             }
             tools_[id].get()->OnStart();
             selected_tool_ = tools_[id].get();
@@ -147,7 +155,6 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
                 selected_tool_->OnMouseUp(evt);
-                selected_tool_ = NULL;
                 return true;
             }
 
@@ -193,13 +200,31 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
         };
 
         virtual bool OnKeyPressed(const dr4::Event::KeyEvent& evt) override {
-            return (selected_shape_ == NULL) ? false : selected_shape_->OnKeyDown(evt);
+            if (selected_tool_) {
+                return selected_tool_->OnKeyDown(evt);
+            }
+            if (selected_shape_) {
+                return selected_shape_->OnKeyDown(evt);
+            }
+            return false;
         }
         virtual bool OnKeyUp(const dr4::Event::KeyEvent& evt) override {
-            return (selected_shape_ == NULL) ? false : selected_shape_->OnKeyUp(evt);
+            if (selected_tool_) {
+                return selected_tool_->OnKeyUp(evt);
+            }
+            if (selected_shape_) {
+                return selected_shape_->OnKeyUp(evt);
+            }
+            return false;
         }
         virtual bool OnText(const dr4::Event::TextEvent& evt) override {
-            return (selected_shape_ == NULL) ? false : selected_shape_->OnText(evt);
+            if (selected_tool_) {
+                return selected_tool_->OnText(evt);
+            }
+            if (selected_shape_) {
+                return selected_shape_->OnText(evt);
+            }
+            return false;
         }
 
         virtual void Redraw() override {
@@ -235,6 +260,20 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
         virtual dr4::Window *GetWindow() override {
             return state->window_;
         };
+
+    private:
+        void LoadPPBackends() {
+            for (auto& plug_name : kDorisovkaPlugNames) {
+                backends_.push_back(dynamic_cast<cum::PPToolPlugin*>(state->manager.LoadFromFile(plug_name)));
+            }
+
+            for (auto& back : backends_) {
+                auto tools = back->CreateTools(this);
+                for (auto& tool : tools) {
+                    tools_.push_back(std::move(tool));
+                }
+            }
+        }
 };
 
 #endif // DORISOVKA_HPP

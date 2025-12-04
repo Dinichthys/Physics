@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.20)
 project (physics CXX)
 
+add_subdirectory(libs/mipt-ded-zemax)
+
 add_executable (${PROJECT_NAME}
     src/main.cpp
     src/raytracing_spheres.cpp
