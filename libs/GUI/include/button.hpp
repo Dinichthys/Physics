@@ -151,7 +151,7 @@ class Button : public WidgetContainer {
             WidgetContainer::Redraw();
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType) override {
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();
@@ -168,7 +168,7 @@ class Button : public WidgetContainer {
             return false;
         };
 
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType) override {
             Coordinates lt_corner(Widget::GetLTCornerLoc());
             float width = Widget::GetWidth();
             float height = Widget::GetHeight();

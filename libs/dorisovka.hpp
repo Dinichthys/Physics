@@ -21,14 +21,14 @@ static const size_t kArrowID = 2;
 static const float kGeomButtonWidth = 60;
 static const float kGeomButtonHeight = 25;
 
-static const std::string kFontFileNameGeomPrim = "data/FiraCodeNerdFont-Regular.ttf";
+static const std::string kFontFileNameGeomPrim = "/usr/share/fonts/TTF/CaskaydiaCoveNerdFontMono-Regular.ttf";
 static const std::string kRectangleButtonName = "rect";
 static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
-static const char* const kDorisovkaPlugNames[2] = {
+static const char* const kDorisovkaPlugNames[3] = {
     "./plugins/MyGeomPrimBackend/build/libgeomprim.so",
-    "./plugins/MyGeomPrimBackend/build/Fedya.so"
+    "./plugins/MyGeomPrimBackend/build/Artempp.so"
 };
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim.so";
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim_image.so";
@@ -93,26 +93,31 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
         ~Dorisovka() {
             for (auto prim : prims_) {
-                delete prim;
+                DelShape(prim);
             }
         };
 
         void CreatePrim(size_t id) {
             if (selected_shape_ != NULL) {
                 DelShape(selected_shape_);
+                selected_shape_ = NULL;
+            }
+            if (selected_tool_ != NULL) {
+                selected_tool_->OnEnd();
             }
             if (selected_tool_ == tools_[id].get()) {
                 selected_tool_ = NULL;
                 return;
             }
+
             tools_[id].get()->OnStart();
             selected_tool_ = tools_[id].get();
         }
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if ((!Widget::OnMousePress(mouse_pos))
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if ((!Widget::OnMousePress(mouse_pos, type))
                 || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
-                bool res = WidgetContainer::OnMousePress(mouse_pos);
+                bool res = WidgetContainer::OnMousePress(mouse_pos, type);
                 if ((state->target_widget_ == this) || (state->target_widget_ == panel_)) {
                     state->target_widget_ = NULL;
                 }
@@ -123,16 +128,18 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
 
             dr4::Event::MouseButton evt;
-            evt.button = dr4::MouseButtonType::UNKNOWN;
+            evt.button = type;
             evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
-                selected_tool_->OnMouseDown(evt);
-                return true;
+                if (selected_tool_->OnMouseDown(evt)) {
+                    return true;
+                }
             }
 
             if (selected_shape_ != NULL) {
-                selected_shape_->OnMouseDown(evt);
-                return true;
+                if (selected_shape_->OnMouseDown(evt)) {
+                    return true;
+                }
             }
 
             for (auto shape : prims_) {
@@ -143,24 +150,26 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
             return true;
         };
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
             if (((selected_shape_ == NULL) && (selected_tool_ == NULL))
-                || (!Widget::OnMouseRelease(mouse_pos))
+                || (!Widget::OnMouseRelease(mouse_pos, type))
                 || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
-                return WidgetContainer::OnMouseRelease(mouse_pos);
+                return WidgetContainer::OnMouseRelease(mouse_pos, type);
             }
 
             dr4::Event::MouseButton evt;
-            evt.button = dr4::MouseButtonType::UNKNOWN;
+            evt.button = type;
             evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
             if (selected_tool_ != NULL) {
-                selected_tool_->OnMouseUp(evt);
-                return true;
+                if (selected_tool_->OnMouseUp(evt)) {
+                    return true;
+                }
             }
 
             if (selected_shape_ != NULL) {
-                selected_shape_->OnMouseUp(evt);
-                return true;
+                if (selected_shape_->OnMouseUp(evt)) {
+                    return true;
+                }
             }
 
             for (auto shape : prims_) {
@@ -171,23 +180,26 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
             return true;
         };
-        virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
             if (((selected_shape_ == NULL) && (selected_tool_ == NULL))
-                || (!Widget::OnMouseEnter(mouse_pos))
+                || (!Widget::OnMouseEnter(mouse_pos, delta))
                 || (mouse_pos[1] + kGeomPrimPanelControlHeight > Widget::GetHeight())) {
-                return WidgetContainer::OnMouseEnter(mouse_pos);
+                return WidgetContainer::OnMouseEnter(mouse_pos, delta);
             }
 
             dr4::Event::MouseMove evt;
             evt.pos = {mouse_pos[0] - Widget::GetLTCornerLoc()[0], mouse_pos[1] - Widget::GetLTCornerLoc()[1]};
+            evt.rel = {delta[0], delta[1]};
             if (selected_tool_ != NULL) {
-                selected_tool_->OnMouseMove(evt);
-                return true;
+                if (selected_tool_->OnMouseMove(evt)) {
+                    return true;
+                }
             }
 
             if (selected_shape_ != NULL) {
-                selected_shape_->OnMouseMove(evt);
-                return true;
+                if (selected_shape_->OnMouseMove(evt)) {
+                    return true;
+                }
             }
 
             for (auto shape : prims_) {
@@ -226,6 +238,18 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
             return false;
         }
+        virtual bool OnIdle(const hui::IdleEvent &idle_evt) {
+            pp::IdleEvent evt;
+            evt.absTime = idle_evt.absTime;
+            evt.deltaTime = idle_evt.deltaTime;
+            if (selected_tool_) {
+                return selected_tool_->OnIdle(evt);
+            }
+            if (selected_shape_) {
+                return selected_shape_->OnIdle(evt);
+            }
+            return false;
+        }
 
         virtual void Redraw() override {
             for (auto shape : prims_) {
@@ -242,6 +266,10 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             prims_.push_back(shape);
         };
         virtual void DelShape(pp::Shape* shape) override {
+            if (selected_shape_ == shape) {
+                selected_shape_ = NULL;
+            }
+
             for (size_t i = 0; i < prims_.size(); i++) {
                 if (prims_[i] == shape) {
                     delete prims_[i];
@@ -251,7 +279,13 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
             }
         };
         virtual void SetSelectedShape(pp::Shape *shape) override {
+            if (selected_shape_ && (shape != selected_shape_)) {
+                selected_shape_->OnDeselect();
+            }
             selected_shape_ = shape;
+            if (shape) {
+                shape->OnSelect();
+            }
         };
         virtual pp::Shape *GetSelectedShape() const override {
             return selected_shape_;

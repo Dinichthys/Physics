@@ -404,32 +404,32 @@ class SceneManager : public Widget {
             cur_object_color_ = cur_object_color_ + color;
         };
 
-        virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
-            if (title_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
+            if (title_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc(), delta)) {
                 return true;
             }
             if (dorisovka_ != NULL) {
-                return dorisovka_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc());
+                return dorisovka_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc(), delta);
             }
-            return Widget::OnMouseEnter(mouse_pos);
+            return Widget::OnMouseEnter(mouse_pos, delta);
         }
 
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
-            if (title_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (title_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc(), type)) {
                 return true;
             }
             if (dorisovka_ != NULL) {
-                return dorisovka_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc());
+                return dorisovka_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc(), type);
             }
-            return Widget::OnMouseRelease(mouse_pos);
+            return Widget::OnMouseRelease(mouse_pos, type);
         }
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (title_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (title_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type)) {
                 return true;
             }
             if (dorisovka_ != NULL) {
-                return dorisovka_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc());
+                return dorisovka_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type);
             }
 
             const Coordinates& widget_lt_corner = Widget::GetLTCornerLoc();
@@ -459,7 +459,7 @@ class SceneManager : public Widget {
                                      coeff, tmp);
 
                 if (cur_object_idx_ == tmp) {
-                    return Widget::OnMousePress(mouse_pos);;
+                    return Widget::OnMousePress(mouse_pos, type);;
                 }
 
                 if (coeff < 0) {
@@ -472,7 +472,7 @@ class SceneManager : public Widget {
                     table_->SetObject(NULL);
                     delete objects_[border_idx_];
                     objects_.erase(objects_.begin() + border_idx_);
-                    return Widget::OnMousePress(mouse_pos);
+                    return Widget::OnMousePress(mouse_pos, type);
                 } else {
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);

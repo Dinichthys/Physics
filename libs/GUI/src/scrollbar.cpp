@@ -2,8 +2,8 @@
 
 #include "widget.hpp"
 
-bool ArrowScrollBar::OnMousePress(const Coordinates& mouse_pos) {
-    if (!Button::OnMousePress(mouse_pos)) {
+bool ArrowScrollBar::OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) {
+    if (!Button::OnMousePress(mouse_pos, type)) {
         return false;
     }
 

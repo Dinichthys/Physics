@@ -20,8 +20,8 @@ class MoveButton : public Button {
             scene_manager->MoveCurrentObject(move_direction_);
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (!Button::OnMousePress(mouse_pos)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (!Button::OnMousePress(mouse_pos, type)) {
                 return false;
             }
             action_(move_direction_);
@@ -37,8 +37,8 @@ class ExistenceButton : public Button {
         explicit ExistenceButton(const Button& button, const std::function<void(void)>& action)
             :Button(button), action_(action) {};
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (!Button::OnMousePress(mouse_pos)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (!Button::OnMousePress(mouse_pos, type)) {
                 return false;
             }
             action_();
@@ -57,8 +57,8 @@ class CoeffChangingButton : public Button {
             delta_ = delta;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (!Button::OnMousePress(mouse_pos)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (!Button::OnMousePress(mouse_pos, type)) {
                 return false;
             }
             action_(delta_);

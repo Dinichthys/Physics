@@ -67,8 +67,8 @@ class UI : public WidgetContainer {
 
         RendererError ShowWindow();
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            WidgetContainer::OnMousePress(mouse_pos);
+        virtual bool OnMousePress(const Coordinates& mouse_pos, dr4::MouseButtonType type) override {
+            WidgetContainer::OnMousePress(mouse_pos, type);
 
             state->target_widget_ = (state->target_widget_ == this) ? NULL : state->target_widget_;
 

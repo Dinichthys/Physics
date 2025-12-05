@@ -129,18 +129,18 @@ class ListObjects : public WidgetContainer {
         #undef CASE_TYPE_STRING_
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
             if (Widget::GetHidden()) {
                 return false;
             }
             for (size_t idx = 0; idx < WidgetContainer::GetChildrenNum() - 1; idx++) {
-                if (WidgetContainer::GetChild(idx)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
+                if (WidgetContainer::GetChild(idx)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type)) {
                     action_(idx + start_index_);
                     return true;
                 }
             }
             return WidgetContainer::GetChild
-                    (WidgetContainer::GetChildrenNum() - 1)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc());
+                    (WidgetContainer::GetChildrenNum() - 1)->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type);
         };
 
         void ShiftStartIndex(int64_t shift) {
@@ -230,8 +230,8 @@ class ListObjectsTitle : public Widget {
             delete rect_;
         }
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (button_.OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type)) {
                 if (list_->GetHidden()) {
                     list_->SetHidden(false);
                     button_.SetText(kListTitleHeightOpenedButtonText);
@@ -242,19 +242,19 @@ class ListObjectsTitle : public Widget {
                 return true;
             }
 
-            return Widget::OnMousePress(mouse_pos);
+            return Widget::OnMousePress(mouse_pos, type);
         };
 
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
-            if (button_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (button_.OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc(), type)) {
                 return true;
             }
 
             return false;
         };
 
-        virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
-            if (button_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc())) {
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
+            if (button_.OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc(), delta)) {
                 return true;
             }
 

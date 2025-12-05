@@ -18,8 +18,8 @@ class GeomPrimCreationButton : public Button {
             id_ = id;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (!Button::OnMousePress(mouse_pos)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (!Button::OnMousePress(mouse_pos, type)) {
                 return false;
             }
             action_(id_);
@@ -34,8 +34,8 @@ class GeomPrimToolBar : public PanelControl {
                         const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
             :PanelControl(lt_corner, width, height, state, buttons, parent) {};
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
-            if (!PanelControl::OnMousePress(mouse_pos)) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (!PanelControl::OnMousePress(mouse_pos, type)) {
                 return false;
             }
 

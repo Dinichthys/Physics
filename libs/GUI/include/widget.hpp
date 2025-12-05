@@ -185,7 +185,7 @@ class Widget : public hui::MyWidget {
             return true;
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType) {
             if (hidden_) {
                 return false;
             }
@@ -200,7 +200,7 @@ class Widget : public hui::MyWidget {
             return false;
         };
 
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType) {
             if (hidden_) {
                 return false;
             }
@@ -214,7 +214,7 @@ class Widget : public hui::MyWidget {
             return false;
         };
 
-        virtual bool OnMouseEnter(const Coordinates& mouse_pos) {
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates&) {
             if (hidden_) {
                 return false;
             }
@@ -232,7 +232,7 @@ class Widget : public hui::MyWidget {
             return false;
         };
 
-        virtual bool OnIdle() {
+        virtual bool OnIdle(const hui::IdleEvent &) {
             return false;
         };
 
@@ -312,7 +312,7 @@ class WidgetContainer : public ::Widget {
             Widget::Redraw();
         };
 
-        virtual bool OnMousePress(const Coordinates& mouse_pos) override {
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
             if (hidden_) {
                 return false;
             }
@@ -327,7 +327,7 @@ class WidgetContainer : public ::Widget {
 
                 int64_t children_num = children_.size();
                 for (int64_t i = children_num - 1; i > -1; i--) {
-                    if (children_[i]->OnMousePress(mouse_pos - lt_corner)) {
+                    if (children_[i]->OnMousePress(mouse_pos - lt_corner, type)) {
                         return true;
                     }
                 }
@@ -339,7 +339,7 @@ class WidgetContainer : public ::Widget {
             return false;
         };
 
-        virtual bool OnMouseRelease(const Coordinates& mouse_pos) override {
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
             if (hidden_) {
                 return false;
             }
@@ -354,7 +354,7 @@ class WidgetContainer : public ::Widget {
 
                 int64_t children_num = children_.size();
                 for (int64_t i = children_num - 1; i > -1; i--) {
-                    if (children_[i]->OnMouseRelease(mouse_pos - lt_corner)) {
+                    if (children_[i]->OnMouseRelease(mouse_pos - lt_corner, type)) {
                         return true;
                     }
                 }
@@ -365,7 +365,7 @@ class WidgetContainer : public ::Widget {
             return false;
         };
 
-        virtual bool OnMouseEnter(const Coordinates& mouse_pos) override {
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
             if (hidden_) {
                 return false;
             }
@@ -380,7 +380,7 @@ class WidgetContainer : public ::Widget {
 
                 int64_t children_num = children_.size();
                 for (int64_t i = children_num - 1; i > -1; i--) {
-                    children_[i]->OnMouseEnter(mouse_pos - lt_corner);
+                    children_[i]->OnMouseEnter(mouse_pos - lt_corner, delta);
                 }
 
                 state->hovered_widget_ = (state->hovered_widget_ == this) ? NULL : state->hovered_widget_;
@@ -393,11 +393,11 @@ class WidgetContainer : public ::Widget {
             return false;
         };
 
-        virtual bool OnIdle() override {
+        virtual bool OnIdle(const hui::IdleEvent &evt) override {
             bool res = false;
             size_t children_num = children_.size();
             for (size_t i = 0; i < children_num; i++) {
-                if (children_[i]->OnIdle()) {
+                if (children_[i]->OnIdle(evt)) {
                     res = true;
                 }
             }
