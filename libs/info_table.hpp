@@ -6,11 +6,16 @@
 #include "colors.hpp"
 
 #include "widget.hpp"
-#include "text.hpp"
+#include "editable_text.hpp"
 #include "object.hpp"
+#include "button.hpp"
+#include "widget_title.hpp"
 
 static const size_t kFieldsNum = 6;
 static const size_t kTextScale = 5;
+
+static const std::string kInfoTableName = "InfoTable";
+
 static const std::string kFontFileNameInfoTable = "data/font.ttf";
 
 static const std::string kCoordinatesFieldStartStr = "Coors: ";
@@ -31,49 +36,100 @@ static const size_t kHexBase = 16;
 
 static const colors::Color kInfoTableColor = colors::Color(30, 30, 32);
 
-class InfoTable : public Widget {
+class SceneManager;
+
+class InfoTable : public WidgetContainer {
     private:
         Text text_type_;
+
         Text text_center_;
+        EditableText val_text_center_x_;
+        EditableText val_text_center_y_;
+        EditableText val_text_center_z_;
+
         Text text_color_;
+        EditableText val_text_color_;
+
         Text text_coeff_reflection_;
+        EditableText val_text_coeff_reflection_;
+
         Text text_coeff_refraction_;
+        EditableText val_text_coeff_refraction_;
+
         Text text_coeff_absorption_;
+        EditableText val_text_coeff_absorption_;
 
         const Object* object_;
 
         dr4::Rectangle* rect_;
 
+        SceneManager* manager_;
+
+        dr4::Texture* base_texture_;
+
+        Title* title_;
+
     public:
         explicit InfoTable(const Coordinates& lt_corner, float width, float height, const Object* object,
                            hui::State* state,
-                           Widget* parent = NULL)
-            :Widget(lt_corner, width, height, state, parent),
+                           Widget* parent = NULL, const std::vector<Widget*>* buttons = NULL)
+            :WidgetContainer(lt_corner, width, height, state, buttons, parent),
              text_type_            (Coordinates(2, 0, 0),
                                     width, height / kFieldsNum, state,
                                     this, TypeToStr(object->GetType()),
                                     kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
              text_center_          (Coordinates(2, 0, height / kFieldsNum),
-                                    width, height / kFieldsNum, state,
-                                    this, CoordinatesToStr(object->GetCenterCoordinates()),
+                                    width / 2, height / kFieldsNum, state,
+                                    this, kCoordinatesFieldStartStr
+                                    + kXCoorStartStr + kYCoorStartStr + kZCoorStartStr,
                                     kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+             val_text_center_x_    (Text(Coordinates(2, width / 2, height / kFieldsNum + height / kFieldsNum / 4),
+                                    width / 2, height / kFieldsNum / 4, state,
+                                    this, CoordinatesToStrX(object->GetCenterCoordinates()),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
+             val_text_center_y_    (Text(Coordinates(2, width / 2, height / kFieldsNum + height / kFieldsNum * 2 / 4),
+                                    width / 2, height / kFieldsNum / 4, state,
+                                    this, CoordinatesToStrY(object->GetCenterCoordinates()),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
+             val_text_center_z_    (Text(Coordinates(2, width / 2, height / kFieldsNum + height / kFieldsNum * 3 / 4),
+                                    width / 2, height / kFieldsNum / 4, state,
+                                    this, CoordinatesToStrZ(object->GetCenterCoordinates()),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
              text_color_           (Coordinates(2, 0, height / kFieldsNum * 2),
-                                    width, height / kFieldsNum, state,
+                                    width / 2, height / kFieldsNum, state,
+                                    this, kColorFieldStartStr,
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+             val_text_color_       (Text(Coordinates(2, width / 2, height / kFieldsNum * 2),
+                                    width / 2, height / kFieldsNum, state,
                                     this, ColorToStr(colors::Color(object->GetColor())),
-                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
              text_coeff_reflection_(Coordinates(2, 0, height / kFieldsNum * 3),
-                                    width, height / kFieldsNum, state,
+                                    width / 2, height / kFieldsNum, state,
+                                    this, kCoeffReflectionFieldStartStr,
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+             val_text_coeff_reflection_ (Text(Coordinates(2, width / 2, height / kFieldsNum * 3),
+                                    width / 2, height / kFieldsNum, state,
                                     this, CoeffReflectionToStr(object->GetCoeffReflection()),
-                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
              text_coeff_refraction_(Coordinates(2, 0, height / kFieldsNum * 4),
-                                    width, height / kFieldsNum, state,
+                                    width / 2, height / kFieldsNum, state,
+                                    this, kCoeffRefractionFieldStartStr,
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+             val_text_coeff_refraction_ (Text(Coordinates(2, width / 2, height / kFieldsNum * 4),
+                                    width / 2, height / kFieldsNum, state,
                                     this, CoeffRefractionToStr(object->GetCoeffRefraction()),
-                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
              text_coeff_absorption_(Coordinates(2, 0, height / kFieldsNum * 5),
-                                    width, height / kFieldsNum, state,
-                                    this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
+                                    width / 2, height / kFieldsNum, state,
+                                    this, kCoeffAbsorptionFieldStartStr,
                                     kFontFileNameInfoTable, height / kFieldsNum / kTextScale),
-            rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
+             val_text_coeff_absorption_(Text(Coordinates(2, width / 2, height / kFieldsNum * 5),
+                                    width / 2, height / kFieldsNum, state,
+                                    this, CoeffAbsorptionToStr(object->GetCoeffAbsorption()),
+                                    kFontFileNameInfoTable, height / kFieldsNum / kTextScale)),
+            rect_((state == NULL) ? NULL : state->window_->CreateRectangle()),
+            base_texture_((state == NULL) ? NULL : state->window_->CreateTexture())  {
+            Widget::SetLTCorner(Coordinates(2, relPos.x, relPos.y + kTitleHeight));
             if (rect_ != NULL) {
                 rect_->SetPos({0, 0});
                 rect_->SetSize({width, height});
@@ -82,11 +138,28 @@ class InfoTable : public Widget {
                 rect_->SetBorderThickness(0);
             }
 
+            if (base_texture_ != NULL) {
+                base_texture_->SetPos({});
+                base_texture_->SetSize(width, height);
+                texture->SetSize({width, height + kTitleHeight});
+                texture->SetPos({relPos.x, relPos.y - kTitleHeight});
+            }
+
             object_ = object;
+
+            manager_ = NULL;
+
+            title_ = new Title(Coordinates(2), width, state, this, kInfoTableName, this);
+
+            SetParentToChildren();
         };
 
         ~InfoTable() {
             delete rect_;
+        }
+
+        void SetManager(SceneManager* manager) {
+            manager_ = manager;
         }
 
         const std::string TypeToStr(ObjectType type) {
@@ -109,17 +182,25 @@ class InfoTable : public Widget {
         #undef CASE_TYPE_STRING_
         };
 
-        const std::string CoordinatesToStr(const Coordinates& center) {
+        const std::string CoordinatesToStrX(const Coordinates& center) {
             std::string str;
-            str.append(kCoordinatesFieldStartStr);
-            str.append(kXCoorStartStr);
             char num[kNumLenInfoTable] = "";
             sprintf(num, "%10.2f", center[0]);
             str.append(num);
-            str.append(kYCoorStartStr);
+
+            return str;
+        };
+        const std::string CoordinatesToStrY(const Coordinates& center) {
+            std::string str;
+            char num[kNumLenInfoTable] = "";
             sprintf(num, "%10.2f", center[1]);
             str.append(num);
-            str.append(kZCoorStartStr);
+
+            return str;
+        };
+        const std::string CoordinatesToStrZ(const Coordinates& center) {
+            std::string str;
+            char num[kNumLenInfoTable] = "";
             sprintf(num, "%10.2f", center[2]);
             str.append(num);
 
@@ -128,13 +209,14 @@ class InfoTable : public Widget {
 
         const std::string ColorToStr(const colors::Color& color) {
             std::string str;
-            str.append(kColorFieldStartStr);
             char num[kNumLenInfoTable] = "";
             sprintf(num, "%x%x", uint8_t(color.r / kHexBase), uint8_t(uint8_t(color.r) % kHexBase));
             str.append(num);
             sprintf(num, "%x%x", uint8_t(color.g / kHexBase), uint8_t(uint8_t(color.g) % kHexBase));
             str.append(num);
             sprintf(num, "%x%x", uint8_t(color.b / kHexBase), uint8_t(uint8_t(color.b) % kHexBase));
+            str.append(num);
+            sprintf(num, " %d", uint8_t(color.a));
             str.append(num);
 
             return str;
@@ -143,7 +225,6 @@ class InfoTable : public Widget {
         const std::string CoeffReflectionToStr(float coeff_reflection) {
             std::string str;
             char num[kNumLenInfoTable] = "";
-            str.append(kCoeffReflectionFieldStartStr);
             sprintf(num, "%10.2f", coeff_reflection);
             str.append(num);
 
@@ -153,7 +234,6 @@ class InfoTable : public Widget {
         const std::string CoeffRefractionToStr(float coeff_refraction) {
             std::string str;
             char num[kNumLenInfoTable] = "";
-            str.append(kCoeffRefractionFieldStartStr);
             sprintf(num, "%10.2f", coeff_refraction);
             str.append(num);
 
@@ -163,7 +243,6 @@ class InfoTable : public Widget {
         const std::string CoeffAbsorptionToStr(float coeff_absorption) {
             std::string str;
             char num[kNumLenInfoTable] = "";
-            str.append(kCoeffAbsorptionFieldStartStr);
             sprintf(num, "%10.2f", coeff_absorption);
             str.append(num);
 
@@ -175,12 +254,11 @@ class InfoTable : public Widget {
             if (object == NULL) {
                 return;
             }
-            text_color_.SetText(ColorToStr(colors::Color(object_->GetColor())));
             text_type_.SetText(TypeToStr(object_->GetType()));
         };
 
         void SetState(hui::State* state_) {
-            state = state_;
+            WidgetContainer::SetState(state_);
 
             if (rect_ == NULL) {
                 delete rect_;
@@ -194,31 +272,160 @@ class InfoTable : public Widget {
             rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
             rect_->SetBorderThickness(0);
 
+            if (base_texture_ != NULL) {
+                delete base_texture_;
+            }
+
+            base_texture_ = state->window_->CreateTexture();
+
+            base_texture_->SetPos({0, kTitleHeight});
+            base_texture_->SetSize(texture->GetSize());
+            texture->SetSize(Widget::GetWidth(), Widget::GetHeight() + kTitleHeight);
+            texture->SetPos({relPos.x, relPos.y - kTitleHeight});
+
             text_type_.SetState(state);
-            text_color_.SetState(state);
+
             text_center_.SetState(state);
-            text_coeff_absorption_.SetState(state);
+            val_text_center_x_.SetState(state);
+            val_text_center_y_.SetState(state);
+            val_text_center_z_.SetState(state);
+
+            text_color_.SetState(state);
+            val_text_color_.SetState(state);
+
             text_coeff_reflection_.SetState(state);
+            val_text_coeff_reflection_.SetState(state);
+
             text_coeff_refraction_.SetState(state);
-            Widget::SetState(state);
+            val_text_coeff_refraction_.SetState(state);
+
+            text_coeff_absorption_.SetState(state);
+            val_text_coeff_absorption_.SetState(state);
+
+            title_->SetState(state);
         };
 
-        virtual void Redraw() override {
-            if (Widget::GetHidden()) {
-                return;
+        virtual void Redraw() override;
+
+        virtual bool OnMousePress(const Coordinates& mouse_pos, const dr4::MouseButtonType type) {
+            if (hidden_) {
+                return false;
             }
-            texture->Draw(*rect_);
-            text_type_.Redraw();
-            text_center_.SetText(CoordinatesToStr(object_->GetCenterCoordinates()));
-            text_center_.Redraw();
-            text_color_.Redraw();
-            text_coeff_reflection_.SetText(CoeffReflectionToStr(object_->GetCoeffReflection()));
-            text_coeff_reflection_.Redraw();
-            text_coeff_refraction_.SetText(CoeffRefractionToStr(object_->GetCoeffRefraction()));
-            text_coeff_refraction_.Redraw();
-            text_coeff_absorption_.SetText(CoeffAbsorptionToStr(object_->GetCoeffAbsorption()));
-            text_coeff_absorption_.Redraw();
-            Widget::Redraw();
+            if (title_->OnMousePress(mouse_pos - Widget::GetLTCornerLoc(), type)) {
+                return true;
+            }
+            Coordinates loc_coors(2, mouse_pos[0] - relPos.x, mouse_pos[1] - relPos.y - kTitleHeight);
+            Coordinates button_loc_coors(2, mouse_pos[0] - relPos.x, mouse_pos[1] - relPos.y);
+            if ((mouse_pos[0] > relPos.x)
+                && (mouse_pos[1] > relPos.y)
+                && (mouse_pos[0] < relPos.x + width_)
+                && (mouse_pos[1] < relPos.y + height_)) {
+                for (auto child : WidgetContainer::GetChildren()) {
+                    if (child->OnMousePress(button_loc_coors, type)) {
+                        return true;
+                    }
+                }
+
+                if (val_text_center_x_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_center_y_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_center_z_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_color_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_coeff_reflection_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_coeff_refraction_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+                if (val_text_coeff_absorption_.OnMousePress(loc_coors, type)) {
+                    return true;
+                }
+
+                return true;
+            }
+
+            return false;
+        };
+
+        virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
+            if (title_->OnMouseEnter(mouse_pos - Widget::GetLTCornerLoc(), delta)) {
+                return true;
+            }
+            return WidgetContainer::OnMouseEnter(mouse_pos, delta);
+        }
+
+        virtual bool OnMouseRelease(const Coordinates& mouse_pos, const dr4::MouseButtonType type) override {
+            if (title_->OnMouseRelease(mouse_pos - Widget::GetLTCornerLoc(), type)) {
+                return true;
+            }
+            return WidgetContainer::OnMouseRelease(mouse_pos, type);
+        }
+
+        virtual bool OnKeyPressed(const dr4::Event::KeyEvent& evt) {
+            if (hidden_) {
+                return false;
+            }
+
+            if (val_text_center_x_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_center_y_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_center_z_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_color_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_coeff_reflection_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_coeff_refraction_.OnKeyPressed(evt)) {
+                return true;
+            }
+            if (val_text_coeff_absorption_.OnKeyPressed(evt)) {
+                return true;
+            }
+
+            return false;
+        };
+
+        virtual bool OnText(const dr4::Event::TextEvent& evt) {
+            if (hidden_) {
+                return false;
+            }
+
+            if (val_text_center_x_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_center_y_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_center_z_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_color_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_coeff_reflection_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_coeff_refraction_.OnText(evt)) {
+                return true;
+            }
+            if (val_text_coeff_absorption_.OnText(evt)) {
+                return true;
+            }
+
+            return true;
         };
 };
 

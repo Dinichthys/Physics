@@ -58,19 +58,23 @@ class Widget;
 
 class hui::State {
     public:
-        MyWidget* target_widget_;
-        MyWidget* hovered_widget_;
+        ::Widget* target_widget_;
+        ::Widget* hovered_widget_;
         dr4::Window* window_;
         cum::Manager manager;
+
+        State()
+            :target_widget_(NULL), hovered_widget_(NULL), window_(NULL), manager(){};
 };
 
 class Widget : public hui::MyWidget {
     private:
-        float width_;
-        float height_;
         Widget* parent_;
 
     protected:
+        float width_;
+        float height_;
+
         bool hovered_;
 
         bool hidden_;

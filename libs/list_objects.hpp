@@ -261,6 +261,11 @@ class ListObjectsTitle : public Widget {
             return false;
         };
 
+        virtual void Move(float shift_x, float shift_y) override {
+            Widget::Move(shift_x, shift_y);
+            list_->Move(shift_x, shift_y);
+        };
+
         virtual void Redraw() override {
             texture->Draw(*rect_);
             button_.Redraw();

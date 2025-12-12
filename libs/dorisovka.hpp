@@ -26,7 +26,7 @@ static const std::string kRectangleButtonName = "rect";
 static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
-static const char* const kDorisovkaPlugNames[3] = {
+static const char* const kDorisovkaPlugNames[2] = {
     "./plugins/MyGeomPrimBackend/build/libgeomprim.so",
     "./plugins/MyGeomPrimBackend/build/Artempp.so"
 };

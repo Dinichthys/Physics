@@ -66,7 +66,7 @@ class Button : public WidgetContainer {
                         hui::State* state = NULL, Widget* parent = NULL,
                         colors::Color pressed_color = kPressedColor,
                         colors::Color released_color = kReleaseColor,
-                        float character_size = 0)
+                        float character_size = 0, colors::Color text_color = colors::kColorWhite)
             :WidgetContainer(lt_corner, width, height, state),
              button_background_((state == NULL) ? NULL : state->window_->CreateRectangle()),
              pressed_color_(pressed_color), released_color_(released_color) {
@@ -84,7 +84,7 @@ class Button : public WidgetContainer {
                 WidgetContainer::AddChild(new(std::nothrow) Text(
                                                             Coordinates(2, 0, 0),
                                                             width, height / kButtonTextScale, state, this,
-                                                            text, file_name, character_size));
+                                                            text, file_name, character_size, text_color));
                 if (WidgetContainer::GetChildren().back() == NULL) {
                     throw std::runtime_error("Bad allocation for text");
                 }

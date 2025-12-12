@@ -9,6 +9,7 @@ add_executable (${PROJECT_NAME}
     src/plane.cpp
     src/triangles_set.cpp
     src/movement.cpp
+    src/info_table.cpp
 
     libs/GUI/src/draw.cpp
     libs/GUI/src/scrollbar.cpp

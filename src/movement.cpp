@@ -11,6 +11,7 @@ bool SceneManager::OnLetterA() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ =  true;
     eye_.SetEyePos(eye_.GetEyePos() + (!(eye_.GetEyeLTCorner() - eye_.GetEyeRTCorner()))
      * kStepEye);
     return true;
@@ -20,6 +21,7 @@ bool SceneManager::OnLetterD() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
     eye_.SetEyePos(eye_.GetEyePos() - (!(eye_.GetEyeLTCorner() - eye_.GetEyeRTCorner()))
      * kStepEye);
     return true;
@@ -29,6 +31,7 @@ bool SceneManager::OnLetterS() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
     eye_.SetEyePos(eye_.GetEyePos() - (!(eye_.GetEyeLTCorner() + eye_.GetEyeRBCorner()))
      * kStepEye);
     return true;
@@ -38,6 +41,7 @@ bool SceneManager::OnLetterW() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
     eye_.SetEyePos(eye_.GetEyePos() + (!(eye_.GetEyeLTCorner() + eye_.GetEyeRBCorner()))
      * kStepEye);
     return true;
@@ -47,6 +51,7 @@ bool SceneManager::OnArrowRight() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
     return CameraRotationInTwoAxis(0, 2, 1);
 }
 
@@ -54,6 +59,7 @@ bool SceneManager::OnArrowLeft() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
     return CameraRotationInTwoAxis(0, 2, -1);
 }
 
@@ -90,6 +96,8 @@ bool SceneManager::OnArrowUp() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
+
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
     Coordinates rt_corner = eye_.GetEyeRTCorner();
@@ -131,6 +139,8 @@ bool SceneManager::OnArrowDown() {
     if (dorisovka_ != NULL) {
         return false;
     }
+    changed_ = true;
+
     Coordinates lt_corner = eye_.GetEyeLTCorner();
     Coordinates lb_corner = eye_.GetEyeLBCorner();
     Coordinates rt_corner = eye_.GetEyeRTCorner();

@@ -72,15 +72,20 @@ RendererError UI::ShowWindow() {
 
 RendererError UI::AnalyzeKey(const dr4::Event& event) {
     static Coordinates mouse_pos(2, 0, 0);
+    static bool is_moving = false;
 
     switch(event.type) {
         case(dr4::Event::Type::MOUSE_DOWN) : {
             this->OnMousePress(Coordinates(2, event.mouseButton.pos.x, event.mouseButton.pos.y), event.mouseButton.button);
 
+            if (state->target_widget_ != NULL) {
+                is_moving = true;
+            }
+
             break;
         }
         case(dr4::Event::Type::MOUSE_UP) : {
-            state_.target_widget_ = NULL;
+            is_moving = false;
 
             this->OnMouseRelease(Coordinates(2, event.mouseButton.pos.x, event.mouseButton.pos.y), event.mouseButton.button);
 
@@ -96,7 +101,7 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
             mouse_pos.SetCoordinate(0, event.mouseMove.pos.x);
             mouse_pos.SetCoordinate(1, event.mouseMove.pos.y);
 
-            if (state_.target_widget_ == NULL) {
+            if ((state_.target_widget_ == NULL) || (!is_moving)) {
                 break;
             }
 
@@ -105,14 +110,29 @@ RendererError UI::AnalyzeKey(const dr4::Event& event) {
             break;
         }
         case(dr4::Event::Type::KEY_DOWN) : {
+            if (state->target_widget_ != NULL) {
+                if (state->target_widget_->OnKeyPressed(event.key)) {
+                    break;
+                }
+            }
             this->OnKeyPressed(event.key);
             break;
         }
         case(dr4::Event::Type::KEY_UP) : {
+            if (state->target_widget_ != NULL) {
+                if (state->target_widget_->OnKeyUp(event.key)) {
+                    break;
+                }
+            }
             this->OnKeyUp(event.key);
             break;
         }
         case(dr4::Event::Type::TEXT_EVENT) : {
+            if (state->target_widget_ != NULL) {
+                if (state->target_widget_->OnText(event.text)) {
+                    break;
+                }
+            }
             this->OnText(event.text);
             break;
         }

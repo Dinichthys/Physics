@@ -14,8 +14,8 @@
 
 #include "my_assert.h"
 
-static const unsigned int kStartHeight = 720;
-static const unsigned int kStartWidth = 1080;
+static const unsigned int kStartHeight = 1080;
+static const unsigned int kStartWidth = 1720;
 static const char* const kWindowName = "Window";
 static const char* const kBackendFileName = "./plugins/MyDR4Backend/build/libbackend.so";
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
@@ -40,7 +40,8 @@ class UI : public WidgetContainer {
                      const std::vector<Widget*>& children, const char* window_name = kWindowName,
                      const char* const dll_backend_name = kBackendFileName)
             :WidgetContainer(Coordinates(2, 0, 0), width, height, NULL),
-             window_(CreateWindow({width, height}, window_name, dll_backend_name)) {
+             window_(CreateWindow({width, height}, window_name, dll_backend_name)),
+             state_() {
             state_.hovered_widget_ = NULL;
             state_.target_widget_ = NULL;
             state_.window_ = window_;

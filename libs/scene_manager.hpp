@@ -149,6 +149,8 @@ class SceneManager : public Widget {
 
         Title* title_;
 
+        bool changed_;
+
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
                      const std::vector<Object*> objects, hui::State* state)
@@ -177,6 +179,8 @@ class SceneManager : public Widget {
             dorisovka_ = NULL;
 
             title_ = new Title(Coordinates(2), width, state, this, kSceneManagerName, this);
+
+            changed_ = true;
         };
 
         ~SceneManager() {
@@ -223,6 +227,7 @@ class SceneManager : public Widget {
         };
         void SetInfoTable(InfoTable* table) {
             table_ = table;
+            table_->SetManager(this);
             table_->SetHidden(true);
         };
 
@@ -237,6 +242,8 @@ class SceneManager : public Widget {
                 }
             }
 
+            bool old_changed = changed_;
+            changed_ = true;
             switch(evt.sym) {
                 case dr4::KeyCode::KEYCODE_A :
                     return OnLetterA();
@@ -248,9 +255,11 @@ class SceneManager : public Widget {
                     return OnLetterW();
 
                 case dr4::KeyCode::KEYCODE_G :
+                    changed_ = old_changed;
                     return OnLetterG();
 
                 case dr4::KeyCode::KEYCODE_ESCAPE :
+                    changed_ = old_changed;
                     return OnESC();
 
                 case dr4::KeyCode::KEYCODE_UP :
@@ -263,6 +272,7 @@ class SceneManager : public Widget {
                     return OnArrowRight();
 
                 default:
+                    changed_ = old_changed;
                     return false;
             };
         }
@@ -292,10 +302,11 @@ class SceneManager : public Widget {
 
         virtual void Redraw() override;
 
-        void MoveCurrentObject(const Coordinates& move_direction_) const {
+        void MoveCurrentObject(const Coordinates& move_direction_) {
             if (cur_object_idx_ >= objects_.size()) {
                 return;
             }
+            changed_ = true;
             objects_[cur_object_idx_]->Move(move_direction_);
             if (objects_[border_idx_] != NULL) {
                 objects_[border_idx_]->Move(move_direction_);
@@ -306,10 +317,11 @@ class SceneManager : public Widget {
             if (cur_object_idx_ >= objects_.size()) {
                 return;
             }
+            changed_ = true;
             delete objects_[cur_object_idx_];
             objects_.erase(objects_.begin() + cur_object_idx_);
             table_->SetHidden(true);
-            panel_->SetHidden(true);
+            if (panel_) panel_->SetHidden(true);
             table_->SetObject(NULL);
             cur_object_idx_ = -1;
             if (objects_[border_idx_] != NULL) {
@@ -322,12 +334,14 @@ class SceneManager : public Widget {
             if (cur_object_idx_ >= objects_.size()) {
                 return;
             }
+            changed_ = true;
             objects_.push_back(objects_[cur_object_idx_]->GetCopy());
             objects_.back()->SetCenterCoordinates(Coordinates(3, 0, 0, 0));
             objects_.back()->SetColor(cur_object_color_);
         };
 
         void ChooseObject(size_t idx) {
+            changed_ = true;
             if (cur_object_idx_ < objects_.size()) {
                 objects_[cur_object_idx_]->SetColor(cur_object_color_);
                 if (objects_[border_idx_] != NULL) {
@@ -338,14 +352,15 @@ class SceneManager : public Widget {
             cur_object_idx_ = idx;
             table_->SetObject(objects_[cur_object_idx_]);
             table_->SetHidden(false);
-            panel_->SetHidden(false);
+            if (panel_) panel_->SetHidden(false);
             cur_object_color_ = colors::Color(objects_[cur_object_idx_]->GetColor());
-            objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
+            // objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
             objects_.push_back(objects_[cur_object_idx_]->GetBorder());
             border_idx_ = objects_.size() - 1;
         };
 
         void ChangeCurObjReflection(float delta) {
+            changed_ = true;
             float new_reflection = objects_[cur_object_idx_]->GetCoeffReflection() + delta;
             if ((new_reflection > -kEpsilon) && (new_reflection < 1 + kEpsilon)) {
                 if (new_reflection > 1) {
@@ -370,6 +385,7 @@ class SceneManager : public Widget {
         };
 
         void ChangeCurObjRefraction(float delta) {
+            changed_ = true;
             float new_coeff = objects_[cur_object_idx_]->GetCoeffRefraction() + delta;
             if (new_coeff >= 0) {
                 objects_[cur_object_idx_]->SetCoeffRefraction(new_coeff);
@@ -377,6 +393,7 @@ class SceneManager : public Widget {
         };
 
         void ChangeCurObjAbsorption(float delta) {
+            changed_ = true;
             float new_absorption = objects_[cur_object_idx_]->GetCoeffAbsorption() + delta;
             if ((new_absorption > -kEpsilon) && (new_absorption < 1 + kEpsilon)) {
                 if (new_absorption > 1) {
@@ -401,7 +418,13 @@ class SceneManager : public Widget {
         };
 
         void ChangeCurObjColor(const colors::Color& color) {
-            cur_object_color_ = cur_object_color_ + color;
+            changed_ = true;
+            cur_object_color_ = color;
+            objects_[cur_object_idx_]->SetColor(color);
+        };
+
+        colors::Color GetCurObjColor() {
+            return cur_object_color_;
         };
 
         virtual bool OnMouseEnter(const Coordinates& mouse_pos, const Coordinates& delta) override {
@@ -462,13 +485,14 @@ class SceneManager : public Widget {
                     return Widget::OnMousePress(mouse_pos, type);;
                 }
 
+                changed_ = true;
                 if (coeff < 0) {
                     if (cur_object_idx_ < objects_.size()) {
                         objects_[cur_object_idx_]->SetColor(cur_object_color_);
                     }
                     cur_object_idx_ = -1;
                     table_->SetHidden(true);
-                    panel_->SetHidden(true);
+                    if (panel_) panel_->SetHidden(true);
                     table_->SetObject(NULL);
                     delete objects_[border_idx_];
                     objects_.erase(objects_.begin() + border_idx_);
@@ -486,9 +510,9 @@ class SceneManager : public Widget {
                     cur_object_idx_ = tmp;
                     table_->SetObject(objects_[cur_object_idx_]);
                     table_->SetHidden(false);
-                    panel_->SetHidden(false);
+                    if (panel_) panel_->SetHidden(false);
                     cur_object_color_ = colors::Color(objects_[cur_object_idx_]->GetColor());
-                    objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
+                    // objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
                     objects_.push_back(objects_[cur_object_idx_]->GetBorder());
                     border_idx_ = objects_.size() - 1;
                 }

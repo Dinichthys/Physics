@@ -22,27 +22,74 @@ void SceneManager::Redraw() {
         return;
     }
 
+    if (!changed_) {
+        texture->Draw(*image_);
+        title_->Redraw();
+        Widget::Redraw();
+        return;
+    }
+
     size_t width = Widget::GetWidth();
     size_t height = Widget::GetHeight();
 
-    tasks_.push(DrawTask(        0,          0, width / 2, height / 2,                      0));
-    tasks_.push(DrawTask(        0, height / 2, width / 2, height    ,     width * height / 4));
-    tasks_.push(DrawTask(width / 2,          0, width,     height / 2,     width * height / 2));
-    tasks_.push(DrawTask(width / 2, height / 2, width,     height    , 3 * width * height / 4));
+    tasks_.push(DrawTask(        0,          0, width / 4, height / 4,                      0 ));
+    tasks_.push(DrawTask(        0, height / 4, width / 4, height / 2,     width * height / 16));
+    tasks_.push(DrawTask(width / 4,          0, width / 2, height / 4,     width * height / 8 ));
+    tasks_.push(DrawTask(width / 4, height / 4, width / 2, height / 2, 3 * width * height / 16));
+
+    tasks_.push(DrawTask(        0,     height / 2,    width / 4, 3 * height / 4,     width * height / 4 ));
+    tasks_.push(DrawTask(width / 4,     height / 2,    width / 2, 3 * height / 4, 5 * width * height / 16));
+    tasks_.push(DrawTask(        0, 3 * height / 4,    width / 4,     height,     3 * width * height / 8 ));
+    tasks_.push(DrawTask(width / 4, 3 * height / 4,    width / 2,     height,     7 * width * height / 16));
+
+    tasks_.push(DrawTask(    width / 2,          0, 3 * width / 4, height / 4,      width * height / 2 ));
+    tasks_.push(DrawTask(    width / 2, height / 4, 3 * width / 4, height / 2,  9 * width * height / 16));
+    tasks_.push(DrawTask(3 * width / 4,          0,     width,     height / 4,  5 * width * height / 8 ));
+    tasks_.push(DrawTask(3 * width / 4, height / 4,     width,     height / 2, 11 * width * height / 16));
+
+    tasks_.push(DrawTask(    width / 2,     height / 2, 3 * width / 4, 3 * height / 4,  3 * width * height / 4 ));
+    tasks_.push(DrawTask(3 * width / 4,     height / 2,     width,     3 * height / 4, 13 * width * height / 16));
+    tasks_.push(DrawTask(    width / 2, 3 * height / 4, 3 * width / 4,     height,      7 * width * height / 8 ));
+    tasks_.push(DrawTask(3 * width / 4, 3 * height / 4,     width,         height,     15 * width * height / 16));
 
     std::thread t1([this](){this->DrawPart();});
     std::thread t2([this](){this->DrawPart();});
     std::thread t3([this](){this->DrawPart();});
     std::thread t4([this](){this->DrawPart();});
+    std::thread t5([this](){this->DrawPart();});
+    std::thread t6([this](){this->DrawPart();});
+    std::thread t7([this](){this->DrawPart();});
+    std::thread t8([this](){this->DrawPart();});
+    std::thread t9([this](){this->DrawPart();});
+    std::thread t10([this](){this->DrawPart();});
+    std::thread t11([this](){this->DrawPart();});
+    std::thread t12([this](){this->DrawPart();});
+    std::thread t13([this](){this->DrawPart();});
+    std::thread t14([this](){this->DrawPart();});
+    std::thread t15([this](){this->DrawPart();});
+    std::thread t16([this](){this->DrawPart();});
 
     t1.join();
     t2.join();
     t3.join();
     t4.join();
+    t5.join();
+    t6.join();
+    t7.join();
+    t8.join();
+    t9.join();
+    t10.join();
+    t11.join();
+    t12.join();
+    t13.join();
+    t14.join();
+    t15.join();
+    t16.join();
 
     texture->Draw(*image_);
     title_->Redraw();
     Widget::Redraw();
+    changed_ = false;
 }
 
 void SceneManager::DrawPart() {
