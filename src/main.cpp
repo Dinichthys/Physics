@@ -96,44 +96,44 @@ int main() {
     desktop_children.push_back(new SceneManager(Coordinates(2, 120, 0), 800, 800, objects, NULL));
     SceneManager* scene_manager = dynamic_cast<SceneManager*>(desktop_children.back());
     MoveButton buttons[6] = {
-        MoveButton(Button(Coordinates(2, 5, 107), 7, 7, "/\\", kFontFileNameScrollBar, NULL,  NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 107), 7, 7, "/\\", kFontFileNameScrollBar, NULL,  NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, 100, 0, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 115), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 115), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, -100, 0, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 123), 7, 7, "/\\", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 123), 7, 7, "/\\", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, 0, 100, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 131), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 131), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, 0, -100, 0),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 139), 7, 7, "/\\", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 139), 7, 7, "/\\", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, 0, 0, 100),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
-        MoveButton(Button(Coordinates(2, 5, 147), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+        MoveButton(Button(Coordinates(2, 5, 147), 7, 7, "\\/", kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                    Coordinates(3, 0, 0, -100),
                    [scene_manager](const Coordinates& move_direction){scene_manager->MoveCurrentObject(move_direction);}),
     };
 
     CoeffChangingButton coeff_changing_buttons[6] = {
         CoeffChangingButton(Button(Coordinates(2, 80, 225), 7, 7, "/\\",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 80, 233), 7, 7, "\\/",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjReflection(delta);}, -0.1),
         CoeffChangingButton(Button(Coordinates(2, 80, 295), 7, 7, "/\\",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 80, 303), 7, 7, "\\/",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjRefraction(delta);}, -0.1),
         CoeffChangingButton(Button(Coordinates(2, 80, 363), 7, 7, "/\\",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, 0.1),
         CoeffChangingButton(Button(Coordinates(2, 80, 371), 7, 7, "\\/",
-                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorBlack),
+                        kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 8, colors::kColorWhite),
                         [scene_manager](float delta){scene_manager->ChangeCurObjAbsorption(delta);}, -0.1),
     };
 
@@ -145,10 +145,10 @@ int main() {
     }
 
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 40), 70, 40, "-",
-                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorBlack),
+                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorWhite),
                                [scene_manager](){scene_manager->DeleteCurrentObject();}));
     buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 85, 40), 70, 40, "+",
-                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorBlack),
+                               kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorWhite),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
 
     size_t buttons_coeff_num = sizeof(coeff_changing_buttons) / sizeof(coeff_changing_buttons[0]);

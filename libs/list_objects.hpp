@@ -19,9 +19,9 @@ static const std::string kListObjectsTitleStr = "Objects";
 static const std::string kListTitleHeightClosedButtonText = " \\/";
 static const std::string kListTitleHeightOpenedButtonText = " /\\";
 
-static const colors::Color kElemInListColor = colors::Color(90, 75, 60);
+static const colors::Color kElemInListColor = colors::Color(49, 49, 49);
 
-static const colors::Color kListColor = colors::Color(62, 62, 66);
+static const colors::Color kListColor = kWidgetDefaultFillColor;
 
 static const colors::Color kListArrowColor = colors::Color(180, 180, 180);
 
@@ -216,11 +216,11 @@ class ListObjectsTitle : public Widget {
                      kFontFileNameListObject, state, this, kListArrowColor, kListArrowColor),
              rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
             if (rect_ != NULL) {
-                rect_->SetPos({0, 0});
-                rect_->SetSize({kWidth, kListObjectsTitleHeight});
+                rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget});
+                rect_->SetSize(dr4::Vec2f{kWidth, kListObjectsTitleHeight} - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2);
                 rect_->SetFillColor(kListColor);
-                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                rect_->SetBorderThickness(0);
+                rect_->SetBorderColor(kWidgetDefaultBorderColor);
+                rect_->SetBorderThickness(kBorderThicknessWidget);
             }
 
             list_->SetHidden(true);
@@ -278,11 +278,11 @@ class ListObjectsTitle : public Widget {
 
             if (rect_ == NULL) {
                 rect_ = state->window_->CreateRectangle();
-                rect_->SetPos({0, 0});
-                rect_->SetSize({kWidth, kListObjectsTitleHeight});
+                rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget});
+                rect_->SetSize(dr4::Vec2f{kWidth, kListObjectsTitleHeight} - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2);
                 rect_->SetFillColor(kListColor);
-                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                rect_->SetBorderThickness(0);
+                rect_->SetBorderColor(kWidgetDefaultBorderColor);
+                rect_->SetBorderThickness(kBorderThicknessWidget);
             }
 
             text_.SetState(state);
