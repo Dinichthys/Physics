@@ -34,9 +34,9 @@ class EditableText : public Text {
                 caret_ = state->window_->CreateRectangle();
                 caret_->SetFillColor(kBorderColorEditableText);
                 caret_->SetSize({kBorderThickness, float(font_size_)});
-                caret_->SetPos({});
+                caret_->SetPos({(text_) ? text_->GetBounds().x : 0, 0});
             }
-            caret_idx_ = 0;
+            caret_idx_ = (text_) ? str_.length() : 0;
             changed_ = false;
         };
 
@@ -51,7 +51,7 @@ class EditableText : public Text {
             caret_ = state_->window_->CreateRectangle();
             caret_->SetFillColor(kBorderColorEditableText);
             caret_->SetSize({kBorderThickness, float(font_size_)});
-            caret_->SetPos({});
+            caret_->SetPos({(text_) ? text_->GetBounds().x : 0, 0});
 
             Text::SetState(state_);
         };

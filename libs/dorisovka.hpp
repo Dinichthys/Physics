@@ -31,10 +31,11 @@ static const std::string kRectangleButtonName = "rect";
 static const std::string kCircleButtonName = "circ";
 static const std::string kArrowButtonName = "arrow";
 
-static const char* const kDorisovkaPlugNames[3] = {
+static const char* const kDorisovkaPlugNames[1] = {
     "./plugins/build/ppMe.so",
-    "./plugins/build/ppArtem.so",
-    "./plugins/build/ppSeva.so",
+    // "./plugins/build/ppArtem.so",
+    // "./plugins/build/ppSeva.so",
+
     // "./plugins/build/ppVova.so",
     // "./plugins/build/ppEgor.so"
 };
@@ -337,6 +338,27 @@ class Dorisovka : public Widget, public pp::Canvas {
         virtual void ShapeChanged(pp::Shape *) override {};
         virtual dr4::Window *GetWindow() override {
             return state->window_;
+        };
+
+        void UploadPlugin(const std::string& plugin_name) {
+            backends_.push_back(dynamic_cast<cum::PPToolPlugin*>(state->manager.LoadFromFile(plugin_name)));
+
+            auto tools = backends_.back()->CreateTools(this);
+
+            for (size_t i = tools_.size(); i < tools_.size() + tools.size(); i++) {
+                toolbar_->AddButton(new GeomPrimCreationButton(Button(
+                    Coordinates(2),
+                    kGeomButtonWidth, kGeomButtonHeight,
+                    std::string(std::string(" ") + std::string(tools[i - tools_.size()].get()->Icon())),
+                    kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
+                    [this] (size_t id) {
+                        this->CreatePrim(id);
+                    }, i));
+            }
+
+            for (auto& tool : tools) {
+                tools_.push_back(std::move(tool));
+            }
         };
 
     private:

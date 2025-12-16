@@ -12,6 +12,7 @@ add_executable (${PROJECT_NAME}
     src/info_table.cpp
     src/color_picker.cpp
     src/toolbar.cpp
+    src/plugin_upload.cpp
 
     libs/GUI/src/draw.cpp
     libs/GUI/src/scrollbar.cpp
