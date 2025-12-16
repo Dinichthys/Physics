@@ -9,9 +9,9 @@
 
 static const char* const kFontFileNameTitle = "data/font.ttf";
 
-static const colors::Color kTitleBackgroundColor = colors::Color(59, 59, 59);
+static const colors::Color kTitleBackgroundColor = colors::Color(80, 80, 80);
 static const colors::Color kTitleBorderColor = colors::Color(100, 100, 100);
-static const float kTitleBorderThickness = 2;
+static const float kTitleBorderThickness = kBorderThicknessWidget;
 
 static const float kTitleHeight = 20;
 
@@ -40,7 +40,14 @@ class Title : public Widget {
                 background_->SetFillColor(kTitleBackgroundColor);
                 background_->SetBorderColor(kTitleBorderColor);
                 background_->SetBorderThickness(kTitleBorderThickness);
-                background_->SetSize({width, kTitleHeight});
+                background_->SetSize({width - 2 * kTitleBorderThickness, kTitleHeight - 2 * kTitleBorderThickness});
+                background_->SetPos({kTitleBorderThickness, kTitleBorderThickness});
+            }
+        };
+
+        ~Title() {
+            if (state->target_widget_ == this) {
+                state->target_widget_ = NULL;
             }
         };
 
@@ -60,7 +67,8 @@ class Title : public Widget {
             background_->SetFillColor(kTitleBackgroundColor);
             background_->SetBorderColor(kTitleBorderColor);
             background_->SetBorderThickness(kTitleBorderThickness);
-            background_->SetSize(Widget::GetSize());
+            background_->SetSize({Widget::GetWidth() - 2 * kTitleBorderThickness, kTitleHeight - 2 * kTitleBorderThickness});
+            background_->SetPos({kTitleBorderThickness, kTitleBorderThickness});
         };
 
         virtual bool OnMouseMove(float shift_x, float shift_y) override {

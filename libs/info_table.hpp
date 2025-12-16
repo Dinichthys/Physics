@@ -19,9 +19,9 @@ static const std::string kInfoTableName = "InfoTable";
 static const std::string kFontFileNameInfoTable = "data/font.ttf";
 
 static const std::string kCoordinatesFieldStartStr = "Coors: ";
-static const std::string kXCoorStartStr = "\n\t X = ";
-static const std::string kYCoorStartStr = "\n\t Y = ";
-static const std::string kZCoorStartStr = "\n\t Z = ";
+static const std::string kXCoorStartStr = "\n\t X : ";
+static const std::string kYCoorStartStr = "\n\t Y : ";
+static const std::string kZCoorStartStr = "\n\t Z : ";
 
 static const std::string kColorFieldStartStr = "Color: #";
 
@@ -34,7 +34,7 @@ static const std::string kCoeffAbsorptionFieldStartStr = "Coeff Absorb: ";
 static const size_t kNumLenInfoTable = 30;
 static const size_t kHexBase = 16;
 
-static const colors::Color kInfoTableColor = colors::Color(30, 30, 32);
+static const colors::Color kInfoTableColor = kTitleBackgroundColor;
 
 class SceneManager;
 
@@ -131,11 +131,11 @@ class InfoTable : public WidgetContainer {
             base_texture_((state == NULL) ? NULL : state->window_->CreateTexture())  {
             Widget::SetLTCorner(Coordinates(2, relPos.x, relPos.y + kTitleHeight));
             if (rect_ != NULL) {
-                rect_->SetPos({0, 0});
-                rect_->SetSize({width, height});
+                rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget});
+                rect_->SetSize(dr4::Vec2f{width, height} - dr4::Vec2f(kBorderThicknessWidget, kBorderThicknessWidget) * 2);
                 rect_->SetFillColor(kInfoTableColor);
-                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                rect_->SetBorderThickness(0);
+                rect_->SetBorderColor(kTitleBorderColor);
+                rect_->SetBorderThickness(kBorderThicknessWidget);
             }
 
             if (base_texture_ != NULL) {
@@ -266,11 +266,11 @@ class InfoTable : public WidgetContainer {
 
             rect_ = state->window_->CreateRectangle();
 
-            rect_->SetPos({0, 0});
-            rect_->SetSize(Widget::GetSize());
+            rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget});
+            rect_->SetSize(Widget::GetSize() - dr4::Vec2f(kBorderThicknessWidget, kBorderThicknessWidget) * 2);
             rect_->SetFillColor(kInfoTableColor);
-            rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-            rect_->SetBorderThickness(0);
+            rect_->SetBorderColor(kTitleBorderColor);
+            rect_->SetBorderThickness(kBorderThicknessWidget);
 
             if (base_texture_ != NULL) {
                 delete base_texture_;

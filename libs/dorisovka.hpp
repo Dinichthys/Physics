@@ -6,14 +6,18 @@
 #include <stdexcept>
 
 #include "widget.hpp"
+#include "draw.hpp"
 #include "pp/canvas.hpp"
 #include "pp/shape.hpp"
 #include "pp/tool.hpp"
 #include "cum/ifc/pp.hpp"
+#include "color_picker.hpp"
 
 #include "dr4/math/rect.hpp"
 
 #include "dorisovka_buttons.hpp"
+
+#include "toolbar.hpp"
 
 static const size_t kRectangleID = 0;
 static const size_t kCircleID = 1;
@@ -38,6 +42,8 @@ static const char* const kDorisovkaPlugNames[2] = {
 // static const char* const kDorisovkaPlugName = "./plugins/MyGeomPrimBackend/build/libgeomprim_old.so";
 // static const char* const kDorisovkaPlugName = "./plugins/optor/build/source/piska/libpiska.so";
 
+static const size_t kDorisovkaBorderThickness = 10;
+
 static colors::Color kGeomPrimButtonColor = colors::Color(49, 49, 49);
 
 class Dorisovka : public WidgetContainer, public pp::Canvas {
@@ -49,7 +55,16 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
         pp::Shape* selected_shape_;
         pp::Tool* selected_tool_;
 
-        const pp::ControlsTheme kTheme = {.shapeFillColor = colors::Color(0, 0, 0, 0),
+        dr4::Rectangle* border_;
+
+        PanelControl* panel_;
+
+        ColorPicker* color_picker_;
+
+        ToolBar* toolbar_;
+
+    public:
+        pp::ControlsTheme theme_ = {.shapeFillColor = colors::Color(0, 0, 0, 0),
                                           .shapeBorderColor = colors::kColorRed,
                                           .selectColor = colors::kColorGreen,
                                           .textColor = colors::kColorGreen,
@@ -58,17 +73,28 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
                                           .handleHoverColor = colors::kColorBlue,
                                           .handleActiveColor = colors::kColorRed};
 
-        PanelControl* panel_;
-
-    public:
         explicit Dorisovka(const Coordinates& lt_corner, dr4::Vec2f size, hui::State* state = NULL)
             :WidgetContainer(lt_corner,  size.x, size.y, state) {
             LoadPPBackends();
+
+            toolbar_ = new ToolBar(Coordinates(2, 0, 0), this, state, this);
+            state->ui->AddChild(toolbar_);
 
             std::vector<Widget*> buttons;
 
             for (size_t i = 0; i < tools_.size(); i++) {
             buttons.push_back(new GeomPrimCreationButton(Button(
+                Coordinates(2,
+                    (i + 1) * (size.x - kGeomButtonWidth * tools_.size()) / (tools_.size() + 1)
+                    + kGeomButtonWidth * i,
+                (kGeomPrimPanelControlHeight - kGeomButtonHeight) / 2),
+                kGeomButtonWidth, kGeomButtonHeight,
+                std::string(tools_[i].get()->Icon()),
+                kFontFileNameGeomPrim, state, this, kGeomPrimButtonColor, kGeomPrimButtonColor),
+                [this] (size_t id) {
+                    this->CreatePrim(id);
+                }, i));
+            toolbar_->AddButton(new GeomPrimCreationButton(Button(
                 Coordinates(2,
                     (i + 1) * (size.x - kGeomButtonWidth * tools_.size()) / (tools_.size() + 1)
                     + kGeomButtonWidth * i,
@@ -89,11 +115,27 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
 
             selected_shape_ = NULL;
             selected_tool_ = NULL;
+
+            border_ = state->window_->CreateRectangle();
+            border_->SetBorderColor(colors::kColorOrange);
+            border_->SetPos({kDorisovkaBorderThickness, kDorisovkaBorderThickness});
+            border_->SetFillColor(colors::Color(0, 0, 0, 0));
+            border_->SetBorderThickness(kDorisovkaBorderThickness);
+            border_->SetSize(size - dr4::Vec2f{kDorisovkaBorderThickness, kDorisovkaBorderThickness} * 2 -
+                dr4::Vec2f{0, kGeomPrimPanelControlHeight});
         };
 
         ~Dorisovka() {
             for (auto prim : prims_) {
                 DelShape(prim);
+            }
+
+            auto children = state->ui->GetChildren();
+            for (size_t i = 0; i < children.size(); i++) {
+                if (children[i] == toolbar_) {
+                    state->ui->GetChildren().erase(children.begin() + i);
+                    delete toolbar_;
+                }
             }
         };
 
@@ -256,12 +298,15 @@ class Dorisovka : public WidgetContainer, public pp::Canvas {
                 shape->DrawOn(*texture);
             }
 
+            border_->DrawOn(*texture);
+
             WidgetContainer::Redraw();
         };
 
         virtual pp::ControlsTheme GetControlsTheme() const override {
-            return kTheme;
+            return theme_;
         };
+
         virtual void AddShape(pp::Shape *shape) override {
             prims_.push_back(shape);
         };

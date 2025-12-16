@@ -10,9 +10,7 @@
 #include "button.hpp"
 #include "widget_title.hpp"
 
-static const std::string kCameraControlTitle = "CameraController";
-
-static const colors::Color kCameraControlColor = colors::Color(30, 30, 32);
+static const std::string kCameraControlTitle = "Camera";
 
 class SceneManager;
 
@@ -30,11 +28,11 @@ class CameraController : public WidgetContainer {
             rect_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
             Widget::SetLTCorner(Coordinates(2, relPos.x, relPos.y + kTitleHeight));
             if (rect_ != NULL) {
-                rect_->SetPos({0, kTitleHeight});
-                rect_->SetSize({width, height});
-                rect_->SetFillColor(kCameraControlColor);
-                rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                rect_->SetBorderThickness(0);
+                rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget + kTitleHeight});
+                rect_->SetSize(dr4::Vec2f{width, height} - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2);
+                rect_->SetFillColor(kTitleBackgroundColor);
+                rect_->SetBorderColor(kTitleBorderColor);
+                rect_->SetBorderThickness(kBorderThicknessWidget);
             }
 
             title_ = new Title(Coordinates(2), width, state, this, kCameraControlTitle, this);
@@ -55,11 +53,11 @@ class CameraController : public WidgetContainer {
 
             rect_ = state->window_->CreateRectangle();
 
-            rect_->SetPos({0, kTitleHeight});
-            rect_->SetSize(Widget::GetSize());
-            rect_->SetFillColor(kCameraControlColor);
-            rect_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-            rect_->SetBorderThickness(0);
+            rect_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget + kTitleHeight});
+            rect_->SetSize(Widget::GetSize() - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2);
+            rect_->SetFillColor(kTitleBackgroundColor);
+            rect_->SetBorderColor(kTitleBorderColor);
+            rect_->SetBorderThickness(kBorderThicknessWidget);
 
             texture->SetSize(Widget::GetWidth(), Widget::GetHeight() + kTitleHeight);
             Widget::SetSize({Widget::GetWidth(), Widget::GetHeight() + kTitleHeight});

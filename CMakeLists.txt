@@ -10,6 +10,8 @@ add_executable (${PROJECT_NAME}
     src/triangles_set.cpp
     src/movement.cpp
     src/info_table.cpp
+    src/color_picker.cpp
+    src/toolbar.cpp
 
     libs/GUI/src/draw.cpp
     libs/GUI/src/scrollbar.cpp

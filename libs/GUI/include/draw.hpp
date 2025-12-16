@@ -21,7 +21,7 @@ static const char* const kBackendFileName = "./plugins/MyDR4Backend/build/libbac
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
 static const size_t kCharacterSize = 100;
 
-static const colors::Color kBackgroundColor = colors::Color(42, 40, 41);
+static const colors::Color kBackgroundColor = colors::Color(50, 50, 50);
 
 enum RendererError {
     kDoneRenderer = 0,
@@ -45,6 +45,7 @@ class UI : public WidgetContainer {
             state_.hovered_widget_ = NULL;
             state_.target_widget_ = NULL;
             state_.window_ = window_;
+            state_.ui = this;
             state = &state_;
 
             Widget::SetState(&state_);

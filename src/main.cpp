@@ -165,26 +165,33 @@ int main() {
     desktop_children.push_back(new InfoTable(Coordinates(2, 920, 0), 160, 410, circles_arr + 0, NULL, NULL, &buttons_on_panel));
     scene_manager->SetInfoTable(dynamic_cast<InfoTable*>(desktop_children.back()));
 
-    CameraControlButton camera_buttons[6] = {
-        CameraControlButton(Button(Coordinates(2, 37, 25), 75, 20, "Forward",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
-                                    [scene_manager](){scene_manager->OnLetterW();}),
-        CameraControlButton(Button(Coordinates(2, 5, 50), 75, 20, "Left",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
+    CameraControlButton camera_buttons[8] = {
+        CameraControlButton(Button(Coordinates(2, 5, 25), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
                                     [scene_manager](){scene_manager->OnLetterA();}),
-        CameraControlButton(Button(Coordinates(2, 37, 75), 75, 20, "Backward",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
-                                    [scene_manager](){scene_manager->OnLetterS();}),
-        CameraControlButton(Button(Coordinates(2, 85, 50), 75, 20, "Right",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
+        CameraControlButton(Button(Coordinates(2, 5, 60), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
                                     [scene_manager](){scene_manager->OnLetterD();}),
-        CameraControlButton(Button(Coordinates(2, 165, 30), 75, 20, "Up",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
+        CameraControlButton(Button(Coordinates(2, 40, 25), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    [scene_manager](){scene_manager->OnLetterW();}),
+        CameraControlButton(Button(Coordinates(2, 40, 60), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    [scene_manager](){scene_manager->OnLetterS();}),
+        CameraControlButton(Button(Coordinates(2, 75, 25), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    [scene_manager](){scene_manager->OnArrowLeft();}),
+        CameraControlButton(Button(Coordinates(2, 75, 60), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    [scene_manager](){scene_manager->OnArrowRight();}),
+        CameraControlButton(Button(Coordinates(2, 110, 25), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
                                     [scene_manager](){scene_manager->OnArrowUp();}),
-        CameraControlButton(Button(Coordinates(2, 165, 70), 75, 20, "Down",
-                                    kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 10, colors::kColorBlack),
+        CameraControlButton(Button(Coordinates(2, 110, 60), 30, 30, " ",
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
                                     [scene_manager](){scene_manager->OnArrowDown();}),
     };
+
 
     std::vector<Widget*> camera_buttons_vec;
     size_t camera_buttons_num = sizeof(camera_buttons) / sizeof(camera_buttons[0]);
@@ -192,7 +199,7 @@ int main() {
         camera_buttons_vec.push_back(new CameraControlButton(camera_buttons[i]));
     }
 
-    desktop_children.push_back(new CameraController(Coordinates(2, 1000, 500), 200, 80, NULL, NULL, &camera_buttons_vec));
+    desktop_children.push_back(new CameraController(Coordinates(2, 1000, 500), 145, 95 - kTitleHeight, NULL, NULL, &camera_buttons_vec));
 
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");

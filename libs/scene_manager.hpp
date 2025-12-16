@@ -151,6 +151,8 @@ class SceneManager : public Widget {
 
         bool changed_;
 
+        dr4::Rectangle* border_;
+
     public:
         SceneManager(const Coordinates& lt_corner, float width, float height,
                      const std::vector<Object*> objects, hui::State* state)
@@ -161,7 +163,8 @@ class SceneManager : public Widget {
                   Coordinates(3,-(float)(width / 2), (float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2),-(float)(height / 2), kWindowDistance),
                   Coordinates(3, (float)(width / 2), (float)(height / 2), kWindowDistance)), tasks_(std::stack<DrawTask>()),
-             list_objects_(NULL), table_(NULL), panel_(NULL) {
+             list_objects_(NULL), table_(NULL), panel_(NULL),
+             border_((state != NULL) ? state->window_->CreateRectangle() : NULL) {
             size_t objects_num = objects.size();
             for (size_t i = 0; i < objects_num; i++) {
                 objects_.push_back(objects[i]);
@@ -170,6 +173,14 @@ class SceneManager : public Widget {
             if (image_ != NULL) {
                 image_->SetSize({width, height});
                 image_->SetPos({0, 0});
+            }
+
+            if (border_ != NULL) {
+                border_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget});
+                border_->SetSize({width - 2 * kBorderThicknessWidget, height - 2 * kBorderThicknessWidget});
+                border_->SetFillColor(colors::Color(0, 0, 0, 0));
+                border_->SetBorderColor(kTitleBorderColor);
+                border_->SetBorderThickness(kBorderThicknessWidget);
             }
 
             cur_object_idx_ = -1;
@@ -214,6 +225,14 @@ class SceneManager : public Widget {
                 image_->SetPos({0, 0});
                 delete tmp;
             }
+
+            border_ = state_->window_->CreateRectangle();
+            border_->SetPos({kBorderThickness, kBorderThickness});
+            border_->SetSize({Widget::GetWidth() - 2 * kBorderThickness, Widget::GetHeight() - 2 * kBorderThickness});
+            border_->SetFillColor(colors::Color(0, 0, 0, 0));
+            border_->SetBorderColor(kTitleBackgroundColor);
+            border_->SetBorderThickness(kBorderThickness);
+
             Widget::SetState(state_);
         };
 

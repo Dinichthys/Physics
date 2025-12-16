@@ -14,6 +14,10 @@
 #include "vector.hpp"
 #include "logging.h"
 
+static const size_t kBorderThicknessWidget = 2;
+
+static const std::string kWidgetDefaultName = "Widget";
+
 namespace hui {
 
 class State;
@@ -55,6 +59,7 @@ public:
 }; // namespace hui
 
 class Widget;
+class UI;
 
 class hui::State {
     public:
@@ -62,9 +67,10 @@ class hui::State {
         ::Widget* hovered_widget_;
         dr4::Window* window_;
         cum::Manager manager;
+        ::UI* ui;
 
         State()
-            :target_widget_(NULL), hovered_widget_(NULL), window_(NULL), manager(){};
+            :target_widget_(NULL), hovered_widget_(NULL), window_(NULL), manager(), ui(NULL){};
 };
 
 class Widget : public hui::MyWidget {
@@ -248,6 +254,10 @@ class Widget : public hui::MyWidget {
         };
         virtual bool OnText(const dr4::Event::TextEvent&) {
             return false;
+        };
+
+        virtual const std::string& GetName() const {
+            return kWidgetDefaultName;
         };
 };
 

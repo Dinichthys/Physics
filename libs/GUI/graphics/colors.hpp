@@ -72,6 +72,7 @@ namespace colors {
     const Color kColorCyan(0, 255, 255);
     const Color kColorYellow(255, 255, 0);
     const Color kColorBlack(19, 19, 19);
+    const Color kColorOrange(255, 140, 0);
 
 };
 
