@@ -8,6 +8,8 @@
 #include "button.hpp"
 #include "object_buttons.hpp"
 #include "camera_control.hpp"
+#include "topbar.hpp"
+#include "file_button.hpp"
 
 #include "scene_manager.hpp"
 
@@ -167,31 +169,30 @@ int main() {
 
     CameraControlButton camera_buttons[8] = {
         CameraControlButton(Button(Coordinates(2, 5, 25), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnLetterA();}),
         CameraControlButton(Button(Coordinates(2, 5, 60), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnLetterD();}),
         CameraControlButton(Button(Coordinates(2, 40, 25), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnLetterW();}),
         CameraControlButton(Button(Coordinates(2, 40, 60), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnLetterS();}),
         CameraControlButton(Button(Coordinates(2, 75, 25), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnArrowLeft();}),
         CameraControlButton(Button(Coordinates(2, 75, 60), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnArrowRight();}),
         CameraControlButton(Button(Coordinates(2, 110, 25), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnArrowUp();}),
         CameraControlButton(Button(Coordinates(2, 110, 60), 30, 30, " ",
-                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorBlack),
+                                    kFontFileNameGeomPrim, NULL, NULL, kColorButtons, kColorButtons, 20, colors::kColorWhite),
                                     [scene_manager](){scene_manager->OnArrowDown();}),
     };
-
 
     std::vector<Widget*> camera_buttons_vec;
     size_t camera_buttons_num = sizeof(camera_buttons) / sizeof(camera_buttons[0]);
@@ -201,6 +202,14 @@ int main() {
 
     desktop_children.push_back(new CameraController(Coordinates(2, 1000, 500), 145, 95 - kTitleHeight, NULL, NULL, &camera_buttons_vec));
 
+    MainField* main_field = new MainField(Coordinates(2, 0, kTitleHeight), kStartWidth, kStartHeight, NULL, &desktop_children, NULL);
+
+    std::vector<Widget*> topbar_buttons;
+
+    topbar_buttons.push_back(new FileButton(Coordinates(2, 0, 0), kTopBarButtonWidth, NULL, NULL));
+
+    TopBar* topbar = new TopBar(Coordinates(2), kStartWidth, NULL, &topbar_buttons, NULL);
+
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libdr4_sdl3.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Artem/plugin/libswuix_sdl3.so");
@@ -209,7 +218,7 @@ int main() {
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/Artem/plugin_new/libswuix_sdl3.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/MyDR4Backend/build/IvanAbrutin.so");
     // UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics", "./plugins/build/libplugin_dr4.so");
-    UI renderer(kStartWidth, kStartHeight, desktop_children, "Physics");
+    UI renderer(kStartWidth, kStartHeight, main_field, topbar, "Physics");
 
     enum RendererError result = renderer.ShowWindow();
     if (result != kDoneRenderer) {

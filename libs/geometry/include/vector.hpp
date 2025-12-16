@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "my_assert.h"
+#include "dr4/math/vec2.hpp"
 
 static const float kVectorWidth = 1.f;
 static const float kArrowLenPercentage  = 0.125f;
@@ -37,6 +38,11 @@ class Coordinates {
             Coordinates::x = x;
             Coordinates::y = y;
             Coordinates::z = z;
+        };
+        Coordinates(dr4::Vec2f vec) {
+            dimension = 2;
+            x = vec.x;
+            y = vec.y;
         };
 
         CoordinatesError SetCoordinate(size_t index, float value) {

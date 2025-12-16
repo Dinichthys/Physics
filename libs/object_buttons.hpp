@@ -4,7 +4,7 @@
 #include "button.hpp"
 #include "scene_manager.hpp"
 
-static const colors::Color kColorButtons = colors::kColorWhite;
+static const colors::Color kColorButtons = colors::Color(49, 49, 49);
 // static const colors::Color kColorButtons = colors::Color(214, 158, 70);
 
 class MoveButton : public Button {

@@ -6,7 +6,7 @@
 #include "widget.hpp"
 
 class Text : public Widget {
-    protected:
+    public:
         dr4::Text* text_;
         dr4::Font* font_;
         std::string font_file_name_;
@@ -34,6 +34,7 @@ class Text : public Widget {
             text_->SetPos({0, 0});
             text_->SetFontSize((character_size > 0) ? character_size : height);
             text_->SetColor(text_color);
+            text_->SetVAlign(dr4::Text::VAlign::TOP);
             if ((state != NULL) && (font_file_name.compare("") != 0)) {
                 if (font_ != NULL) { font_->LoadFromFile(font_file_name); }
                 text_->SetFont(font_);
@@ -55,6 +56,7 @@ class Text : public Widget {
             text_->SetPos(other.text_->GetPos());
             text_->SetFontSize(other.text_->GetFontSize());
             text_->SetColor(other.text_->GetColor());
+            text_->SetVAlign(dr4::Text::VAlign::TOP);
             if ((state != NULL) && (font_file_name_.compare("") != 0)) {
                 if (font_ != NULL) { font_->LoadFromFile(font_file_name_); }
                 text_->SetFont(font_);
@@ -77,6 +79,7 @@ class Text : public Widget {
                 text_->SetFontSize(font_size_);
                 text_->SetPos({0, 0});
                 text_->SetColor(text_color_);
+                text_->SetVAlign(dr4::Text::VAlign::TOP);
                 font_ = state_->window_->CreateFont();
                 if (font_ != NULL) { font_->LoadFromFile(font_file_name_); }
                 text_->SetFont(font_);

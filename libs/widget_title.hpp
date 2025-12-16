@@ -9,8 +9,8 @@
 
 static const char* const kFontFileNameTitle = "data/font.ttf";
 
-static const colors::Color kTitleBackgroundColor = colors::Color(80, 80, 80);
-static const colors::Color kTitleBorderColor = colors::Color(100, 100, 100);
+static const colors::Color kTitleBackgroundColor = kWidgetDefaultFillColor;
+static const colors::Color kTitleBorderColor = kWidgetDefaultBorderColor;
 static const float kTitleBorderThickness = kBorderThicknessWidget;
 
 static const float kTitleHeight = 20;

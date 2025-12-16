@@ -14,7 +14,11 @@
 #include "vector.hpp"
 #include "logging.h"
 
+static const colors::Color kWidgetDefaultBorderColor = colors::Color(100, 100, 100);
+static const colors::Color kWidgetDefaultFillColor = colors::Color(80, 80, 80);
 static const size_t kBorderThicknessWidget = 2;
+
+static const std::string kWidgetDefaultFontFileName = "/usr/share/fonts/TTF/CaskaydiaCoveNerdFontMono-Regular.ttf";
 
 static const std::string kWidgetDefaultName = "Widget";
 
@@ -180,6 +184,7 @@ class Widget : public hui::MyWidget {
         virtual void Move(float shift_x, float shift_y) {
             relPos.x += shift_x;
             relPos.y += shift_y;
+            relPos = relPos.Clamped({0, 0}, parent->GetSize() - dr4::Vec2f{width_, height_});
         };
 
         bool EventInside(dr4::Vec2f pos) {

@@ -145,8 +145,10 @@ class SceneManager : public Widget {
         InfoTable* table_;
         PanelControl* panel_;
 
+    public:
         Dorisovka* dorisovka_;
 
+    private:
         Title* title_;
 
         bool changed_;

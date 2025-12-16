@@ -11,6 +11,8 @@
 
 #include "widget.hpp"
 #include "vector.hpp"
+#include "topbar.hpp"
+#include "main_field.hpp"
 
 #include "my_assert.h"
 
@@ -21,7 +23,7 @@ static const char* const kBackendFileName = "./plugins/MyDR4Backend/build/libbac
 static const size_t kOneSceneUpdateTimeInMicro = 10000;
 static const size_t kCharacterSize = 100;
 
-static const colors::Color kBackgroundColor = colors::Color(50, 50, 50);
+static const std::string kDefaultFontFileName = "/usr/share/fonts/TTF/CaskaydiaCoveNerdFontMono-Regular.ttf";
 
 enum RendererError {
     kDoneRenderer = 0,
@@ -36,8 +38,10 @@ class UI : public WidgetContainer {
         cum::DR4BackendPlugin* backend_;
 
     public:
-        explicit UI(float width, float height,
-                     const std::vector<Widget*>& children, const char* window_name = kWindowName,
+        TopBar* topbar_;
+        MainField* main_field_;
+
+        explicit UI(float width, float height, MainField* main_field, TopBar* topbar, const char* window_name = kWindowName,
                      const char* const dll_backend_name = kBackendFileName)
             :WidgetContainer(Coordinates(2, 0, 0), width, height, NULL),
              window_(CreateWindow({width, height}, window_name, dll_backend_name)),
@@ -48,14 +52,13 @@ class UI : public WidgetContainer {
             state_.ui = this;
             state = &state_;
 
-            Widget::SetState(&state_);
+            topbar_ = topbar;
+            main_field_ = main_field;
 
-            std::vector<Widget*>& children_ = WidgetContainer::GetChildren();
-            size_t children_num = children.size();
-            for (size_t i = 0; i < children_num; i++) {
-                children_.push_back(children[i]);
-                children_[i]->SetState(&state_);
-            }
+            WidgetContainer::AddChild(main_field_);
+            WidgetContainer::AddChild(topbar_);
+
+            WidgetContainer::SetState(&state_);
 
             WidgetContainer::SetParentToChildren();
         };
@@ -90,6 +93,12 @@ class UI : public WidgetContainer {
             window->Open();
             window->SetSize(size);
             window->SetTitle(name);
+
+            dr4::Font* font = window->CreateFont();
+            font->LoadFromFile(kDefaultFontFileName);
+
+            window->SetDefaultFont(font);
+
             return window;
         }
 };

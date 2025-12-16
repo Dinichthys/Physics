@@ -16,7 +16,7 @@ RendererError UI::ShowWindow() {
     dr4::Rectangle* background = window_->CreateRectangle();
     background->SetPos({0, 0});
     background->SetSize({(float)GetWidth(), (float)GetHeight()});
-    background->SetFillColor(kBackgroundColor);
+    background->SetFillColor(kWidgetDefaultFillColor);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto start_time = end_time;

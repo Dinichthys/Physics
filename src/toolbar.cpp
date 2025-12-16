@@ -2,7 +2,7 @@
 #include "dorisovka.hpp"
 
 ToolBar::ToolBar(const Coordinates& lt_corner, Dorisovka* cvs, hui::State* state, Widget* parent)
-    :Widget(lt_corner, kWidthToolBar, kTitleHeight + kColorBoxSize + kSpaceBetweenTools + (kWidthToolBar - kColorBoxSize) / 2, state, parent) {
+    :Widget(lt_corner, kWidthToolBar, kTitleHeight + kColorBoxSize + 2 * kSpaceBetweenTools, state, parent) {
     cvs_ = cvs;
 
     title_ = new Title(Coordinates(2), kWidthToolBar, state, this, kToolBarName, this);
@@ -18,4 +18,20 @@ ToolBar::ToolBar(const Coordinates& lt_corner, Dorisovka* cvs, hui::State* state
     background_->SetFillColor(kTitleBackgroundColor);
     background_->SetSize(dr4::Vec2f{kWidthToolBar, kTitleHeight + kColorBoxSize + 2 * kSpaceBetweenTools} - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2 - dr4::Vec2f{0, kTitleHeight});
     background_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget + kTitleHeight});
+
+    color_picker_ = NULL;
+};
+
+void ToolBar::Redraw() {
+    background_->DrawOn(*texture);
+
+    for (auto button : buttons_) {
+        button->Redraw();
+    }
+
+    color_box_->Clear(cvs_->theme_.shapeBorderColor);
+    color_box_->DrawOn(*texture);
+
+    title_->Redraw();
+    Widget::Redraw();
 };

@@ -13,12 +13,12 @@
 static const colors::Color kDefaultButtonColor = colors::kColorBlue;
 static const colors::Color kPressedColor = colors::kColorGreen;
 static const colors::Color kReleaseColor = colors::kColorRed;
-static const colors::Color kPanelColor = colors::Color(60, 56, 54);
-static const colors::Color kButtonBorderColor = colors::kColorWhite;
-static const colors::Color kPanelBorderColor = colors::kColorWhite;
+static const colors::Color kPanelColor = kWidgetDefaultFillColor;
+static const colors::Color kButtonBorderColor = kWidgetDefaultBorderColor;
+static const colors::Color kPanelBorderColor = kWidgetDefaultBorderColor;
 
-static const float kButtonBorderThickness = 5;
-static const float kPanelBorderThickness = 7;
+static const float kButtonBorderThickness = kBorderThicknessWidget;
+static const float kPanelBorderThickness = kBorderThicknessWidget;
 
 static uint8_t kHoveredColorScale = 2;
 
@@ -71,8 +71,8 @@ class Button : public WidgetContainer {
              button_background_((state == NULL) ? NULL : state->window_->CreateRectangle()),
              pressed_color_(pressed_color), released_color_(released_color) {
             if (button_background_ != NULL) {
-                button_background_->SetPos({0, 0});
-                button_background_->SetSize({width, height});
+                button_background_->SetPos({kButtonBorderThickness, kButtonBorderThickness});
+                button_background_->SetSize(dr4::Vec2f{width, height} - dr4::Vec2f{kButtonBorderThickness, kButtonBorderThickness} * 2);
                 button_background_->SetFillColor(released_color);
                 button_background_->SetBorderColor(kButtonBorderColor);
                 button_background_->SetBorderThickness(kButtonBorderThickness);
@@ -84,7 +84,10 @@ class Button : public WidgetContainer {
                 WidgetContainer::AddChild(new(std::nothrow) Text(
                                                             Coordinates(2, 0, 0),
                                                             width, height / kButtonTextScale, state, this,
-                                                            text, file_name, character_size, text_color));
+                                                            text, file_name,
+                                                            (character_size < height / kButtonTextScale)
+                                                                ? character_size
+                                                                : height / kButtonTextScale, text_color));
                 if (WidgetContainer::GetChildren().back() == NULL) {
                     throw std::runtime_error("Bad allocation for text");
                 }
@@ -103,11 +106,11 @@ class Button : public WidgetContainer {
 
             if (button_background_ == NULL) {
                 button_background_ = state->window_->CreateRectangle();
-                button_background_->SetPos({0, 0});
-                button_background_->SetSize(Widget::GetSize());
+                button_background_->SetPos({kButtonBorderThickness, kButtonBorderThickness});
+                button_background_->SetSize(Widget::GetSize() - dr4::Vec2f{kButtonBorderThickness, kButtonBorderThickness} * 2);
                 button_background_->SetFillColor(pressed_color_);
-                button_background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                button_background_->SetBorderThickness(0);
+                button_background_->SetBorderColor(kButtonBorderColor);
+                button_background_->SetBorderThickness(kButtonBorderThickness);
             }
 
             WidgetContainer::SetState(state_);
@@ -118,7 +121,7 @@ class Button : public WidgetContainer {
             if (WidgetContainer::GetChildrenNum() != 0) {
                 WidgetContainer::GetChild(0)->SetSize(size);
             };
-            button_background_->SetSize(size);
+            button_background_->SetSize(size - dr4::Vec2f{kButtonBorderThickness, kButtonBorderThickness} * 2);
         };
 
         void SetText(const std::string& text_str) {
@@ -198,14 +201,14 @@ class PanelControl : public WidgetContainer {
             WidgetContainer::SetParentToChildren();
         };
 
-        explicit PanelControl(const Coordinates& lt_corner = Coordinates(3), float width = 0, float height = 0,
+        explicit PanelControl(const Coordinates& lt_corner = Coordinates(2), float width = 0, float height = 0,
                               hui::State* state = NULL,
                               const std::vector<Widget*>* buttons = NULL, Widget* parent = NULL)
             :WidgetContainer(lt_corner, width, height, state, buttons),
              background_((state == NULL) ? NULL : state->window_->CreateRectangle()) {
             if (background_ != NULL) {
-                background_->SetPos({0, 0});
-                background_->SetSize({width, height});
+                background_->SetPos({kPanelBorderThickness, kPanelBorderThickness});
+                background_->SetSize(dr4::Vec2f{width, height} - dr4::Vec2f{kPanelBorderThickness, kPanelBorderThickness} * 2);
                 background_->SetFillColor(kPanelColor);
                 background_->SetBorderColor(kPanelBorderColor);
                 background_->SetBorderThickness(kPanelBorderThickness);
@@ -224,11 +227,11 @@ class PanelControl : public WidgetContainer {
 
             if (background_ == NULL) {
                 background_ = state->window_->CreateRectangle();
-                background_->SetPos({0, 0});
-                background_->SetSize(Widget::GetSize());
+                background_->SetPos({kPanelBorderThickness, kPanelBorderThickness});
+                background_->SetSize(Widget::GetSize() - dr4::Vec2f{kPanelBorderThickness, kPanelBorderThickness} * 2);
                 background_->SetFillColor(kPanelColor);
-                background_->SetBorderColor(dr4::Color(0, 0, 0, 0));
-                background_->SetBorderThickness(0);
+                background_->SetBorderColor(kPanelBorderColor);
+                background_->SetBorderThickness(kPanelBorderThickness);
             }
 
             WidgetContainer::SetState(state_);
