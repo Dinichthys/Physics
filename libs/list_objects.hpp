@@ -195,6 +195,10 @@ class ListObjects : public WidgetContainer {
 
             WidgetContainer::SetState(state_);
         };
+
+        virtual const std::string& GetName() const override {
+            return kListObjectsTitleStr;
+        };
 };
 
 class ListObjectsTitle : public Widget {
@@ -290,6 +294,9 @@ class ListObjectsTitle : public Widget {
             Widget::SetState(state);
         };
 
+        virtual const std::string& GetName() const override {
+            return kListObjectsTitleStr;
+        };
 };
 
 #endif // LIST_OBJECTS_HPP

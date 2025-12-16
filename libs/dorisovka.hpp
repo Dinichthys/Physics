@@ -99,7 +99,7 @@ class Dorisovka : public Widget, public pp::Canvas {
                 }, i));
             }
 
-            plugin_upload_button_ = new PluginUploadButton(Coordinates(2, kTopBarButtonWidth, 0), state, NULL);
+            plugin_upload_button_ = new PluginUploadButton(Coordinates(2, kTopBarButtonWidth * 2, 0), state, NULL);
             state->ui->topbar_->AddChild(plugin_upload_button_);
 
             selected_shape_ = NULL;

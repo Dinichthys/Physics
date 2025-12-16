@@ -176,6 +176,10 @@ class ToolBar : public Widget {
             return false;
         };
 
+        virtual const std::string& GetName() const override {
+            return kToolBarName;
+        };
+
         virtual void Redraw() override;
 };
 

@@ -255,6 +255,10 @@ class ColorPicker : public Widget {
 //
 //                 // Для процентов: return (H, S * 100, V * 100)
         };
+
+        virtual const std::string& GetName() const override {
+            return kColorPickerName;
+        };
 };
 
 #endif // COLOR_PICKER_HPP

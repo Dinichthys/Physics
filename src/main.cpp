@@ -10,6 +10,7 @@
 #include "camera_control.hpp"
 #include "topbar.hpp"
 #include "file_button.hpp"
+#include "view.hpp"
 
 #include "scene_manager.hpp"
 
@@ -206,6 +207,7 @@ int main() {
 
     std::vector<Widget*> topbar_buttons;
 
+    topbar_buttons.push_back(new ViewButton(Coordinates(2, kTopBarButtonWidth, 0), NULL, NULL));
     topbar_buttons.push_back(new FileButton(Coordinates(2, 0, 0), kTopBarButtonWidth, NULL, NULL));
 
     TopBar* topbar = new TopBar(Coordinates(2), kStartWidth, NULL, &topbar_buttons, NULL);

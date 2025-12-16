@@ -427,6 +427,10 @@ class InfoTable : public WidgetContainer {
 
             return true;
         };
+
+        virtual const std::string& GetName() const override {
+            return kInfoTableName;
+        };
 };
 
 #endif // INFO_TABLE_HPP

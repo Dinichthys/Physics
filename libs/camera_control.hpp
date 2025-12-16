@@ -98,6 +98,10 @@ class CameraController : public WidgetContainer {
             }
             return WidgetContainer::OnMouseRelease(mouse_pos, type);
         }
+
+        virtual const std::string& GetName() const override {
+            return kCameraControlTitle;
+        };
 };
 
 class CameraControlButton : public Button {

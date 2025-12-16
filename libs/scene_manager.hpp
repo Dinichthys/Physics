@@ -563,6 +563,10 @@ class SceneManager : public Widget {
             return true;
         };
 
+        virtual const std::string& GetName() const override {
+            return kSceneManagerName;
+        };
+
     private:
         bool CameraRotationInTwoAxis(size_t ace_1, size_t ace_2, float direction);
 

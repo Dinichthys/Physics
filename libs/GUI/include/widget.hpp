@@ -143,7 +143,7 @@ class Widget : public hui::MyWidget {
             }
         };
 
-        void SetHidden(bool hidden) {hidden_ = hidden;};
+        virtual void SetHidden(bool hidden) {hidden_ = hidden;};
         bool GetHidden() const {return hidden_;};
 
         dr4::Texture* GetTexture() const {return texture;};
