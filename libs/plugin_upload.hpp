@@ -9,10 +9,17 @@
 
 static const std::string kPluginButtonName = "Plugin";
 
+static const std::string kPluginNameOkButtonName = "Ok";
+
 static const size_t kPluginNameWidth = 300;
-static const size_t kPluginNameHeight = 40;
+static const size_t kPluginNameYOffset = 10;
 static const size_t kPluginNameTextFieldWidth = 280;
 static const size_t kPluginNameTextFieldHeight = 20;
+static const size_t kPluginNameOkButtonHeight = 20;
+static const size_t kPluginNameOkButtonWidth = 30;
+static const size_t kPluginNameHeight = kPluginNameYOffset * 3 + kPluginNameTextFieldHeight + kPluginNameOkButtonHeight;
+
+static const colors::Color kPluginNameOkButtonColor = colors::Color(49, 49, 49);
 
 static const std::string kPluginNameTitle = "Plugin Name";
 static const std::string kStartInputPluginName = "./plugins/build/ppMe.so";
@@ -36,6 +43,8 @@ class PluginName : public Widget {
 
         PluginNameEditField* plugin_name_;
 
+        Button* ok_button_;
+
         dr4::Rectangle* background_;
 
     public:
@@ -44,7 +53,7 @@ class PluginName : public Widget {
                     kPluginNameWidth, kPluginNameHeight + kTitleHeight, state, parent) {
             title_ = new Title(Coordinates(2), kPluginNameWidth, state, this, kPluginNameTitle, this);
 
-            plugin_name_ = new PluginNameEditField(EditableText(Text(Coordinates(2, (kPluginNameWidth - kPluginNameTextFieldWidth) / 2, kTitleHeight + (kPluginNameHeight - kPluginNameTextFieldHeight) / 2),
+            plugin_name_ = new PluginNameEditField(EditableText(Text(Coordinates(2, kPluginNameYOffset, kTitleHeight + kPluginNameYOffset),
                 kPluginNameTextFieldWidth, kPluginNameTextFieldHeight,
                 state, this, kStartInputPluginName, kWidgetDefaultFontFileName, kPluginNameTextFieldHeight)), this);
 
@@ -54,6 +63,10 @@ class PluginName : public Widget {
             background_->SetFillColor(kWidgetDefaultFillColor);
             background_->SetPos({kBorderThicknessWidget, kBorderThicknessWidget + kTitleHeight});
             background_->SetSize(dr4::Vec2f{kPluginNameWidth, kPluginNameHeight} - dr4::Vec2f{kBorderThicknessWidget, kBorderThicknessWidget} * 2);
+
+            ok_button_ = new Button(Coordinates(2, kPluginNameWidth - kPluginNameYOffset - kPluginNameOkButtonWidth, kTitleHeight + kPluginNameYOffset + kPluginNameTextFieldHeight + kPluginNameYOffset),
+                kPluginNameOkButtonWidth, kPluginNameOkButtonHeight, kPluginNameOkButtonName, kWidgetDefaultFontFileName, state, this, kPluginNameOkButtonColor, kPluginNameOkButtonColor);
+
         };
 
         virtual void Redraw() override {
@@ -64,6 +77,8 @@ class PluginName : public Widget {
             background_->DrawOn(*texture);
 
             plugin_name_->Redraw();
+
+            ok_button_->Redraw();
 
             title_->Redraw();
             Widget::Redraw();
@@ -78,6 +93,12 @@ class PluginName : public Widget {
             if (Widget::OnMousePress(mouse_pos, type)) {
                 if (state->target_widget_ == this) {
                     state->target_widget_ = NULL;
+                }
+
+                if (ok_button_->OnMousePress(loc_coors, type)) {
+                    state->target_widget_ = plugin_name_;
+                    plugin_name_->OnKeyPressed({dr4::KeyCode::KEYCODE_ENTER, 0});
+                    return true;
                 }
 
                 if (plugin_name_->OnMousePress(loc_coors, type)) {
@@ -104,6 +125,10 @@ class PluginName : public Widget {
                     return true;
                 }
 
+                if (ok_button_->OnMouseRelease(loc_coors, type)) {
+                    return true;
+                }
+
                 if (title_->OnMouseRelease(loc_coors, type)) {
                     return true;
                 }
@@ -121,6 +146,10 @@ class PluginName : public Widget {
             Coordinates loc_coors(2, mouse_pos[0] - relPos.x, mouse_pos[1] - relPos.y);
             if (Widget::OnMouseEnter(mouse_pos, delta)) {
                 if (plugin_name_->OnMouseEnter(loc_coors, delta)) {
+                    return true;
+                }
+
+                if (ok_button_->OnMouseEnter(loc_coors, delta)) {
                     return true;
                 }
 

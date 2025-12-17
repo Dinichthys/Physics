@@ -45,8 +45,8 @@ int main() {
     };
 
     Triangle triangles_arr[1] = {
-        Triangle(Plane(Coordinates(3, 0, 800, 1500), Coordinates(3, 0, -1, 0), colors::kColorYellow),
-                 Coordinates(3, -400, 800, 1000), Coordinates(3, 400, 800, 1000)),
+        Triangle(Plane(Coordinates(3, 0, 800, 1300), Coordinates(3, 0, -1, 0), colors::kColorYellow),
+                 Coordinates(3, -200, 0, -300), Coordinates(3, 200, 0, -300)),
     };
 
     // Triangle triangles_pyramid[6] {
