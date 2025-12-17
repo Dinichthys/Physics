@@ -210,6 +210,10 @@ class SceneManager : public Widget {
             delete title_;
         };
 
+        void SetChanged(bool changed) {
+            changed_ = changed;
+        };
+
         virtual void SetState(hui::State* state_) {
             title_->SetState(state_);
 
@@ -378,6 +382,13 @@ class SceneManager : public Widget {
             // objects_[cur_object_idx_]->SetColor(kChoseObjectColor);
             objects_.push_back(objects_[cur_object_idx_]->GetBorder());
             border_idx_ = objects_.size() - 1;
+        };
+
+        Object* GetCurObject() {
+            if (cur_object_idx_ < objects_.size()) {
+                return objects_[cur_object_idx_];
+            }
+            return NULL;
         };
 
         void ChangeCurObjReflection(float delta) {

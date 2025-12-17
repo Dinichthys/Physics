@@ -3,7 +3,7 @@
 #include "scene_manager.hpp"
 
 void InfoTable::Redraw() {
-    if (Widget::GetHidden()) {
+    if (Widget::GetHidden() || (object_ == NULL)) {
         return;
     }
 
@@ -89,6 +89,21 @@ void InfoTable::Redraw() {
         }
     }
     val_text_coeff_absorption_.Redraw();
+
+    for (auto text : additional_texts_) {
+        text->Redraw();
+    }
+
+    for (size_t i = 0; i < additional_params_.size(); i++) {
+        if (!additional_params_[i]->GetPrintingInfo()) {
+            if (additional_params_[i]->GetChanged()) {
+                call_if_change_[i](additional_params_[i], manager_);
+            } else {
+                additional_params_[i]->SetText(call_if_nothing_[i](object_));
+            }
+        }
+        additional_params_[i]->Redraw();
+    }
 
     auto tmp = texture->GetPos();
     texture->SetPos({});

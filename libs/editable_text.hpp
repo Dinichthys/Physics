@@ -67,6 +67,10 @@ class EditableText : public Text {
             return state->target_widget_ == this;
         }
 
+        void SetCaretHeight(float height) {
+            caret_->SetSize({kBorderThickness, height});
+        }
+
         virtual void Redraw() override {
             if (hidden_) {
                 return;
@@ -158,6 +162,12 @@ class EditableText : public Text {
         }
 
         virtual void Move(float, float) override {};
+
+        virtual void SetSize(dr4::Vec2f size) {
+            Text::SetSize(size);
+
+            border_->SetSize(size - dr4::Vec2f{kBorderThickness, kBorderThickness} * 2);
+        }
 };
 
 #endif // EDITABLE_TEXT_HPP

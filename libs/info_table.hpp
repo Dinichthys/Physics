@@ -2,6 +2,7 @@
 #define INFO_TABLE_HPP
 
 #include <string>
+#include <functional>
 
 #include "colors.hpp"
 
@@ -66,6 +67,11 @@ class InfoTable : public WidgetContainer {
         SceneManager* manager_;
 
         dr4::Texture* base_texture_;
+
+        std::vector<Text*> additional_texts_;
+        std::vector<EditableText*> additional_params_;
+        std::vector<std::function<void(EditableText*, SceneManager*)>> call_if_change_;
+        std::vector<std::function<std::string(const  Object*)>> call_if_nothing_;
 
         Title* title_;
 
@@ -252,9 +258,14 @@ class InfoTable : public WidgetContainer {
         void SetObject(const Object* object) {
             object_ = object;
             if (object == NULL) {
+                ResetParam();
                 return;
             }
             text_type_.SetText(TypeToStr(object_->GetType()));
+
+            ResetParam();
+
+            object->OnSelect(this);
         };
 
         void SetState(hui::State* state_) {
@@ -348,6 +359,12 @@ class InfoTable : public WidgetContainer {
                     return true;
                 }
 
+                for (auto param : additional_params_) {
+                    if (param->OnMousePress(loc_coors, type)) {
+                        return true;
+                    }
+                }
+
                 return true;
             }
 
@@ -395,6 +412,12 @@ class InfoTable : public WidgetContainer {
                 return true;
             }
 
+            for (auto param : additional_params_) {
+                if (param->OnKeyPressed(evt)) {
+                    return true;
+                }
+            }
+
             return false;
         };
 
@@ -425,11 +448,54 @@ class InfoTable : public WidgetContainer {
                 return true;
             }
 
+            for (auto param : additional_params_) {
+                if (param->OnText(evt)) {
+                    return true;
+                }
+            }
+
             return true;
         };
 
         virtual const std::string& GetName() const override {
             return kInfoTableName;
+        };
+
+        void AddParam(Text* intro, EditableText* changing_param,
+                std::function<void(EditableText*, SceneManager*)> call_if_change,
+                std::function<std::string(const Object*)> call_if_nothing) {
+            additional_texts_.push_back(intro);
+            additional_params_.push_back(changing_param);
+            call_if_change_.push_back(call_if_change);
+            call_if_nothing_.push_back(call_if_nothing);
+
+            intro->SetSize(text_center_.GetSize());
+            intro->SetRelPos({0, height_});
+            intro->text_->SetFontSize(text_center_.text_->GetFontSize());
+            if (changing_param != NULL) {
+                changing_param->SetSize(text_center_.GetSize());
+                changing_param->SetRelPos({width_ / 2, height_});
+                changing_param->text_->SetFontSize(text_center_.text_->GetFontSize());
+                changing_param->SetCaretHeight(text_center_.text_->GetFontSize());
+            }
+
+            Widget::SetSize(Widget::GetSize() + dr4::Vec2f{0, intro->GetSize().y});
+
+            base_texture_->SetSize(base_texture_->GetSize() + dr4::Vec2f{0, intro->GetSize().y});
+            rect_->SetSize(rect_->GetSize() + dr4::Vec2f{0, intro->GetSize().y});
+            texture->SetSize(Widget::GetSize() + dr4::Vec2f({0, kTitleHeight}));
+        };
+
+        void ResetParam() {
+            Widget::SetSize({width_, height_ - additional_params_.size() * text_center_.GetSize().y});
+            base_texture_->SetSize(base_texture_->GetSize() - dr4::Vec2f{0, text_center_.GetSize().y} * additional_params_.size());
+            rect_->SetSize(rect_->GetSize() - dr4::Vec2f{0, text_center_.GetSize().y} * additional_params_.size());
+            texture->SetSize(Widget::GetSize() + dr4::Vec2f({0, kTitleHeight}));
+
+            additional_params_.clear();
+            additional_texts_.clear();
+            call_if_change_.clear();
+            call_if_nothing_.clear();
         };
 };
 

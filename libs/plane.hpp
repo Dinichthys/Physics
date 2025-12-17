@@ -92,6 +92,8 @@ class Plane : public Object {
         };
 
         virtual Border* GetBorder() const override;
+
+        virtual void OnSelect(InfoTable*) const override;
 };
 
 #endif // PLANE_HPP

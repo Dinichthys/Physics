@@ -21,6 +21,7 @@ static const std::map<ObjectType, ObjectInfo> kObjectsInfo = {
 };
 
 class Border;
+class InfoTable;
 
 class Object : public ObjectInfo{
     private:
@@ -62,6 +63,8 @@ class Object : public ObjectInfo{
         virtual Object* GetCopy() const = 0;
 
         virtual Border* GetBorder() const = 0;
+
+        virtual void OnSelect(InfoTable*) const {};
 };
 
 #endif // OBJECT_HPP

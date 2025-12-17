@@ -112,6 +112,8 @@ class Circle : public Object {
             return new Border(Object::GetCenterCoordinates(), 2 * radius_, 2 * radius_, 2 * radius_);
         };
 
+        virtual void OnSelect(InfoTable*) const override;
+
     private:
         bool GetIntersectionResultQuadraticEquation(const Coordinates& point,
                                                     const Coordinates& vec,

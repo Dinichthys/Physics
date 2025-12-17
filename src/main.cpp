@@ -145,10 +145,10 @@ int main() {
         buttons_on_panel.push_back(new MoveButton(buttons[i]));
     }
 
-    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 40), 70, 40, "-",
+    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 5, 40), 70, 40, "   -",
                                kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorWhite),
                                [scene_manager](){scene_manager->DeleteCurrentObject();}));
-    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 85, 40), 70, 40, "+",
+    buttons_on_panel.push_back(new ExistenceButton(Button(Coordinates(2, 85, 40), 70, 40, "   +",
                                kFontFileNameScrollBar, NULL, NULL, kColorButtons, kColorButtons, 0, colors::kColorWhite),
                                [scene_manager](){scene_manager->AddCopyCurrentObject();}));
 
