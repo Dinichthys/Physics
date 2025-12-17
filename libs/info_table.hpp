@@ -178,6 +178,7 @@ class InfoTable : public WidgetContainer {
                 CASE_TYPE_TO_STRING_(Sphere);
                 CASE_TYPE_TO_STRING_(Light);
                 CASE_TYPE_TO_STRING_(Plane);
+                CASE_TYPE_TO_STRING_(Triangle);
                 CASE_TYPE_TO_STRING_(TrianglesSet);
                 CASE_TYPE_TO_STRING_(Border);
 

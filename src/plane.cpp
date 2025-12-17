@@ -10,8 +10,7 @@ static const float kStartSizeText = 100;
 static const size_t kNumMaxLen = 30;
 
 Border* Plane::GetBorder() const {
-    float size = 2 * (!normal_).GetModule();
-    return new Border(Object::GetCenterCoordinates(), 2 * size, 2 * size, 2 * size);
+    return new Border(Object::GetCenterCoordinates(), 2, 2, 2);
 };
 
 static std::string GetNormalStr(const Coordinates& normal) {

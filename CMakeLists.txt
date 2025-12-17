@@ -14,6 +14,7 @@ add_executable (${PROJECT_NAME}
     src/toolbar.cpp
     src/plugin_upload.cpp
     src/circle.cpp
+    src/triangle.cpp
 
     libs/GUI/src/draw.cpp
     libs/GUI/src/scrollbar.cpp

@@ -99,7 +99,7 @@ class ListObjects : public WidgetContainer {
             std::string str;
 
             char num[kNumLenListObjects] = "";
-            sprintf(num, "%lu", index);
+            sprintf(num, "%lu", index + 1);
             str.append(num);
 
             str.append(" | ");
@@ -119,6 +119,7 @@ class ListObjects : public WidgetContainer {
                 CASE_TYPE_TO_STRING_(Sphere);
                 CASE_TYPE_TO_STRING_(Light);
                 CASE_TYPE_TO_STRING_(Plane);
+                CASE_TYPE_TO_STRING_(Triangle);
                 CASE_TYPE_TO_STRING_(TrianglesSet);
                 CASE_TYPE_TO_STRING_(Border);
 

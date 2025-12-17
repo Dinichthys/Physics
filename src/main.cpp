@@ -44,10 +44,10 @@ int main() {
         // Plane(Coordinates(3, 500, 0, 0), Coordinates(3, 0, -1, 0), colors::kColorWhite, 0, 0.2, 2)
     };
 
-    // Triangle triangles_arr[1] = {
-    //     Triangle(Plane(Coordinates(3, 500, 0, 500), Coordinates(3, 0, 1, 1), colors::kColorYellow),
-    //              Coordinates(3, -400, 500, -500), Coordinates(3, -300, 0, 0)),
-    // };
+    Triangle triangles_arr[1] = {
+        Triangle(Plane(Coordinates(3, 0, 800, 1500), Coordinates(3, 0, -1, 0), colors::kColorYellow),
+                 Coordinates(3, -400, 800, 1000), Coordinates(3, 400, 800, 1000)),
+    };
 
     // Triangle triangles_pyramid[6] {
     //     Triangle (Plane(Coordinates(3, 0, 0, 0), Coordinates(3, 0, 1, 0), colors::kColorYellow),
@@ -87,11 +87,11 @@ int main() {
     for (size_t i = 0; i < planes_num; i++) {
         objects.push_back(new Plane(planes_arr[i]));
     }
-//
-//     size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
-//     for (size_t i = 0; i < triangles_num; i++) {
-//         objects.push_back(new Triangle(triangles_arr[i]));
-//     }
+
+    size_t triangles_num = sizeof(triangles_arr) / sizeof(triangles_arr[0]);
+    for (size_t i = 0; i < triangles_num; i++) {
+        objects.push_back(new Triangle(triangles_arr[i]));
+    }
 
     std::vector<Widget*> desktop_children;
     desktop_children.push_back(new SceneManager(Coordinates(2, 120, 0), 800, 800, objects, NULL));
@@ -165,7 +165,7 @@ int main() {
     desktop_children.push_back(new ListObjectsTitle(Coordinates(2, 1000, 410),
                                                     dynamic_cast<ListObjects*>(desktop_children.back())));
     scene_manager->SetListObjects(dynamic_cast<ListObjectsTitle*>(desktop_children.back()));
-    desktop_children.push_back(new InfoTable(Coordinates(2, 920, 0), 160, 410, circles_arr + 0, NULL, NULL, &buttons_on_panel));
+    desktop_children.push_back(new InfoTable(Coordinates(2, 920, 0), 200, 410, circles_arr + 0, NULL, NULL, &buttons_on_panel));
     scene_manager->SetInfoTable(dynamic_cast<InfoTable*>(desktop_children.back()));
 
     CameraControlButton camera_buttons[8] = {

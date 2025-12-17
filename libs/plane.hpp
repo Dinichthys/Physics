@@ -4,7 +4,7 @@
 #include "object.hpp"
 
 class Plane : public Object {
-    private:
+    protected:
         Coordinates normal_;
 
     public:
@@ -85,6 +85,10 @@ class Plane : public Object {
         virtual Coordinates GetNormal(__attribute_maybe_unused__ const Coordinates& point,
                                       __attribute_maybe_unused__ const Coordinates& vec) const override {
             return !(normal_ * ((!normal_) && (!vec)) * (-1));
+        };
+
+        void SetNormal(const Coordinates& normal) {
+            normal_ = normal;
         };
 
         virtual Object* GetCopy() const override {

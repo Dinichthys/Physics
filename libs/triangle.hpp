@@ -14,7 +14,9 @@ class Triangle : public Plane {
         explicit Triangle(const Plane& plane,
                  const Coordinates& point_b,
                  const Coordinates& point_c)
-            :Plane(plane), point_b_(point_b), point_c_(point_c) {};
+            :Plane(plane), point_b_(point_b), point_c_(point_c) {
+            type_ = kTriangle;
+        };
 
         virtual bool GetIntersection(const Coordinates& start_pos,
                                      const Coordinates& vec,
@@ -34,12 +36,32 @@ class Triangle : public Plane {
 
         bool IsInhere(const Coordinates& point) const {
             const Coordinates& point_a = Object::GetCenterCoordinates();
-            Coordinates vec_1 = !((point - point_a) || point_b_);
-            Coordinates vec_2 = !((point - point_a - point_b_) || (point_c_ - point_b_));
-            Coordinates vec_3 = !((point - point_a - point_c_) || (point_c_ * (-1)));
+            Coordinates vec_1 = point_c_ - point_a;
+            Coordinates vec_2 = point_b_ - point_a;
+            Coordinates vec_3 = point - point_a;
 
-            return ((abs((vec_1 && vec_2) - kNormModule) < kEpsilon)
-                    && (abs((vec_1 && vec_3) - kNormModule) < kEpsilon));
+            float dot11 = vec_1.SqLength();
+            float dot12 = vec_1 && vec_2;
+            float dot13 = vec_1 && vec_3;
+            float dot22 = vec_2.SqLength();
+            float dot23 = vec_2 && vec_3;
+
+            float denom = dot11 * dot22 - dot12 * dot12;
+            float betta = (dot22 * dot13 - dot12 * dot23) / denom;
+            float gamma = (dot11 * dot23 - dot12 * dot23) / denom;
+
+            return (1 - betta - gamma >= 0) && (betta >= 0) && (gamma >= 0);
+        };
+
+        virtual void OnSelect(InfoTable*) const override;
+
+        void UpdateNormal() {
+            Coordinates new_normal(!((Plane::GetCenterCoordinates() - point_b_) || (point_c_ - point_b_)));
+            if ((new_normal && normal_) < 0) {
+                normal_ = Coordinates(3, -new_normal[0], -new_normal[1], -new_normal[2]);
+            } else {
+                normal_ = new_normal;
+            }
         };
 
         virtual Object* GetCopy() const override {

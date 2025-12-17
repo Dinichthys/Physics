@@ -7,6 +7,7 @@ enum ObjectType {
     kSphere = 0,
     kLight,
     kPlane,
+    kTriangle,
     kTrianglesSet,
     kBorder,
 
@@ -14,7 +15,7 @@ enum ObjectType {
 };
 
 class ObjectInfo {
-    private:
+    protected:
         ObjectType type_;
         float coeff_refraction_;
         float coeff_reflection_;
